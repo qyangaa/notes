@@ -3,21 +3,29 @@
 ## Subgradient Basics
 
 $$
-f(y)-f(x) \ge g^T(y-x)\\
-\partial f(x) = \text{set}(g)
+f(y)-f(x) \ge g^T(y-x) \quad \text{ [Subgradient] }\\
+\partial f(x) = \text{set}(g) \quad \text{ [Subdifferential] }
 $$
+
+###  Properties
+
++ normally defined for convex function, definition works for non-convex function, but subgradients may not exist for non-convex functions
++ negative subgradient is not always a descent direction, i.e. $f(x-\eta g) \leq f(x)$ Not always true (always true if differentiable).
++ negative subgradient is ==descent direction for distance to optimal point==
+
+- $\partial f(x)=\{\nabla f(x)\}$ if $f$ is differentiable at $x$
+- Optimality conditions
+  + Unconstrained convex $f(x)$: if $0 \in \partial f(\hat{x})$
+  + Constrained convex, KKT stationarity: $0 \in \partial f(x)+\sum_{i=1}^{m} u_{i} \partial h_{i}(x)+\sum_{j=1}^{r} v_{j} \partial \ell_{j}(x)$ 
+  + $x$ is optimal (minimizes $f$) iff. there is no descent direction for $f$ at $x$
 
 ### Basic rules
 
 - scaling: $\partial(\alpha f)=\alpha \partial f($ for $\alpha>0)$
-- summation: $\partial\left(f_{1}+f_{2}\right)=\partial f_{1}+\partial f_{2}$
-- affine transformation: $\quad$ if $h(\boldsymbol{x})=f(\boldsymbol{A} \boldsymbol{x}+\boldsymbol{b}),$ then
-
-$$
-\partial h(\boldsymbol{x})=\boldsymbol{A}^{\top} \partial f(\boldsymbol{A} \boldsymbol{x}+\boldsymbol{b})
-$$
-
+- summation + linearity (from set relationship): $\partial\left(a_{1} f_{1}+a_{2} f_{2}\right)=a_{1} \partial f_{1}+a_{2} \partial f_{2}$
+- Affine composition: if $g(x)=f(A x+b)$, then $\partial g(x)=A^{T} \partial f(A x+b)$
 - chain rule: suppose $f$ is convex, and $g$ is differentiable, nondecreasing, and convex. Let $h=g \circ f,$ then
+
 $$
 \partial h(\boldsymbol{x})=g^{\prime}(f(\boldsymbol{x})) \partial f(\boldsymbol{x})
 $$
@@ -28,7 +36,7 @@ $$
 q_{1} \boldsymbol{g}_{1}+\cdots+q_{n} \boldsymbol{g}_{n} \in \partial f(\boldsymbol{x})
 $$
 
-- point-wise maximum: if $f(x)=\max _{1 \leq i \leq k} f_{i}(x),$ then
+- point-wise maximum: if $f(x)=\max _{1 \leq i \leq k} f_{i}(x),$ then ( convex hull of union of subdifferentials of 'active' functions at $x$)
 $$
 \partial f(\boldsymbol{x})=\underbrace{\operatorname{conv}\left\{\bigcup\left\{\partial f_{i}(\boldsymbol{x}) \mid f_{i}(\boldsymbol{x})=f(\boldsymbol{x})\right\}\right\}}_{\text {convex hull of subdifferentials of all active functions }}
 $$
@@ -36,6 +44,23 @@ $$
 
 $$
 \partial f(\boldsymbol{x})=\text { closure }\left(\operatorname{conv}\left\{\bigcup\left\{\partial f_{\alpha}(\boldsymbol{x}) \mid f_{\alpha}(\boldsymbol{x})=f(\boldsymbol{x})\right\}\right\}\right)
+$$
+
+### Examples
+
++ 1-Norm
+  + $$\begin{aligned}
+    &f(x)=\|x\|_{1}=\sum_{i=1}^{n}\left|x_{i}\right|\\
+    &g \in \partial\|x\|_{1} \text { if either } g_{i}=\operatorname{sign}\left(x_{i}\right) \text { if } x_{i} \neq 0, \text { or } g_{i} \in[-1,1] \text { if } x_{i}=0
+    \end{aligned}$$
++ $f(x)=\max \left\{f_{1}(x), f_{2}(x)\right\},$ where $f_{1}, f_{2}$ are differentiable.
+
+$$
+\begin{array}{l}
+f_{1}(x)>f_{2}(x) \Rightarrow g=\nabla f_{1}(x) \\
+f_{1}(x)<f_{2}(x) \Rightarrow g=\nabla f_{2}(x) \\
+f_{1}(x)=f_{2}(x) \Rightarrow g \in \operatorname{conv}\left\{\nabla f_{1}(x), \nabla f_{2}(x)\right\}
+\end{array}
 $$
 
 

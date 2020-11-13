@@ -6,6 +6,7 @@
 + 0-st order condition: $f(\theta x+(1-\theta) y) \leq \theta f(x)+(1-\theta) f(y)$, extension $f(\mathbf{E} z) \leq \mathbf{E} f(z)$ for any random variable $z$
 + 1st-order condition: differentiable $f$, $f(y) -f(x)\geq \nabla f(x)^{T}(y-x) \quad \text { for all } x, y \in \operatorname{dom} f$
 + 2-nd order condition: $\nabla^{2} f(x) \succeq 0 \quad \text { for all } x \in \operatorname{dom} f$
++ $\forall x, y(\nabla f(x)-\nabla f(y))^{T}(x-y) \geq 0$
 
 ### Convex program definition
 standard form convex optimization problem
@@ -378,7 +379,7 @@ then [$x$ is primal opt, $\lambda, \nu$ are dual opt] iff. [$x, \lambda, \nu$ sa
 2. Dual feasibility $\lambda_i \ge 0$
 3. Complementary slackness: $\lambda_i f_i(x) =0$
 4. Stationarity: $\nabla L = \nabla f_{0}\left(x^{\star}\right)+\sum_{i=1}^{m} \nabla f_{i}\left(x^{\star}\right)^{T} \lambda_{i}^{\star}+\sum_{i=1}^{p} \nu_{i}^{\star} \nabla h_{i}\left(x^{\star}\right)=0$
-Stationality in practice: for tight primal:
+Stationarity in practice: for tight primal:
 $$-\nabla f_0 = \sum \lambda_i \nabla f_i$$
 $\nabla f_i$ are n-dimensional.
 
@@ -716,11 +717,11 @@ The choice of $i$: cyclic (most popular), random, greedy, etc.
 + Properties
   + If $f$ is smooth, then $x$ is optimal
     + Proof: If $\nabla f(x)$ exists,$f\left(x+\delta e_{i}\right) \geq f(x) \forall e_{i}, \forall \delta \Leftrightarrow \nabla f(x)=0$, thus $x$ is a 0 -derivative point.
-  + If not smooth, generally not necessarily hold, but hold for intermediate case: $f$ can be written as smooth function plus a separable non-smooth function.
+  + If not smooth, generally not necessarily hold, but hold for intermediate case: $f$ can be written as ==smooth function plus a separable non-smooth function.==
 $$
 \min _{x} g(x)+\sum_{i=1}^{d} h_{i}\left(x_{i}\right)
 $$
-  + Not necessarily fastert than GD because 1 cycle of CD ~ 1 step of GD
+  + Not necessarily faster than GD because ==1 cycle of CD ~ 1 step of GD==
   + For equality constraints that is not separable, pick two coordinates and optimize jointly to satisfy the constraint
 + Key: separable functions
   + L1 norm = $\sum_{i}\left|x_{i}\right|$
@@ -739,41 +740,6 @@ $$
 (x)_{+}=\{\begin{array}{lcc}
 x & \text { if } & x \geq 0 \\
 0 & \text { otherwise }
-\end{array}
-$$
-
-## Subgradients
-Subgradient: $f(y) \geq f(x)+g^{T}_x(y-x) \forall y$
-Subdifferential: $\partial f(x)=\{g: g \text { is subgradient of } f \text { at } x\}$
-+ Properties
-  + Subgradient normally defined for convex function, definition works for non-convex function, but subgradients may not exist for non-convex functions
-  + negative subgradient is not always a descent direction, i.e. $f(x-\eta g) \leq f(x)$ Not always true (always true if differentiable).
-  + negative subgradient is descent direction for distance to optimal point
-  + Linearity (from set relationship): $\partial\left(a_{1} f_{1}+a_{2} f_{2}\right)=a_{1} \partial f_{1}+a_{2} \partial f_{2}$
-  + Affine composition: if $g(x)=f(A x+b)$, then $\partial g(x)=A^{T} \partial f(A x+b)$
-  - $\partial f(x)=\{\nabla f(x)\}$ if $f$ is differentiable at $x$
-  - pointwise maximum: if $f=\max _{i=1, \ldots, m} f_{i},$ then
-$$
-  \partial f(x)=\mathbf{C o} \bigcup\left\{\partial f_{i}(x) \mid f_{i}(x)=f(x)\right\}
-$$
-  i. e., convex hull of union of subdifferentials of 'active' functions at $x$
-
-+ Optimality conditions
-  + Unconstrained convex $f(x)$: if $0 \in \partial f(\hat{x})$
-  + Constrained convex, KKT stationarity: $0 \in \partial f(x)+\sum_{i=1}^{m} u_{i} \partial h_{i}(x)+\sum_{j=1}^{r} v_{j} \partial \ell_{j}(x)$ 
-  + x is optimal (minimizes f) iff there is no descent direction for f at x
-
-+ Examples
-  + $$\begin{aligned}
-  &f(x)=\|x\|_{1}=\sum_{i=1}^{n}\left|x_{i}\right|\\
-&g \in \partial\|x\|_{1} \text { if either } g_{i}=\operatorname{sign}\left(x_{i}\right) \text { if } x_{i} \neq 0, \text { or } g_{i} \in[-1,1] \text { if } x_{i}=0
-\end{aligned}$$
-+ $f(x)=\max \left\{f_{1}(x), f_{2}(x)\right\},$ where $f_{1}, f_{2}$ are differentiable.
-$$
-\begin{array}{l}
-f_{1}(x)>f_{2}(x) \Rightarrow g=\nabla f_{1}(x) \\
-f_{1}(x)<f_{2}(x) \Rightarrow g=\nabla f_{2}(x) \\
-f_{1}(x)=f_{2}(x) \Rightarrow g \in \operatorname{conv}\left\{\nabla f_{1}(x), \nabla f_{2}(x)\right\}
 \end{array}
 $$
 

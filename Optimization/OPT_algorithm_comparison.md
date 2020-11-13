@@ -12,9 +12,11 @@
 |                  |                              |                                                              |                                                              |                                                       |                                                              |
 |                  |                              |                                                              |                                                              |                                                       |                                                              |
 
-Proximal gradient descent: same as GD for decomposable objective function.
+**Proximal gradient descent:** same as GD for decomposable objective function.
 
-Projected gradient descent: same as GD but projection step may be slow
+**Projected gradient descent**: same as GD but projection step may be slow
 
-Frank Wolfe: projection-free. $O(1/k)$ sublinear
+**Coordinate descent:** similar to GD for function decomposable to smooth + separable non-smooth parts.
+
+**Frank Wolfe**: projection-free. $O(1/k)$ sublinear
 
