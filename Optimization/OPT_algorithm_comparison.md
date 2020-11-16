@@ -20,3 +20,39 @@
 
 **Frank Wolfe**: projection-free. $O(1/k)$ sublinear
 
+
+
+## Definition of convergence rate
+
+[ref](https://www.stat.cmu.edu/~ryantibs/convexopt-F13/scribes/lec9.pdf)
+
+
+
+1. Linear convergence rate $(\delta<1)$ :
+$$
+\begin{array}{l}
+\text { Example: } s_{i}=c q^{i}, 0<q<1, \bar{s}=0 \\
+\lim _{i \rightarrow \infty} \frac{\left|s_{i+1}-\bar{s}\right|}{\left|s_{i}-\bar{s}\right|}=\lim _{i \rightarrow \infty} \frac{c q^{i+1}}{c q^{i}}=q<1
+\end{array}
+$$
+2. Superlinear convergence rate $(\delta=0)$ :
+$$
+\text { Example: } s_{i}=\frac{c}{i !}, \bar{s}=0
+$$
+$$
+\lim _{i \rightarrow \infty} \frac{\left|s_{i+1}-\bar{s}\right|}{\left|s_{i}-\bar{s}\right|}=\lim _{i \rightarrow \infty} \frac{c i !}{c(i+1) !}=\lim _{i \rightarrow \infty} \frac{1}{i+1}=0
+$$
+3. Sublinear convergence rate $(\delta=1)$ :
+$$
+\begin{array}{l}
+\text { Example: } s_{i}=\frac{c}{i^{a}}, a>0, \bar{s}=0 \\
+\lim _{i \rightarrow \infty} \frac{\left|s_{i+1}-\bar{s}\right|}{\left|s_{i}-\bar{s}\right|}=\lim _{i \rightarrow \infty} \frac{c i^{a}}{c(i+1)^{a}}=\lim _{i \rightarrow \infty}\left(\frac{i}{i+1}\right)^{a}=1
+\end{array}
+$$
+4. Quadratic convergence rate $\left(\lim _{i \rightarrow \infty} \frac{\left|s_{i+1}-\bar{s}\right|}{\left|s_{i}-\bar{s}\right|^{2}}<\infty\right)$
+$$
+\text { Example: } s_{i}=q^{2^{i}}, 0<q<1, \bar{s}=0
+$$
+$$
+\lim _{i \rightarrow \infty} \frac{\left|s_{i+1}-\bar{s}\right|}{\left|s_{i}-\bar{s}\right|^{2}}=\lim _{i \rightarrow \infty} \frac{q^{2^{i+1}}}{q^{2^{i}}}=\lim _{i \rightarrow \infty} q^{2^{i}}=0
+$$
