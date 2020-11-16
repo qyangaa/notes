@@ -563,7 +563,7 @@ $$
 #### Properties
 + Smoothness of function, self-tuning: get arbitrarily close to optimal solution without very small $\eta$
 + $g(x)=\frac{M}{2} x^{\top} x-f(x)$ is convex
-  + $\nabla^{2} g(x)=M I-Q \succeq 0$, $M$ is the biggest eigen value of $Q$
+  + $\nabla^{2} g(x)=M I-Q \succeq 0$, $M$ is the biggest eigen value of $Q$[Question: Q have to be PSD?]
 + $f$ is less convex than $\frac{M}{2} x^{T} x$
 + $f(y) \leq f(x)+\nabla f(x)^{T}(y-x)+\frac{M}{2}\|y-x\|_{2}^{2}$ Quadratic upper bound
 + for $x_{+}=x-\eta \nabla f(x)$, 

@@ -24,7 +24,9 @@ $$
 - scaling: $\partial(\alpha f)=\alpha \partial f($ for $\alpha>0)$
 - summation + linearity (from set relationship): $\partial\left(a_{1} f_{1}+a_{2} f_{2}\right)=a_{1} \partial f_{1}+a_{2} \partial f_{2}$
 - Affine composition: if $g(x)=f(A x+b)$, then $\partial g(x)=A^{T} \partial f(A x+b)$
-- chain rule: suppose $f$ is convex, and $g$ is differentiable, nondecreasing, and convex. Let $h=g \circ f,$ then
+- chain rule: 
+  - $\partial(\phi \circ f)(\bar{x})=\{\alpha u||(\alpha, u) \in \partial \phi(f(\bar{x})) \times \partial f(\bar{x})\}$
+  - suppose $f$ is convex, and $g$ is differentiable, nondecreasing, and convex. Let $h=g \circ f,$ then
 
 $$
 \partial h(\boldsymbol{x})=g^{\prime}(f(\boldsymbol{x})) \partial f(\boldsymbol{x})
