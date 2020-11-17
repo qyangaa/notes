@@ -263,26 +263,168 @@ x_{t+1}=x_{t}-\eta_{t} g_{t}\\
 \text{update to }x_{\text {best }}
 $$
 
-For each step, choose $\eta_t=\frac{1}{\sqrt{t}}$ for the problem to converge, $g_t=z$ is calculated as stated in problem 3:
+For each step, choose $\eta_t=\frac{1}{\sqrt{t}}$ for the problem to converge, $g_t=z$ is calculated as stated in problem 3. One subgradient is the following:
 
-(a) $-A^{\prime}(\boldsymbol{y}-A \overline{\boldsymbol{x}})+\lambda \boldsymbol{z}=0$
-(b) For every $i \in[d], z_{i}=\operatorname{sign}\left(\bar{x}_{i}\right)$ if $\bar{x}_{i} \neq 0,$ and $\left|z_{i}\right| \leq 1$ if $\bar{x}_{i}=0$
-
-Finding $z$ is another convex program:
-
-$$
-$$
-minimize-A^{\prime}(\boldsymbol{y}-A \overline{\boldsymbol{x}})+\lambda \boldsymbol{z}\\
-s.t. \quad -A^{\prime}(\boldsymbol{y}-A \overline{\boldsymbol{x}})+\lambda \boldsymbol{z}\ge 0\\
-\text { For every } i \in[d], z_{i}=\operatorname{sign}\left(\bar{x}_{i}\right) \text { if } \bar{x}_{i} \neq 0, \text { and }\left|z_{i}\right| \leq 1 \text { if } \bar{x}_{i}=0
-$$
+$g = A'(Ax-y)+\lambda*sign(x)$
+When  $x_i\ne 0$, it equals to the gradient of smooth part of the function. When $x_i=0$,   then $sign(x_i)=0$ must be a subgradient of $|x_i|$ because it is within the convex hull of positive and negative gradients on either side of the absolute function on $i$'th coordinate.
 
 ### (b) Write proximal gradient update with fixed step size, $\eta_{t}=\eta .$ What is a good choice of $\eta ?$
 
 $$
 \begin{array}{c}
 \operatorname{prox}_{\eta}(x)=\arg \min _{z}\left\{\frac{1}{2 \eta}\|x-z\|^{2}+h(z)\right\} \\
-x_{+}=\operatorname{prox}_{\eta}(x-\eta \nabla g(x))
-\end{array}
+\end{array}\\
+f(\beta)=\frac{1}{2} \underbrace{\|y-A \beta\|_{2}^{2}}_{g(\beta)}+\underbrace{\lambda\|\beta\|_{1}}_{h(\beta)}\\
+\begin{aligned}
+\operatorname{prox}_{\eta}(\beta) &=\underset{z }{\operatorname{argmin}} \frac{1}{2 \eta}\|\beta-z\|_{2}^{2}+\lambda\|z\|_{1} \\
+& =\underset{z }{\operatorname{argmin}} \frac{1}{2}\|\beta-z\|_{2}^{2}+\lambda \eta\|z\|_{1} \\
+&=S_{\lambda \eta}(\beta)\\
+&=\left\{\begin{array}{ll}\beta_{i}-\eta \lambda & \text { if } \beta_{i}>\eta \lambda \\\beta_{i}+\eta \lambda & \text { if } \beta_{i}<-\eta \lambda \\0 & \text { else }\end{array}\right.\\
+x_{+}&=\operatorname{prox}_{\eta}(x-\eta \nabla g(x))\\
+&=s_{\lambda n}\left(x+\eta A^{T}(y-A x)\right)\\
+\end{aligned}
 $$
 
++ Choose $\eta$
+
+  + Proximal gradient descent converges when $\eta < \frac{1}{M}$ , where $g(x)$ is M-smooth. Since $g(x)$ is a quadratic function, thus 
+    $$
+    \begin{aligned}
+    \|\nabla f(x)-\nabla f(x')\| \leq M\|x-x'\|\\
+    \|A'(Ax-y)-A'(Ax'-y)\| \leq M\|x-x'\|\\
+    \|A'A\|\|x-x'\|\leq M\|x-x'\|\\
+    \Rightarrow M=\|A'A\|
+    \end{aligned}
+    $$
+    
+
+  + Therefore we can choose $\eta < \frac{1}{\|A'A\|}$
+
+## 5. Implementation
+
+For the same setting as above, generate random data, and solve the problem numerically, plotting the rate of convergence $\left\|\boldsymbol{x}_{t}-\boldsymbol{x}^{*}\right\|_{2} .$ 
+
++ choose $n=50$ and $d=200,$
++  $\boldsymbol{x}^{*}$ : a vector with only 5 non-zero values (say, choose them to be -10 or $\left.10\right) .$ 
++ Choose the matrix $A$ by selecting each of its $n \times d$ entries uniformly at random from a standard Gaussian distribution $\left(A_{i j} \sim N(0,1)\right) .$ 
++ let $e$ be a random $n$ -dimensional vector, where each entry is generated according to $N(0,0.1) .$ And finally, set
+
+$$
+\boldsymbol{y}=A \boldsymbol{x}^{*}+\boldsymbol{e}
+$$
+Use sub-gradient and prox grad method to solve
+$$
+\hat{\boldsymbol{x}}=\arg \min : \frac{1}{2}\|A \boldsymbol{x}-\boldsymbol{y}\|_{2}^{2}+\lambda\|\boldsymbol{x}\|_{1}
+$$
+compare the rate of convergence for each method by plotting $\left\|\boldsymbol{x}_{t}-\boldsymbol{x}^{*}\right\|_{2}$ vs iteration.
+
+Implementation and result are shown below:
+
+#### Set up Lasso Problem
+
+```python
+# Lasso
+n = 50
+d = 200
+nonZero = d-5
+np.random.seed(0)
+
+# Generate xStar
+xStar = (np.random.rand(d)-0.5)*20
+toZero = np.random.choice(np.arange(d),nonZero,replace=False)
+xStar[toZero]=0
+
+# Generate A
+A = np.random.normal(0,1,(n,d))
+
+# Generate e
+e = np.random.normal(0,.1,n)
+
+# Calculate y
+y = np.matmul(A,xStar)+e
+
+# Set lambda
+Lambda = 1
+
+def residual(x):
+    return np.matmul(A,x)-y
+
+def f(x):
+    r = residual(x)
+    return 0.5*np.matmul(r.T, r)+Lambda*np.linalg.norm(x,1)
+
+def convergence(x):
+    return np.linalg.norm(x-xStar,2)
+```
+
+#### Implementation of Subgradient Descent
+
+```python
+# Subgradient
+epochs = 2000
+
+def subgrad(x):
+    r = residual(x)
+    g = np.matmul(A.T,r)+Lambda*np.sign(x)
+    return g
+
+
+#Generate X:
+np.random.seed(5)
+x = (np.random.rand(d)-0.5)*20
+xbest = x
+fbest = f(xbest)
+convergenceListSubgrad=[]
+for i in range(epochs):
+    eta = 1/(i+1)
+    convergenceListSubgrad.append(convergence(x))
+    xtemp = x - eta*subgrad(x)
+    ftemp = f(xtemp)
+    if ftemp<fbest:
+        x = xtemp
+        xbest = x
+        fbest = ftemp
+```
+
+#### Implementation of proximal gradient descent
+
+```python
+# proximal
+epochs = 2000
+eta = 1/(np.linalg.norm(np.matmul(A.T,A),2)+1)
+def prox(x):
+    def thresholdCoord(bi):
+        if bi>eta*Lambda:
+            return bi-eta*Lambda
+        elif bi<eta*Lambda:
+            return bi+eta*Lambda
+        else:
+            return 0
+    def threshold(b):
+        return np.array([thresholdCoord(bi) for bi in b])
+    return threshold(x-eta*np.matmul(A.T,residual(x)))
+
+
+#Generate X:
+np.random.seed(5)
+x = (np.random.rand(d)-0.5)*20
+
+convergenceListProx=[]
+for i in range(epochs):
+    convergenceListProx.append(convergence(x))
+    x = prox(x)
+```
+
+#### Plot results
+
+```python
+t = np.arange(epochs)
+plt.plot(t,convergenceListSubgrad, label="Subgradient Descent")
+plt.plot(t,convergenceListProx, label="Proximal Gradient Descent")
+plt.xlabel('Steps')
+plt.ylabel(r'$\|x_t-x^*\|_2$')
+plt.legend()
+plt.show()
+```
+
+![image-20201117095023697](../attachments/image-20201117095023697.png)

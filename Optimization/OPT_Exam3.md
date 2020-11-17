@@ -142,7 +142,6 @@ $$
 ### Algorithm
 
 **Prox operator**: $\mathbb{R}^n \rightarrow \mathbb{R}^n$, not a function but a mapping
-
 $$
 \begin{array}{c}
 \operatorname{prox}_{\eta}(x)=\arg \min _{z}\left\{\frac{1}{2 \eta}\|x-z\|^{2}+h(z)\right\} \\

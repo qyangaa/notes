@@ -129,7 +129,7 @@ $$
 + Lasso: $\min _{\beta}\|y-X \beta\|^{2}+\lambda\|\beta\|_{1}$
   + separable to each coordinates
   + $\operatorname{prox}_{\eta}(\beta)=\arg \min _{z}\left\{\frac{1}{2 \eta}\|\beta-z\|^{2}+\lambda\|z\|_{1}\right\}$
-  + $\arg \min _{z_{i}} \frac{1}{2 \eta}\left\|\beta-z_{i}\right\|^{2}\lambda\left\|z_{i}\right\|_{1}=\left\{\begin{array}{ll}\beta_{i}-\eta \lambda & \text { if } \beta_{i}>\eta \lambda \\\beta_{i}+\eta \lambda & \text { if } beta_{i}<-\eta \lambda \\0 & \text { else }\end{array}\right.$
+  + $\arg \min _{z_{i}} \frac{1}{2 \eta}\left\|\beta-z_{i}\right\|^{2}+\lambda\left\|z_{i}\right\|_{1}=\left\{\begin{array}{ll}\beta_{i}-\eta \lambda & \text { if } \beta_{i}>\eta \lambda \\\beta_{i}+\eta \lambda & \text { if } \beta_{i}<-\eta \lambda \\0 & \text { else }\end{array}\right.$
   + $z=s_{\lambda n}(\beta)$ soft thresholding operator
   + $\beta_{+}=s_{\lambda n}\left(\beta+\eta X^{T}(y-X \beta)\right)$
   + Iterative Soft Thresholding Algorithm (ISTA)
