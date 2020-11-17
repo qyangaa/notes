@@ -4,6 +4,8 @@ $$
 x_{+}=x_{0}-\eta\left[\nabla^{2} f\left(x_{0}\right)\right]^{-1} \nabla f\left(x_{0}\right)
 $$
 
+Stanford(10-14)
+
 ### Step size - Convergence
 
 + $\eta=1$ Pure Newton Method, may not converge
@@ -41,20 +43,24 @@ $$
       \frac{L}{2 m^{2}}\left\|\nabla f\left(x_{+}\right)\right\| \leq\left(\frac{L}{2 m^{2}}\|\nabla f(x)\|\right)^{2} \le 1 \quad [\frac{L}{2 m^{2}}\text{ guarantees} \le 1]
       $$
 
+      + For Strongly convex: $\forall x, y\langle\nabla f(x)-\nabla f(y), x-y\rangle \geq m\|x-y\|^{2}$
+    + $\nabla f(x)-\nabla f(x^*)\le \|\nabla f(x)\|$
+      + Thus $\|\nabla f(x)\|$ is a good measurement of error 
+    
     + $\epsilon_{k+1}=-\frac{\nabla^{2} f\left(\xi_{k}\right)}{2 \nabla f\left(x_{k}\right)} \epsilon_{k}^{2}$
 
     + $\left|\epsilon_{k+1}\right| \leq M \epsilon_{k}^{2},  \quad \text{ where } M=\sup _{x, y} \frac{\left|\nabla^{2} f(x)\right|}{2 \nabla f(y) \mid}<\infty$
 
     + [Question: [go through derivation](https://www.stat.cmu.edu/~ryantibs/convexopt-F13/scribes/lec9.pdf)]
-
+  
   + Overall number of steps to reach $f(x)-f^{*} \leq \varepsilon$: 
 
     + $$
-      \frac{f\left(x_{0}\right)-f^{*}}{\gamma}+\log \log \left(\frac{\varepsilon_{0}}{\varepsilon}\right)
+    \frac{f\left(x_{0}\right)-f^{*}}{\gamma}+\log \log \left(\frac{\varepsilon_{0}}{\varepsilon}\right)
       $$
-
+  
     + **Quadratic convergence:** $\log \log \frac{\varepsilon_{0}}{\varepsilon} \approx$ constant, because it changes very slowly. Thus total number of steps ~ constant
-
+  
     + Compare to GD Linear convergence: $\log \left(\frac{1}{\varepsilon}\right)$ 
 
 ### Affine invariance
