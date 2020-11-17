@@ -1,6 +1,6 @@
 # HW9
 
-## 1. Affine transform of ellipse
+## 1. Affine transformation of ellipse
 
 ### a) Plot 
 
@@ -428,3 +428,5 @@ plt.show()
 ```
 
 ![image-20201117095023697](../attachments/image-20201117095023697.png)
+
+As is shown above, proximal gradient descent converges faster than subgradient descent, and subgradient descent flattens out due to diminishing $\eta_t$
