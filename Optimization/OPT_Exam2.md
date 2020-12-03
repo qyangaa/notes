@@ -556,7 +556,7 @@ $x_{i}^{*}=\arg \min _{x_{i}} f_{i}\left(x_{i}\right)-a_{i} \mu^{*} x_{i}$
 + For $x_{k+1} = g(k) x_0$, convergence = $\log (g(k))$.i.e.:
   + $f(x)=a x^{2}, x_{0}=1$ -> $g(k)=(1-2a\eta )^k$, linear convergence
 ### Smoothness: Lipschitz (less convex than a quadratic)
-$f$ has $M$ -Lipschitz gradients if
+$f$ has $M$ -Lipschitz gradients/ is smooth if
 $$
 \|\nabla f(x)-\nabla f(y)\| \leq M\|x-y\| \forall x, y
 $$

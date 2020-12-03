@@ -25,28 +25,28 @@ Stanford(10-14)
     + For strongly convex and smooth function: $m I \leq \nabla^{2} f(x) \leq M I \forall x$
     + $\nabla^{2} f(.) \text { is } L \text { -Lipschitz }$
       + $|\nabla^{2} f(x_1)-\nabla^{2} f(x_2)|\le L|x_1-x_2|$
-      + [Question: try to understand Lipschitz continuous]
-
-  + **2-stage convergence**
-
-    + $$
+    
++ **2-stage convergence**
+  
+  + $$
       f\left(x_{k}\right)-f^{*} \leq\left\{\begin{array}{llll}
       f\left(x_{0}\right)-f^{*}-\gamma k & k \leq k_{0} & [\text{Linear (log-Sublinear)}]\\
       \frac{2 m^{3}}{L^{2}}\left(\frac{1}{2}\right)^{k-k_{0}+1} & k \ge k_{0} & [\text{Inversed Exponential, diminishes fast}]
       \end{array}\right.
       $$
-
-    + Damped phase: if $\|\nabla f(x)\| \geq \alpha$ then $f\left(x_{+}\right)-f(x) \leq-\gamma$
-
-    + Pure phase: if $\|\nabla f(x)\|<\alpha$ then BTLS selects $\eta=1$ automatically, quadratic approximate close to optima is a good approximation, gradient going smaller exponentially:
+  
+  + Damped phase: if $\|\nabla f(x)\| \geq \alpha$ then $f\left(x_{+}\right)-f(x) \leq-\gamma$
+  
+  + Pure phase: if $\|\nabla f(x)\|<\alpha$ then BTLS selects $\eta=1$ automatically, quadratic approximate close to optima is a good approximation, gradient going smaller exponentially:
       $$
       \frac{L}{2 m^{2}}\left\|\nabla f\left(x_{+}\right)\right\| \leq\left(\frac{L}{2 m^{2}}\|\nabla f(x)\|\right)^{2} \le 1 \quad [\frac{L}{2 m^{2}}\text{ guarantees} \le 1]
       $$
-
-      + For Strongly convex: $\forall x, y\langle\nabla f(x)-\nabla f(y), x-y\rangle \geq m\|x-y\|^{2}$
+  
+    + For Strongly convex: $\forall x, y\langle\nabla f(x)-\nabla f(y), x-y\rangle \geq m\|x-y\|^{2}$
     + $\nabla f(x)-\nabla f(x^*)\le \|\nabla f(x)\|$
-      + Thus $\|\nabla f(x)\|$ is a good measurement of error 
-    
+      
+    + Thus $\|\nabla f(x)\|$ is a good measurement of error 
+      
     + $\epsilon_{k+1}=-\frac{\nabla^{2} f\left(\xi_{k}\right)}{2 \nabla f\left(x_{k}\right)} \epsilon_{k}^{2}$
 
     + $\left|\epsilon_{k+1}\right| \leq M \epsilon_{k}^{2},  \quad \text{ where } M=\sup _{x, y} \frac{\left|\nabla^{2} f(x)\right|}{2 \nabla f(y) \mid}<\infty$
@@ -66,7 +66,7 @@ Stanford(10-14)
 ### Affine invariance
 
 + Algorithm is affine invariance
-+ But bounds are not affine invariance, depend on m, M, L..
++ But bounds are not affine invariant, depend on m, M, L..
 
 #### Self-Concordance
 
