@@ -25,7 +25,7 @@ Stanford(10-14)
     + For strongly convex and smooth function: $m I \leq \nabla^{2} f(x) \leq M I \forall x$
     + $\nabla^{2} f(.) \text { is } L \text { -Lipschitz }$
       + $|\nabla^{2} f(x_1)-\nabla^{2} f(x_2)|\le L|x_1-x_2|$
-    
+  
 + **2-stage convergence**
   
   + $$
@@ -188,7 +188,7 @@ For case when finding and inverting Hessian is infeasible
       $$
       and $B_{k}$ is a symmetric and positive-definite matrix.
 
-  + __Broyden-Fletcher-Goldfarb-Shanno algorithm__:(more popular) [Question: what causes it to be different from DFP? Idea: added one more degree of freedom, we can have multiple solutions, solution depends on how they choose alpha and beta]
+  + __Broyden-Fletcher-Goldfarb-Shanno algorithm__:(more popular) 
 
     + $B_{k+1}=B_{k}+\frac{\mathbf{y}_{k} \mathbf{y}_{k}^{\mathrm{T}}}{\mathbf{y}_{k}^{\mathrm{T}} \mathbf{s}_{k}}-\frac{B_{k} \mathbf{s}_{k} \mathbf{s}_{k}^{\mathrm{T}} B_{k}^{\mathrm{T}}}{\mathbf{s}_{k}^{\mathrm{T}} B_{k} \mathbf{s}_{k}}$
     + $\begin{aligned}
@@ -205,7 +205,7 @@ For case when finding and inverting Hessian is infeasible
 
 + Theorem: If $f$ strongly convex, plus a few technical conditions, and $\eta$ satisfies the above conditions, then $x_{k} \rightarrow x^{*}$ **super linearly**.
 
-+ Improvements: LBFGS (lLimited-memory BFGS)
++ Improvements: LBFGS (Limited-memory BFGS)
 
   + Retaining and updating $B$ and $B^{-1}$ may still be hard: BFGS involves
     $$
@@ -257,7 +257,7 @@ $$
 
 + Key: improve barrier function (choosing of $t$) over time
 
-  + if choose a large value of $t$ and solve, Gives a very badly conditioned optimization problem which is bad, especially when $x_0$ is far from $x^∗$ [Question: define bad conditioning]
+  + if choose a large value of $t$ and solve, Gives a very badly conditioned optimization problem which is bad, especially when $x_0$ is far from $x^∗$ 
 
   + Idea 1: increase $t,$ take a few steps, repeat $\ldots$ 
 

@@ -13,11 +13,11 @@
 
 $$
 \begin{array}{|l|l|l|}
-\hline & \text { Gradient descent } & \text { Lower bound } \\
+\hline \text { Gradient descent } & \text { Upper bound } & \text { Lower bound } \\
 \hline \begin{array}{l}
 \nabla f \\
 \text { L-Lipschitz }
-\end{array} & O\left(\frac{1}{T}\right) & O\left(\frac{1}{T^{2}}\right) \\
+\end{array} & O\left(\frac{1}{T}\right) & \Omega\left(\frac{1}{T^{2}}\right) \\
 \hline \begin{array}{l}
 \text { Strongly convex with } \\
 \text { condition number } \kappa
@@ -130,8 +130,9 @@ $$
 + $\left\|x_{0}-x^{*}\right\|^{2} \leq R^{2}$, $R$ depends on initial condition
 + $G^{2} \geq E\left[\|g(x)\|^{2} \mid x\right]$ : $G$ is a uniform upper bound on the variance of $g(x)$, higher variance, slower convergence
 + If fixed step size: not converge, because when close to $x^*$, fixed step size will keep stepping away from $x^*$
-  + ![image-20201124093238280](../attachments/image-20201124093238280.png)
-
+  
++ ![image-20201124093238280](../attachments/image-20201124093238280.png)
+  
 + Problem: Stochastic gradient descent needs $\eta_{k} \rightarrow 0$ because $\operatorname{Var}\left(g_{k}\right)$ does not approach zero, But $\eta_{k} \rightarrow 0$ makes $\mathrm{SGD}$ "slower than it needs to be".
 
 + Summary
@@ -335,8 +336,6 @@ $$
 $$
 x^{(k)} \rightarrow x^{*} \Rightarrow g_{i_{k}}^{(k)} \rightarrow g_{i_{k}}^{(k-1)} \text { as } k \rightarrow \infty
 $$
-+  [TODO: Why divide by n makes it biased in SAG?]
-
 + Similar convergence rates to those of SAG
 
 + Works with proximal idea

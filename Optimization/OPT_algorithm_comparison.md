@@ -1,26 +1,36 @@
 ## Step size/ convergence rate/ complexity
 
-| Algorithms       | Usage                        | Convex                                                       | Convex+Smooth                                                | Strongly convex                                       | Strongly convex+Smooth                                       |
-| ---------------- | ---------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------ |
-| Gradient Descent | Differentiable               | Can diverge                                                  | $\frac{1}{M}$ or  $\frac{\beta}{M}$;$\frac{1}{T}$; $\frac{1}{\varepsilon}$ | Can diverge                                           | $\frac{1}{M}$ ;$(1-\frac{m}{M})^T$; $\log\frac{1}{\varepsilon}$ |
-| Subgradient      | Non-differentiable           | $\frac{1}{\sqrt{t}}$ ;$\frac{1}{\sqrt{T}}$; $\frac{1}{\varepsilon^2}$ | $\frac{1}{\sqrt{t}}$ ;$\frac{1}{\sqrt{T}}$; $\frac{1}{\varepsilon^2}$ | $\frac{1}{t}$ ;$\frac{1}{T}$; $\frac{1}{\varepsilon}$ | $\frac{1}{t}$ ;$\frac{1}{T}$; $\frac{1}{\varepsilon}$        |
-| Frank Wolfe      | Projection free, constrained | $\frac{1}{t}$ ;$\frac{1}{T}$; $\frac{1}{\varepsilon}$        | $\frac{1}{t}$ ;$\frac{1}{T}$; $\frac{1}{\varepsilon}$        | $\frac{1}{t}$ ;$\frac{1}{T}$; $\frac{1}{\varepsilon}$ | $\frac{1}{t}$ ;$\frac{1}{T}$; $\frac{1}{\varepsilon}$        |
-|                  |                              |                                                              |                                                              |                                                       |                                                              |
-|                  |                              |                                                              |                                                              |                                                       |                                                              |
-|                  |                              |                                                              |                                                              |                                                       |                                                              |
-|                  |                              |                                                              |                                                              |                                                       |                                                              |
-|                  |                              |                                                              |                                                              |                                                       |                                                              |
-|                  |                              |                                                              |                                                              |                                                       |                                                              |
+| Algorithms       | Best<br />Convergence | Usage                        | Convex                                                       | Convex+Smooth                                                | Strongly convex                                       | Strongly convex+Smooth                                       |
+| ---------------- | --------------------- | ---------------------------- | ------------------------------------------------------------ | ------------------------------------------------------------ | ----------------------------------------------------- | ------------------------------------------------------------ |
+| Gradient Descent | Linear                | Differentiable               | Can diverge                                                  | $\frac{1}{M}$ or  $\frac{\beta}{M}$;$\frac{1}{T}$; $\frac{1}{\varepsilon}$ | Can diverge                                           | $\frac{1}{M}$ ;$(1-\frac{m}{M})^T$; $\log\frac{1}{\varepsilon}$ |
+| Subgradient      | Sublinear             | Non-differentiable           | $\frac{1}{\sqrt{t}}$ ;$\frac{1}{\sqrt{T}}$; $\frac{1}{\varepsilon^2}$ | $\frac{1}{\sqrt{t}}$ ;$\frac{1}{\sqrt{T}}$; $\frac{1}{\varepsilon^2}$ | $\frac{1}{t}$ ;$\frac{1}{T}$; $\frac{1}{\varepsilon}$ | $\frac{1}{t}$ ;$\frac{1}{T}$; $\frac{1}{\varepsilon}$        |
+| Frank Wolfe      | Sublinear             | Projection free, constrained | $\frac{1}{t}$ ;$\frac{1}{T}$; $\frac{1}{\varepsilon}$        | $\frac{1}{t}$ ;$\frac{1}{T}$; $\frac{1}{\varepsilon}$        | $\frac{1}{t}$ ;$\frac{1}{T}$; $\frac{1}{\varepsilon}$ | $\frac{1}{t}$ ;$\frac{1}{T}$; $\frac{1}{\varepsilon}$        |
+| Newton           | Quadratic             |                              |                                                              |                                                              |                                                       | $\frac{f\left(x_{0}\right)-f^{*}}{\gamma}+\log \log \left(\frac{\varepsilon_{0}}{\varepsilon}\right)$ |
+| Quasi-Newton     | Superlinear           |                              |                                                              |                                                              |                                                       |                                                              |
+| GD (not diverge) | Linear                | $O(nd)$ per iteration        | $O(\frac{1}{\sqrt{T}})$                                      | $O(\frac{1}{T})$                                             | $O(c^T)$                                              |                                                              |
+| SGD              | Sublinear             | $O(d)$ per iteration         | $O(\frac{1}{\sqrt{T}})$                                      | $O(\frac{1}{\sqrt{T}})$                                      | $O(\frac{1}{T})$                                      |                                                              |
+| Minibatch SGD    | Sublinear             | $O(bd)$ per iteration        | $O(\frac{1}{\sqrt{T}})$                                      | $O\left(\frac{1}{\sqrt{b T}}+\frac{1}{T}\right)$             | $O(\frac{1}{T})$                                      |                                                              |
+|                  |                       |                              |                                                              |                                                              |                                                       |                                                              |
+|                  |                       |                              |                                                              |                                                              |                                                       |                                                              |
+|                  |                       |                              |                                                              |                                                              |                                                       |                                                              |
 
-**Proximal gradient descent:** same as GD for decomposable objective function.
+- **Proximal gradient descent:** same as GD for decomposable objective function.
 
-**Projected gradient descent**: same as GD but projection step may be slow
+- **Projected gradient descent**: same as GD but projection step may be slow
+- **Coordinate descent:** similar to GD for function decomposable to smooth + separable non-smooth parts.
 
-**Coordinate descent:** similar to GD for function decomposable to smooth + separable non-smooth parts.
+- **Frank Wolfe**: projection-free. $O(1/k)$ sublinear
+- **Newton**:  Quadratic convergence $\frac{f\left(x_{0}\right)-f^{*}}{\gamma}+\log \log \left(\frac{\varepsilon_{0}}{\varepsilon}\right)$
+  - Strongly convex smooth functions:
+    - Damped phase: $\eta$ from backtrack, $\left(\|\nabla f(x)\|_{2} \geq \alpha\right)$, at most $\left(f\left(x^{(0)}\right)-p^{\star}\right) / \gamma$ iterations
+    - pure phase: $\eta = 1$, $\left(\|\nabla f(x)\|_{2}<\alpha\right)$, $f(x_k)-f^* \le \frac{2 m^{3}}{L^{2}}\left(\frac{1}{2}\right)^{k-k_{0}+1}$
+  - Self concordant objective function: quadratic convergence without unknown constants: $c(\alpha, \beta)\left(f\left(x_{0}\right)-f *\right)+\log \log \frac{1}{\varepsilon}$
 
-**Frank Wolfe**: projection-free. $O(1/k)$ sublinear
-
-
++ __Quasi Newton:__ Super linear convergence $\lim _{t \rightarrow \infty} \frac{\left\|\boldsymbol{x}^{t+1}-\boldsymbol{x}^{*}\right\|_{2}}{\left\|\boldsymbol{x}^{t}-\boldsymbol{x}^{*}\right\|_{2}}=0$
++ __Barrier method__: # Newton steps * # outer iterations
+  + #outer iterations = $\left[\frac{\log \left(m /\left(\epsilon t^{(0)}\right)\right)}{\log \mu}\right\rceil$, Linear
++ __Accelerated Gradient descent__: add momentum to reach lower bound of convergence speed
++ **Variance reduction**: modify SGD, use averaged updated and not updated coordinate gradient values for $x$ update
 
 ## Definition of convergence rate
 
