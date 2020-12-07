@@ -6,20 +6,7 @@ created: '2020-11-10T00:02:59.650Z'
 modified: '2020-11-10T16:48:21.402Z'
 ---
 
-# OPT Exam 1
-## Linear Algebra Basics
-+ Norms
-  + $\|\mathbf{x}\|_{\infty}:=\max _{i}\left|x_{i}\right|$
-  + $\|\boldsymbol{x}\|_{1}:=\sum_{i=1}^{n}\left|x_{i}\right|$
-  + $\|\boldsymbol{x}\|:=\sqrt{\boldsymbol{x} \cdot \boldsymbol{x}}$
-+ Cauchy-schwaz inequality
-  + $|\langle\mathbf{u}, \mathbf{v}\rangle|^{2} \leq\langle\mathbf{u}, \mathbf{u}\rangle \cdot\langle\mathbf{v}, \mathbf{v}\rangle$
-  + $|\langle\mathbf{u}, \mathbf{v}\rangle| \leq\|\mathbf{u}\|\|\mathbf{v}\|$
-+ Hölder's inequality
-  + $p, q \in$ $[1, \infty)$ with $1 / p+1 / q=1$: $\|f g\|_{1} \leq\|f\|_{p}\|g\|_{q}$
-+ Half-space: $H_{s \cdot b}^{+}=\left\{x \in \mathbb{R}^{n}: s^{\top} x \geqslant b y\right\}$
-+ $Q^{-1}$ is symmetric if $Q$ is symmetric
-
+# Convex Program
 ## Convex sets
 ### Definition
  $x_{1}, x_{2} \in C, \quad 0 \leq \theta \leq 1 \quad \Longrightarrow \quad \theta x_{1}+(1-\theta) x_{2} \in C$
@@ -430,22 +417,23 @@ where sgn is the sign function which gives +1 when $c_{i} \geq 0$ and -1 when $c
 
 ### Process of writing
 + $\min _{x} c^{\prime} x$, $\text { s.t. } A x=b \quad Dx\ge f \text { and } x \geq 0$
-+ $\min _{x \geq 0}\max _{p,q} \ c^{\prime} x+p^{\prime}(b-A x) + q(f-Dx)$: terms in max should be <= 0
++ $\min _{x \geq 0}\max _{p,q} \ c^{\prime} x+p^{\prime}(b-A x) + q(f-Dx)$: terms in max should be <= 0, then $q$>=0
 + $\max \min (c'x -p'A-qD)x+p'b+qf$: terms in min should be >= 0
 + $\max pb+qf,\; q\ge 0, \; c'-pA-qD\ge 0$
-### Properties
-+ Dual of dual is primal
+
+Dual of dual is primal
+
 ### Duality
 #### Weak duality
-$\min _{x}\left\{\max _{y} f(x, y)\right\} \geq \max _{y}\left\{\min _{x} f(x, y)\right\} \Rightarrow c^{\prime} \times(\text { primal value }) \geq p^{\prime} b \text { (dual value) }$
+$\min _{x}\left\{\max _{y} f(x, y)\right\} \geq \max _{y}\left\{\min _{x} f(x, y)\right\} \Rightarrow c^{\prime} x(\text { primal value }) \geq p^{\prime} b \text { (dual value) }$
 #### Strong duality
 + Farkas' lemma:  For any vectors $c$ and $a_{i}, i \in I$ either 
-  + (a)
+  + (a) c within the convex hull of a
   $\exists$ some $p_{i} \geq 0$ s.t.
   $$
   c=\sum_{i} a_{i} p_{i}
   $$
-  + or (b)
+  + or (b) Exist separating hyperplane
   $\exists d$ s.t. $d^{\prime} a_{i} \geq 0$ for all $i,$ but $d^{\prime} c<0$
 + Corollary to Farkas' lemma:
   + If vectors $c$ and $a_{i}, i \in I$ are such that the following holds :
@@ -457,6 +445,8 @@ $x, y$ are optimal iff:
 $(b_i -\sum_j a_{ij}x_j)y_i=0\; \forall i$
 $(\sum_i a_{ij}y_j -c_j)x_j=0\; \forall j$
 dual/primal constraints/variable cannot be $\ne$ at the same time
+
+![Possible combinations of primal and dual properties | Download Table](https://www.researchgate.net/profile/Dr_Hossein_Arsham/publication/258995625/figure/tbl1/AS:667714486013959@1536206947300/Possible-combinations-of-primal-and-dual-properties.png)
 
 ### Max-Flow Min-Cut Duality
 #### Max-Flow
@@ -487,7 +477,7 @@ $$\min_x c^Tx, \; a_i^Tx\le b_i\; \forall i$$
 
 
 
-## SDP
+## Semidefinite Program (SDP)
 
 ### Symmetric matrices
 
@@ -519,7 +509,7 @@ $$\min_x c^Tx, \; a_i^Tx\le b_i\; \forall i$$
 + Operation that preserves PSD: 
   + addition, some multiplication (MNM, NMN, or MN=NM)
   + Hadamard product $M \circ N = \sum M_{ij}N_{ij}\geq 0$
-+ $tr(M)\ge 0$
++ $tr(M)=\sum\lambda_i\ge 0$
 + Convexity: if $M$ and $N$ are positive semidefinite, then for any $\alpha$ between 0 and 1, ==$\alpha M+(1-\alpha) N$ is also positive semidefinite==
 + If $M>0$ is real, then there is a $\delta>0$ such that $M>\delta I,$ where $I$ is the identity matrix.
 + $A \le 0$ then $-A\ge 0$
@@ -600,11 +590,11 @@ B^{\top} & C
 $$
 
 + If $X$ symmetric and $C$ invertible:
-+ $X \succ 0 \Leftrightarrow A \succ 0, X / A=C-B^{\top} A^{-1} B \succ 0$
-+ $X \succ 0 \Leftrightarrow C \succ 0, X / C=A-B C^{-1} B^{\top} \succ 0$
-+ If $A \succ 0,$ then $X \succeq 0 \Leftrightarrow X / A=C-B^{\top} A^{-1} B \succeq 0$
-+ If $C \succ 0,$ then $X \succeq 0 \Leftrightarrow X / C=A-B C^{-1} B^{\top} \succeq 0$
-  Generalized Schur Complement
+  + $X \succ 0 \Leftrightarrow A \succ 0, X / A=C-B^{\top} A^{-1} B \succ 0$
+  + $X \succ 0 \Leftrightarrow C \succ 0, X / C=A-B C^{-1} B^{\top} \succ 0$
+  + If $A \succ 0,$ then $X \succeq 0 \Leftrightarrow X / A=C-B^{\top} A^{-1} B \succeq 0$
+  + If $C \succ 0,$ then $X \succeq 0 \Leftrightarrow X / C=A-B C^{-1} B^{\top} \succeq 0$
+    Generalized Schur Complement
 + $X \succeq 0 \Leftrightarrow A \succeq 0, C-B^{\top} A^{g} B \succeq 0,\left(I-A A^{g}\right) B=0$
 + $X \succeq 0 \Leftrightarrow C \succeq 0, A-B C^{g} B^{\top} \succeq 0,\left(I-C C^{g}\right) B^{\top}=0$
 + where $A^{g}$ denotes the generalized inverse of $A$.
@@ -659,7 +649,7 @@ $$
 #### 3. Sum of squares (SoS)
 
 + f is PSD: $f(x) \geq 0 \quad \forall x \in \mathbb{R}^{n}$
-+ SoS decomposition: $f$ is PSD if $f=\sum_{i=1}^{s} g_{i}^{2}$, polynomials $g_{1}, \ldots, g_{s}$ (i.e. polynomial $g_i(x)$) A certificate for [$f$ is PSD].
++ SoS decomposition: $f$ is PSD if $f=\sum_{i=1}^{s} g_{i}^{2}$, polynomials $g_{1}, \ldots, g_{s}$ (i.e. ==polynomial $g_i(x)$) A certificate for [$f$ is PSD].==
 + Find semidefinite formulation:
   $g_i(x) = <g_i, x>$ where $g_i^j$ is the j'th coefficient of the polynomial. 
    $\sum g_i(x)^2=\sum x^Tg_i^Tg_ix = x^T[\sum g_i^Tg_i]x=x^TQx$, $Q \succeq 0$
@@ -731,7 +721,7 @@ $$
 ### Strong duality
 
 + sufficient condition for strong duality to hold for convex problem
-+ Slater's condition (equivalent description):  
++ **Slater's condition (equivalent description):**  
   + feasible region have an interior point 
   + strictly feasible: all constraints are satisfied and the nonlinear constraints are satisfied with strict inequalities
   + $f_i(x)<0, \quad \forall i$
@@ -746,21 +736,21 @@ $$
 
 $$
 \begin{aligned}
-\operatorname{minimize} x^T\omega x\\
-\text { s.t. } x_i^2=1 \forall i \\
-L(x,\nu) = x^T\omega x+\sum\nu_i(x_i^2-1)\\
-=x^T(\omega+diag(\nu))x -\mathbb{1}^T\nu\\
-g(\nu)=\min_x L(x,\nu)\\
-= -1^T\nu \text{ if }\omega+diag(\nu)\ge 0, -\infty \text{ else }\\
-\text {choose minimum value that } \omega+diag(\nu)\ge 0 \text { holds: }\\
- \nu = -\lambda_{min}(\omega)1^T \\
- p^* \ge 1^T\lambda_{min}(\omega)1^T=n\lambda_{min}(\omega)
+\operatorname{minimize} \quad & x^T\omega x\\
+\text { s.t. } \quad & x_i^2=1 \forall i \\
+L(x,\nu) &= x^T\omega x+\sum\nu_i(x_i^2-1)\\
+&=x^T(\omega+diag(\nu))x -\mathbb{1}^T\nu\\
+g(\nu)&=\min_x L(x,\nu)\\
+&= -1^T\nu \text{ if }\omega+diag(\nu)\ge 0, -\infty \text{ else }\\
+\text {choose minimum value that }& \omega+diag(\nu)\ge 0 \text { holds: }\\
+ \nu &= -\lambda_{min}(\omega)1^T \\
+ p^* &\ge 1^T\lambda_{min}(\omega)1^T=n\lambda_{min}(\omega)
 \end{aligned}
 $$
 
 ### Duality and sensitivity
 
-Perturbe with $u_i, v_i$:
+Perturb with $u_i, v_i$:
 $$
 \begin{array}{ll}
 \operatorname{minimize} & f_{0}(x) \\
@@ -829,8 +819,8 @@ then [$x$ is primal opt, $\lambda, \nu$ are dual opt] iff. [$x, \lambda, \nu$ sa
 1. Primal feasibility $f_{i}(x) \leq 0, \quad h_{i}(x)=0$
 2. Dual feasibility $\lambda_i \ge 0$
 3. Complementary slackness: $\lambda_i f_i(x) =0$
-4. Stationarity: $\nabla L = \nabla f_{0}\left(x^{\star}\right)+\sum_{i=1}^{m} \nabla f_{i}\left(x^{\star}\right)^{T} \lambda_{i}^{\star}+\sum_{i=1}^{p} \nu_{i}^{\star} \nabla h_{i}\left(x^{\star}\right)=0$
-   Stationarity in practice: for tight primal:
+4. ==Stationarity: $\nabla L = \nabla f_{0}\left(x^{\star}\right)+\sum_{i=1}^{m} \nabla f_{i}\left(x^{\star}\right)^{T} \lambda_{i}^{\star}+\sum_{i=1}^{p} \nu_{i}^{\star} \nabla h_{i}\left(x^{\star}\right)=0$==
+   Stationarity in practice: for tight primal ($f_i(x)=0$, $\lambda_i$ can be $\ne 0$):
    $$-\nabla f_0 = \sum \lambda_i \nabla f_i$$
    $\nabla f_i$ are n-dimensional.
 
@@ -850,26 +840,26 @@ then [$x$ is primal opt, $\lambda, \nu$ are dual opt] iff. [$x, \lambda, \nu$ sa
 
 ### Max Margin Classification
 
-+ Margin (of a linear classifier/ hyperplane): min distance between any data point and hyperplane
++ ==Margin (of a linear classifier/ hyperplane): min distance between any data point and hyperplane==
 + Max margin classifier: the one with largest margin
 + Find Max margin classifier:
   + Classifier: $y^{(i)}\left(w^{\top} x^{(i)}-b\right)>0$
   + Rescale to make $y^{(i)}\left(w^{\top} x^{(i)}-b\right) \geq 1$
   + Calculate margin between planes $w^{\top} x-b=\pm 1$ is $\frac{2}{\|w\|}$
-  + Task becomes:
-    $$\begin{aligned}
+  + ==Task becomes:==
+    ==$$\begin{aligned}
     &\min _{w, b} \quad\|w\|^{2}\\
     &\text { s.t. } \quad y^{(i)}\left(w^{\top} x^{(i)}-b\right) \geq 1 \text { for all samples } i
-    \end{aligned}$$
+    \end{aligned}$$==
   + __Support Vectors__: the best $(\widehat{w}, \hat{b})$ found
 
 ### Soft Margin
 
-+ For data that is not separable, add a penalty for being wrong (but still allowed)
++ For data that is not separable by half plane, add a penalty for being wrong (but still allowed)
 
 $$
 \begin{aligned}
-&\min _{w, b, \xi} \frac{1}{n^{n}} \sum_{i} \xi^{(i)}+\lambda\|w\|^{2}\\
+&\min _{w, b, \xi} \frac{1}{n} \sum_{i} \xi^{(i)}+\lambda\|w\|^{2}\\
 &\text { s.t. } \quad y^{(i)}\left(w^{\top} x^{(i)}-b\right) \geq 1-\xi^{(i)} \text { for all samples } i\\
 &\xi^{(i)} \geq 0 \text { for all samples } i
 \end{aligned}
@@ -893,7 +883,7 @@ $$
 ### Kernel Trick
 
 + Kernel: as a similarity measure
-+ $\text { Replace all }\left\langle x^{(i)}, x^{(j)}\right\rangle \text { by } k\left(x^{(i)}, x^{(j)}\right), \text { where } k(\cdot, \cdot) \text { is the kernel function }$
++ ==$\text { Replace all }\left\langle x^{(i)}, x^{(j)}\right\rangle \text { by } k\left(x^{(i)}, x^{(j)}\right), \text { where } k(\cdot, \cdot) \text { is the kernel function }$==
 + $\max _{c} \sum_{i} c^{(i)}-\frac{1}{2} \sum_{i} \sum_{j} y^{(i)} c^{(i)} k\left(x^{(i)}, x^{(j)}\right) y^{(j)} c^{(j)}$
 + $k(\hat{w}, x)=\sum_{i} \widehat{c}^{(i)} y^{(i)} k\left(x^{(i)}, x\right)$
 + $\widehat{c}^{(i)}\ne 0$ only if $i$ is a support vector
@@ -903,9 +893,21 @@ $$
 Non-linear classifiers
 
 + Quadratic Kernel: $k(a, b)=\left(a^{\top} b\right)^{2}$, equivalent to linear classifier over a larger set of features
+
   + $K(x, y)=\left(\sum_{i=1}^{n} x_{i} y_{i}+c\right)^{2}=\sum_{i=1}^{n}\left(x_{i}^{2}\right)\left(y_{i}^{2}\right)+\sum_{i=2}^{n} \sum_{j=1}^{i-1}\left(\sqrt{2} x_{i} x_{j}\right)\left(\sqrt{2} y_{i} y_{j}\right)+\sum_{i=1}^{n}\left(\sqrt{2 c} x_{i}\right)\left(\sqrt{2 c} y_{i}\right)+c^{2}$
+
   + Feature map is given by: $\varphi(x)=\left\langle x_{n}^{2}, \ldots, x_{1}^{2}, \sqrt{2} x_{n} x_{n-1}, \ldots, \sqrt{2} x_{n} x_{1}, \sqrt{2} x_{n-1} x_{n-2}, \ldots, \sqrt{2} x_{n-1} x_{1}, \ldots, \sqrt{2} x_{2} x_{1}, \sqrt{2 c} x_{n}, \ldots, \sqrt{2 c} x_{1}, c\right\rangle$
 
+  + Polynomial kernel $K(x, z)=(x \cdot z+1)^{d}$ feature space dimension ($(n+2)(n+1)$ for quadratic):
+    $$
+    \left(\begin{array}{c}
+    N+d \\
+    d
+    \end{array}\right)
+    $$
+  
++ 
+  
 + RBF Kernel: $K\left(\mathbf{x}, \mathbf{x}^{\prime}\right)=\exp \left(-\frac{\left\|\mathbf{x}-\mathbf{x}^{\prime}\right\|^{2}}{2 \sigma^{2}}\right)$,  feature space of the kernel has an infinite number of dimensions
 
 ## Conjugate Function
@@ -916,19 +918,21 @@ $$
 f^{*}(y)=\max _{x} y^{T} x-f(x)
 $$
 
+![image-20201205074541935](../attachments/image-20201205074541935.png)
+
 ### Properties
 
 + Every function as a conjugate
-+ $f^{*}$ always convex function because it is max of affine functions
-+ Fenchel’s inequality: $f(x)+f^{*}(y) \geq y^{T} x$
++ ==$f^{*}$ always convex== function because it is max of affine functions
++ Fenchel’s inequality: ==$f(x)+f^{*}(y) \geq y^{T} x$==
 + If can be decoupled: $\text { If } f(u, v)=f_{1}(u)+f_{2}(v) \text { then } f^{*}(w, z)=f_{1}^{*}(w)+f_{2}^{*}(z)$
 + Double conjugate: 
-  + $f^{* *}(z) \leq f(z)$, $f^{* *}(z)$ is always convex
+  + ==$f^{* *}(z) \leq f(z)$, $f^{* *}(z)$ is always convex==
   + if $f$ is __closed__ and convex:
     + $f^{* *}(z)=f(z)$ and $f(x)+f^{*}(y)=x^{T} y$ 
-    + $f$ and $f^{*}$ are inverse of each other, i.e. $y=\nabla f(x)$<=> $x=\nabla f^*(y)$
+    + $f$ and $f^{*}$ are inverse of each other, ==i.e. $y=\nabla f(x)$<=> $x=\nabla f^*(y)$==
   + If f is not convex, 
-    + $f^{**}$ is the convex envelope of $f$, or the largest convex function smaller than $f$, or $g(x) \leq f(x) \forall x$, then $g(x) \leq f^{* *}(x)$
+    + ==$f^{**}$ is the convex envelope of $f$,== or the largest convex function smaller than $f$, or $g(x) \leq f(x) \forall x$, then $g(x) \leq f^{* *}(x)$
     + $y \in \partial f(x)$<=> $x \in \partial f^*(y)$
 + If $f$ is convex and $\bar{y} \in \partial f(\bar{x})$, then $f^*(\bar{y})=\bar{y}^{T} \bar{x}-f(\bar{x})$
 + Calculus rules:
@@ -965,23 +969,26 @@ Dual Norm: $\|z\|_{*}=\sup \left\{z^{T} x \mid\|x\| \leq 1\right\} = \sup _{x \n
 
 #### Duality
 
-1.  $\min _{x} f(x)+g(x)$
-    $\min _{x, z} f(x)+g(z) \text { s.t. } x=z$
-    $L(x, z, \mu)=f(x)+g(z)+\mu^{T}(z-x)$
-    $$\begin{aligned}
-    \operatorname{dual}(\mu) &=\min _{x, 2} L(x, z, \mu) \\
-    &=\min _{x}\left\{f(x)-\mu^{T} x\right\}+\min _{z}\left\{g(z)+\mu^{T} z\right\} \\
-    &=-\left[\max _{x}\left\{\mu^{T} x-f(x)\right\}\right]-\left[\max _{z}\left\{-\mu^{T} z-g(z)\right\}\right] \\
-    &=-f^{*}(\mu)-g^{*}(-\mu)
-    \end{aligned}$$
+1. $\min _{x} f(x)+g(x)$
+   $\min _{x, z} f(x)+g(z) \text { s.t. } x=z$
+   $L(x, z, \mu)=f(x)+g(z)+\mu^{T}(z-x)$
+   $$\begin{aligned}
+   \operatorname{dual}(\mu) &=\min _{x, 2} L(x, z, \mu) \\
+   &=\min _{x}\left\{f(x)-\mu^{T} x\right\}+\min _{z}\left\{g(z)+\mu^{T} z\right\} \\
+   &=-\left[\max _{x}\left\{\mu^{T} x-f(x)\right\}\right]-\left[\max _{z}\left\{-\mu^{T} z-g(z)\right\}\right] \\
+   &=-f^{*}(\mu)-g^{*}(-\mu)
+   \end{aligned}$$
 
-2.  $$\begin{array}{c}
-    \min _{x}\{f(x)+g(A x)\} \\
-    \min _{x, z} \max _{\mu}\left\{f(x)+g(z)+\mu^{T}(A x-z)\right\} \\
-    \max _{\mu}\left\{-f^{*}\left(A^{T} \mu\right)-g^{*}(-\mu)\right\}
-    \end{array}$$
+2. 
+   $$
+   \begin{array}{c}
+   \min _{x}\{f(x)+g(A x)\} \\
+   \min _{x, z} \max _{\mu}\left\{f(x)+g(z)+\mu^{T}(A x-z)\right\} \\
+   \max _{\mu}\left\{-f^{*}\left(A^{T} \mu\right)-g^{*}(-\mu)\right\}
+   \end{array}
+   $$
 
-3.  
+3. 
 
 $$
 \begin{array}{c}

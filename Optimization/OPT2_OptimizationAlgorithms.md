@@ -20,12 +20,12 @@
 
 ### Convergence
 
-+ For $x_{k+1} = g(k) x_0$, convergence = $\log (g(k))$.i.e.:
++ ==For $x_{k+1} = g(k) x_0$, convergence = $\log (g(k))$.==i.e.:
   + $f(x)=a x^{2}, x_{0}=1$ -> $g(k)=(1-2a\eta )^k$, linear convergence
 
 ### Smoothness: Lipschitz (less convex than a quadratic)
 
-$f$ has $M$ -Lipschitz gradients/ is smooth if
+$f$ has $M$ -Lipschitz gradients/ is smooth if $M>0$
 $$
 \|\nabla f(x)-\nabla f(y)\| \leq M\|x-y\| \forall x, y
 $$
@@ -35,7 +35,7 @@ $$
 + Smoothness of function, self-tuning: get arbitrarily close to optimal solution without very small $\eta$
 + $g(x)=\frac{M}{2} x^{\top} x-f(x)$ is convex
   + $\nabla^{2} g(x)=M I-Q \succeq 0$, $M$ is the biggest eigen value of $Q$[Question: Q have to be PSD?]
-+ $f$ is less convex than $\frac{M}{2} x^{T} x$
++ ==$f$ is less convex than $\frac{M}{2} x^{T} x$==
 + $f(y) \leq f(x)+\nabla f(x)^{T}(y-x)+\frac{M}{2}\|y-x\|_{2}^{2}$ Quadratic upper bound
 + for $x_{+}=x-\eta \nabla f(x)$, 
   + $f\left(x_{+}\right) \leq f(x)-\eta\|\nabla f(x)\|^{2}+\frac{M}{2} \eta^{2}\|\nabla f(x)\|^{2}$, 
@@ -49,11 +49,13 @@ $$
 
 + $f(x)=a x^{2}$ -> $M=2a$
 
-### Strongly convex (more convex than a quadratic)
+### Strongly convex 
+
++ more convex than a quadratic
 
 + Motivation: for very flat convex functions, convergence to optima $x^*$, rather than $f(x^*)$ can be very slow when getting close to optima.
 
-$f$ is $m$ -strongly convex if and only if
+$f$ is $m$ -strongly convex if and only if for $m>0$
 $$
 \forall x, y\langle\nabla f(x)-\nabla f(y), x-y\rangle \geq m\|x-y\|^{2}
 $$
@@ -68,8 +70,6 @@ $$
 + $f(y) \geq f(x)+\nabla f(x)^{T}(y-x)+\frac{m}{2}\|x-y\|^{2}$
 
 ### M-Lipshitz and m-strongly convex
-
-![](@attachment/Clipboard_2020-11-05-14-46-46.png)
 
 #### Convergence rate at $\eta=\frac{1}{M}$:
 
@@ -87,6 +87,7 @@ $$
 + If both smooth and strongly convex - linear convergence: $f(x_T)-f(x^*) \le O((1-m/M)^T)$ 
 + If only smooth - sublinear convergence: $f(x_T)-f(x^*) \le O(1/T)$
 + If only strongly convex: may not be smooth or differentiabe, can diverge
++ Lipschitz and strongly convex conditions are not affine invariant
 
 ### Line Search
 
@@ -103,7 +104,7 @@ $$
 $d=p_k$ is the descent direction: $\left\langle\mathbf{p}_{k}, \nabla f\left(\mathbf{x}_{k}\right)\right\rangle<0$
 
 + $f\left(x_{t}-\eta d_{t}\right)$ is a convex function of $\eta,$ and $x_{t+1}=x_{t}-\eta d_{t}$
-+ Correctness: when $f$ is convex, $f(x-\eta d) \geq f(x)-\eta \nabla f(x)^{T} d$,   $\eta \nabla f(x)^{T} d$ is the biggest descrease possible
++ Correctness: when $f$ is convex, $f(x-\eta d) \geq f(x)-\eta \nabla f(x)^{T} d$,   $\eta \nabla f(x)^{T} d$ is the biggest decrease possible
 + Problem: computationally expensive
 
 #### Backtracking Line Search
@@ -131,9 +132,9 @@ $$
   + $f(x_T)-f^*\le \frac{M}{2T}\|x_0-x^*\|^2$
   + with m-strong convexity, $(1-\frac{m}{M})$ factor decrease each step
 + BTLS
-  + $\eta \ge \frac{\beta}{M}$
+  + ==$\eta \ge \frac{\beta}{M}$==
   + $f(x_T)-f^*\le \frac{M}{2T\alpha \beta}\|x_0-x^*\|^2$
-  + with m-strong convexity, $(1-min(2m\alpha , \frac{2\alpha \beta m}{M}))$ factor decrease each step
+  + ==with m-strong convexity, $(1-min(2m\alpha , \frac{2\alpha \beta m}{M}))$ factor decrease each step==
 
 ## Gradient Descent Methods
 
@@ -223,7 +224,7 @@ $$
   + For equality constraints that is not separable, pick two coordinates and optimize jointly to satisfy the constraint
 + Key: separable functions
   + L1 norm = $\sum_{i}\left|x_{i}\right|$
-+ Example: 
++ Example [Lasso Problem]: 
 
 $$
 \begin{array}{c}
@@ -244,7 +245,21 @@ $$
 
 
 
++ Example where coordinate descent doesn't work:
 
+  + 
+    $$
+    f(x, y)=x^{2}+y^{2}+3 x y\\
+    \frac{\partial f}{\partial x}=2 x+3 y, \quad \frac{\partial f}{\partial y}=2 y+3 x\\
+    x_{k+1}=-3 y_{k} / 2\\
+    y_{k+1}=-3 x_{k+1} / 2 = 9x_k/4 \text{  [diverge]}
+    $$
+
+  + $$
+    f\left(x_{1}, x_{2}\right)=\max \left\{x_{1}, x_{2}\right\}
+    $$
+
+    Coordinate descent stuck at (1,1), a local minimum
 
 ## Subgradient Basics
 
@@ -296,6 +311,8 @@ $$
 $$
 \partial f(\boldsymbol{x})=\text { closure }\left(\operatorname{conv}\left\{\bigcup\left\{\partial f_{\alpha}(\boldsymbol{x}) \mid f_{\alpha}(\boldsymbol{x})=f(\boldsymbol{x})\right\}\right\}\right)
 $$
+
++ For convex function, subdifferential is a monotone operator: $<\partial f(x)-\partial f(y), x-y> \ge 0$
 
 ### Examples
 
@@ -357,6 +374,17 @@ $$
 
 + $R=\left\|x_{0}-x^{*}\right\|$ and note that $\left\|x_{t}-x^{*}\right\|^{2} \geq 0,\left\|g_{s}\right\|^{2} \leq G^{2}$
 + Corresponds to $O\left(\frac{1}{\varepsilon^{2}}\right)$ convergence rate
+
+### Examples
+
++ Lasso: 
+  $$
+  \min _{\boldsymbol{x}}: \frac{1}{2}\|A \boldsymbol{x}-\boldsymbol{y}\|_{2}^{2}+\lambda\|\boldsymbol{x}\|_{1}\\
+  \boldsymbol{g}_{t}=A^{\top}\left(A \boldsymbol{x}_{t}-\boldsymbol{y}\right)+\lambda \boldsymbol{z}\\
+  \text { where } \boldsymbol{z} \in \partial\left(\left\|\boldsymbol{x}_{t}\right\|_{1}\right)\\ \text{if } x_{i} \neq 0, \text { then }\\
+  z_{i}=\operatorname{sign}\left(x_{i}\right), \text { and otherwise }\left|z_{i}\right| \leq 1
+  $$
+  
 
 ### Comparing Gradient and subgradient algorithms
 
@@ -487,12 +515,12 @@ Fixed step size $\eta = 1$ Pure Newton Method, may not converge
   + (pure) quadratically convergent phase $\left(\|\nabla f(x)\|_{2}<\alpha\right)$
     + all iterations use step size $\eta=1$
     + gradient exponential decrement / $\|\nabla f(x)\|_{2}$ converges to zero quadratically: if $\left\|\nabla f\left(x^{(k)}\right)\right\|_{2}<\eta,$ then $\frac{L}{2 m^{2}}\left\|\nabla f\left(x_{+}\right)\right\| \leq\left(\frac{L}{2 m^{2}}\|\nabla f(x)\|\right)^{2} \le 1 \quad [\frac{L}{2 m^{2}}\text{ guarantees} \le 1]$
-    + $f(x_k)-f^* \le \frac{2 m^{3}}{L^{2}}\left(\frac{1}{2}\right)^{k-k_{0}+1}$
+    + $f(x_k)-f^* \le \frac{2 m^{3}}{L^{2}}^{\left(\frac{1}{2}\right)^{k-k_{0}+1}}$
   
 + Overall number of steps to reach $f(x)-f^{*} \leq \varepsilon$: 
 
   + $$
-    \frac{f\left(x_{0}\right)-f^{*}}{\gamma}+\log \log \left(\frac{\varepsilon_{0}}{\varepsilon}\right)
+    \underbrace{\frac{f\left(x_{0}\right)-f^{*}}{\gamma}}_{\text{damped phase}}+\underbrace{\log \log \left(\frac{\varepsilon_{0}}{\varepsilon}\right)}_{\text{pure/quadratic phase}}
     $$
 
   + **Quadratic convergence:** $\log \log \frac{\varepsilon_{0}}{\varepsilon} \approx$ constant, because it changes very slowly. Thus total number of steps ~ constant
@@ -567,8 +595,10 @@ For case when finding and inverting Hessian is infeasible
 
 ### Requirements
 
+Use $B$ or $H$ to approximate Hessian: $s = x^+-x$, $y = \nabla f(x^+)-\nabla f(x)$
+
 1. $s_t = -B_t^{-1}\nabla f(x_t)$ [From Newton Update]
-2. $s_t = B_{t+1}^{-1} y_t$ [Secant equation, from second-order Taylor expansion]
+2. $s_t = B_{t+1}^{-1} y_t$ , $B_{t+1} \succcurlyeq 0$[Secant equation, from second-order Taylor expansion]
 
 #### Update
 
@@ -599,7 +629,7 @@ Requirement:
 + Convex function has positive semidefinite Hessian: $\boldsymbol{s}_{t}^{\top} \boldsymbol{y}_{t}=\boldsymbol{y}_{t}^{\top} \boldsymbol{H}_{t+1}^{-1} \boldsymbol{y}_{t}>0$
 + Has infinite number of Hessians as solution: $n$ equality constraints with $O(n^2)$ degree of freedom in Hessian
 + Different methods offer different choice of solution
-+ Approximate $B\approx \nabla^{2} f(x),$
++ Approximate $B\approx \nabla^{2} f(x)$
 
 ### Rank-1 Update
 
@@ -615,7 +645,7 @@ x_{k+2}=x_{k+1}+s_{k+1} \eta_{k+1}
 $$
 
 + by Sherman, Morrison, Woodbury (SMW) theorem: $\left(A+u v^{T}\right)^{-1}=A^{-1}-\frac{A^{-1} u v^{T} A^{-1}}{1+v^{T} A^{-1} u}$, where $\frac{A^{-1} u v^{T} A^{-1}}{1+v^{T} A^{-1} u}$ is rank=1, we can update $B_+^{-1}$ from $B^{-1}$ directly with low cost
-+ **Problem**: if $(y-B s)^{T} s<0$, $B_+$ may not be positive semidefinite, $B_+$ needs to be symmetric and positive semidefinite for convex function
++ ==**Problem**: if $(y-B s)^{T} s<0$, $B_+$ may not be positive semidefinite==, $B_+$ needs to be symmetric and positive semidefinite for convex function
 
 ### Rank-2 Update
 
@@ -681,7 +711,7 @@ $$
 \begin{array}{l}
 \text { Algorithm BFGS } \\
 \hline \text { 1: for } t=0,1, \cdots \text { do } \\
-\text { 2: } x^{t+1}=x^{t}-\eta_{t} H_{t} \nabla f\left(x^{t}\right) \text { (line search to determine } \left.\eta_{t}\right) \\
+\text { 2: } \quad x^{t+1}=x^{t}-\eta_{t} H_{t} \nabla f\left(x^{t}\right) \text { (line search to determine } \left.\eta_{t}\right) \\
 \text { 3: } \quad H_{t+1}=\left(I-\rho_{t} s_{t} y_{t}^{\top}\right) H_{t}\left(I-\rho_{t} y_{t} s_{t}^{\top}\right)+\rho_{t} s_{t} s_{t}^{\top} \\
 \text { , where } s_{t}= 
 x^{t+1}-x^{t}, y_{t}=\nabla f\left(x^{t+1}\right)-\nabla f\left(x^{t}\right), \text { and } \rho_{t}=\frac{1}{y_{t}^{\top} s_{t}}
@@ -691,7 +721,7 @@ $$
 + Backtracking: step size satisfies ($0<\alpha_1<\alpha_2<1$) (for strongly convex $f$)
   + $f(x+\eta s) \leq f(x)+\alpha_{1} \eta \nabla f(x)^{T} s$ [Original Backtracking requirement]
   + $\nabla f(x+\eta x)^{T} s \geq \alpha_{2}\left|\nabla f(x)^{T} s\right|$
-  + Convergence: $x_{k} \rightarrow x^{*}$ **super linearly**. $\lim _{t \rightarrow \infty} \frac{\left\|\boldsymbol{x}^{t+1}-\boldsymbol{x}^{*}\right\|_{2}}{\left\|\boldsymbol{x}^{t}-\boldsymbol{x}^{*}\right\|_{2}}=0$
+  + ==Convergence: $x_{k} \rightarrow x^{*}$ **super linearly**.== $\lim _{t \rightarrow \infty} \frac{\left\|\boldsymbol{x}^{t+1}-\boldsymbol{x}^{*}\right\|_{2}}{\left\|\boldsymbol{x}^{t}-\boldsymbol{x}^{*}\right\|_{2}}=0$
 + each iteration costs $O(n^2)$ from matrix multiplication involving $H$ (in addition to computing gradients)
 + no need to solve linear systems or invert matrices
 + no magic formula for initialization; possible choices: approximate
@@ -758,7 +788,7 @@ $$
 
 ##### Central path: $\left\{x^{\star}(t) \mid t>0\right\}$, optimal solution at each $t$
 
-![image-20201204110250873](../attachments/image-20201204110250873.png)
+<img src="../attachments/image-20201204110250873.png" alt="image-20201204110250873" style="zoom:33%;" />
 
 ##### Dual points on central path
 
@@ -797,7 +827,7 @@ $$
    1. Usually with Newton's method
 2. Update. $x:=x^{\star}(t)$.
 3. Stopping criterion. **quit** if $m / t<\epsilon$.
-   1. Follows from $f_{0}\left(x^{\star}(t)\right)-p^{\star} \leq m / t$
+   1. Follows from $f_{0}\left(x^{\star}(t)\right)-p^{\star} \leq m / t$, $m$ is the number of inequality constraints
 4. Increase $t . t:=\mu t$.
    1. Large $\mu$ : fewer outer iterations, more Newton steps
    2. Typical $\mu = 10 - 20$
@@ -819,7 +849,7 @@ For LPs:
   $$
   \left[\frac{\log \left(m /\left(\epsilon t^{(0)}\right)\right)}{\log \mu}\right\rceil
   $$
-  plus the initial centering step (to compute $\left.x^{\star}\left(t^{(0)}\right)\right)$
+  plus the initial centering step (to compute $\left.x^{\star}\left(t^{(0)}\right)\right)$ Linear convergence
 
 + Centering problem (Newton's steps)
   <img src="../attachments/image-20201116102223728.png" alt="image-20201116102223728" style="zoom:50%;" />
@@ -854,7 +884,7 @@ For LPs:
 ### Heavy ball method
 
 $$
-\boldsymbol{x}^{t+1}=\boldsymbol{x}^{t}-\alpha_{t} \nabla f\left(\boldsymbol{x}^{t}\right)+\underbrace{\beta_{t}\left(\boldsymbol{x}^{t}-\boldsymbol{x}^{t-1}\right)}_{\text {momentum term }}
+\boldsymbol{x}^{t+1}=\boldsymbol{x}^{t}-\alpha_{t} \nabla f\left(\boldsymbol{x}^{t}\right)+\underbrace{\beta_{t}\left(\boldsymbol{x}^{t}-\boldsymbol{x}^{t-1}\right)}_{\text {momentum after gradient }}
 $$
 
 + Understanding momentum term:
@@ -866,9 +896,9 @@ $$
     \end{aligned}$
   + Accumulates gradients but with earlier terms weighted down
 
-+ Achieves lower bound for strongly convex but not L-lipschitz condition.
++ ==Achieves lower bound for strongly convex but not L-lipschitz condition.==
 
-+ Implementation:  **"gradient before momentum"**
++ Implementation:  **"gradient after momentum"**
   $$
   \begin{aligned}
   p_{k} &=-\nabla f\left(x_{k}\right)+\beta_{k} p_{k-1} & \text{Gradient Step}\\
@@ -879,25 +909,24 @@ $$
 
 ### Nestrov Accelerated Gradient
 
-**"Momentum before gradient"**
 $$
 \begin{aligned}
-p_{k} &=-\nabla f\left(x_{k}+\beta_{k}\left(x_{k}-x_{k-1}\right)\right)+\beta_{k} p_{k-1} \\
+p_{k} &=-\nabla f\left( x_{k}+\underbrace{\beta_{k}\left(x_{k}-x_{k-1}\right)}_{\text{momentum before gradient}}\right)+\beta_{k} p_{k-1} \\
 x_{k+1} &=x_{k}+\alpha_{k} p_{k}
 \end{aligned}
 $$
 
 + $-\nabla f\left(x_{k}+\beta_{k}\left(x_{k}-x_{k-1}\right)\right)$: take a step with momentum and calculate the gradient at the new point
 + $\alpha_{k}=\frac{1}{L}$ , $\beta_{k}=\frac{k-2}{k-1}$ as standard choice for both methods
-+ Achieves lower bound for both stronly convex and L-lipshitz condition
++ ==Achieves lower bound for both stronly convex and L-lipshitz condition==
 + Also works for proximal gradient setting
 
 
 
 ## Stochastic Gradient Descent
 
-+ Gradient descent: calculate $\nabla f(x)$ can be expensive if dimenion is high
-+ Separable problem $\min _{x} \frac{1}{n} \sum_{i=1}^{n} f_{i}(x)$: gradient can be calculated for each dimension independently
++ Gradient descent: calculate $\nabla f(x)$ can be expensive if dimension is high
++ Separate problem to a sum of each sample $\min _{x} \frac{1}{n} \sum_{i=1}^{n} f_{i}(x)$
 
 ### Noisy Unbiased (sub) Gradient (NUS)
 
@@ -936,7 +965,7 @@ $$
 
 + $\left\|x_{0}-x^{*}\right\|^{2} \leq R^{2}$, $R$ depends on initial condition
 
-+ $G^{2} \geq E\left[\|g(x)\|^{2} \mid x\right]$ : $G$ is a uniform upper bound on the variance of $g(x)$, higher variance, slower convergence
++ $G^{2} \geq Var\left[\|g(x)\|^{2} \mid x\right]$ : $G$ is a uniform upper bound on the variance of $g(x)$, higher variance, slower convergence
 
 + If fixed step size: not converge, because when close to $x^*$, fixed step size will keep stepping away from $x^*$ Works in practice if very small error is not required
 
@@ -1002,14 +1031,14 @@ $$
 | Cost per iteration           | $O(nd)$                 | $O(d)$                                | $O(bd)$                                          |
 |                              |                         |                                       |                                                  |
 
-## Variance Reduction
+## Variance Reduction of subgradient
 
 #### Variance of SGD
 
 $$
 \begin{array}{l}
 g(x) \equiv(\text { random }) \text { update } \\
-\qquad x_{k+1}=x_{k} \eta_{k} g\left(x_{k}\right)
+\qquad x_{k+1}=x_{k} - \eta_{k} g\left(x_{k}\right)
 \end{array}
 $$
 
@@ -1035,7 +1064,7 @@ $$
 ​		Memory efficient implementation (no need to memorize all $g_k$' s)':
 
 $$
-\sum_{i=1}^{k} g_{i}^{(k)}=\frac{g_{i_{k}}^{(k)}}{n}-\frac{g_{i_{k}}^{(k-1)}}{n}+\sum_{i=1}^{n} g_{i}^{(k-1)}
+\sum_{i=1}^{k} g_{i}^{(k)}=g_{i_{k}}^{(k)}-g_{i_{k}}^{(k-1)}+\sum_{i=1}^{n} g_{i}^{(k-1)} \text{[Update changed gradient component]}
 $$
 
 $$
@@ -1043,9 +1072,9 @@ a^{(k)}=\frac{g_{i_{k}}^{(k)}}{n}-\frac{g_{i_{k}}^{(k-1)}}{n}+a^{(k-1)}\\
 x^{(k)}=x^{(k-1)}-\eta_{k}\left[\frac{g_{i_{k}}^{(k)}-g_{i_{k}}^{(k-1)}}{n}+\frac{1}{n} \sum_{i} g_{i}^{(k-1)}\right]
 $$
 
-​		$a^{(0)}$ just accumulates $\nabla f_{i}\left(x^{(0)}\right)$ values
+​		$a^{(0)}$ just accumulates averaged $\nabla f_{i}\left(x^{(0)}\right)$ values
 
-+ Not unbiased, but **Asymptotically unbiased**: As $k \rightarrow \infty, x^{(k)} \rightarrow x^{*}$ and so $B I A S \rightarrow 0$ and variance $\rightarrow 0$ Allows **fixed step size**. $B I A S=\frac{1}{n} \sum_{i} \nabla f_{i}\left(x^{(k)}\right)-\frac{1}{n} \sum_{i} g_{i}^{(k)}$
++ ==Not unbiased, but **Asymptotically unbiased**==: As $k \rightarrow \infty, x^{(k)} \rightarrow x^{*}$ and so $B I A S \rightarrow 0$ and variance $\rightarrow 0$ Allows **fixed step size**. $B I A S=\frac{1}{n} \sum_{i} \nabla f_{i}\left(x^{(k)}\right)-\frac{1}{n} \sum_{i} g_{i}^{(k)}$
 
 #### Convergence
 
