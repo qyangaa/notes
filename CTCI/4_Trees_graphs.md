@@ -930,3 +930,367 @@ Design an algorithm and write code to find the first common ancestor of two node
     
 
 + Tips
+
+  + When dealing with two nodes in the tree, it is usually useful to find the depth of the two nodes first, then move both from the same depth up together
+
+### ==4.9 BST Sequences==
+
+A binary search tree was created by traversing through an array from left to right
+and inserting each element. Given a binary search tree with distinct elements, print all possible arrays that could have led to this tree.
+
++ Draw Example
+
+  ```mermaid
+  graph TD;
+  	2 --> 1
+  	2 --> 3
+  ```
+
+  Output: {2,1,3}, {2,3,1}
+
+  ```mermaid
+  graph TD;
+  	50 --> 20
+  	50 --> 60
+  	20 --> 10
+  	20 --> 25
+  	60 --> 70
+  	10 --> 5
+  	10 --> 15
+  	70 --> 65
+  	70 --> 80
+  ```
+
+  
+
++ Brute Force
+
+  + Write out all permutations of the numbers and compare which permutations result in same tree as the given tree
+
++ Optimize + Conceptual algorithm walk through
+
+  + Interpretation: 
+    + child elements are always inserted after parent
+    + Order of insertion of the two children doesn't matter
+  + Recursion
+    + Base case: 
+      + If no child: return itself.
+    + Recursion
+      + two children:  two permutations
+        + {10,5,15},{10,15,5}
+        + {70,65,80},{70,85,65}
+        + In the 20 level, 25 can be inserted during any time as long as it is after 20, given the left sibling {10,5,15},
+          + {20,}+{25,10,5,15},{10,25,5,15},{10,5,25,15},{10,5,15,25}
+        + If the tree in 25 is larger than one node, we need to 'weave' the two subtrees: eg. weaving {1,2,3},{4,5,6}
+          + Prepend 1 to all weaves of {2,3} and {4,5,6}
+          + Prepend 4 to all weaves of {1,2,3} and {5,6}
+          + Use a linked list to implement
+      + Only one child, one permutation
+        + {60,} + {70,65,80},{70,85,65}
+
++ Implement + Test
+
+  + Answer:
+
+    ```java
+        ArrayList<LinkedList<Integer>> answer(TreeNode node) {
+            ArrayList<LinkedList<Integer>> result = new ArrayList<LinkedList<Integer>>();
+    
+            if(node==null){
+                result.add(new LinkedList<Integer>());
+                return result;
+            }
+            LinkedList<Integer> prefix = new LinkedList<Integer>();
+            prefix.add(node.data);
+    
+            ArrayList<LinkedList<Integer>> leftSeq = answer(node.left);
+            ArrayList<LinkedList<Integer>> rightSeq = answer(node.right);
+    
+            for (LinkedList<Integer> left : leftSeq){
+                for (LinkedList<Integer> right : rightSeq){
+                    ArrayList<LinkedList<Integer>> weaved =
+                            new ArrayList<LinkedList<Integer>>();
+                    weaveLists(left,right,weaved,prefix);
+                    result.addAll(weaved);
+                }
+            }
+            return result;
+        }
+    
+        void weaveLists(LinkedList<Integer> first, LinkedList<Integer> second,
+                        ArrayList<LinkedList<Integer>> results, LinkedList<Integer> prefix){
+            if (first.size()==0 || second.size() ==0){
+                LinkedList<Integer> result = (LinkedList<Integer>) prefix.clone();
+                result.addAll(first);
+                result.addAll(second);
+                results.add(result);
+                return;
+            }
+            int headFirst = first.removeFirst();
+            prefix.addLast(headFirst);
+            weaveLists(first,second,results,prefix);
+            //put back first for operations on the second case
+            prefix.removeLast();
+            first.addFirst(headFirst);
+    
+            int headSecond = second.removeFirst();
+            prefix.addLast(headSecond);
+            weaveLists(first,second,results,prefix);
+            prefix.removeLast();
+            second.addFirst(headSecond);
+        }
+    ```
+
+    
+
++ Tips
+
+  + When recursing over lists and need to return a collection of manipulation between lists, can pass (sublist1, sublist2, resultsCollection, remainingListFromParent) to modify the result when recursing down, and return void. (instead of return results and passing results back)
+
+
+
+### 4.10 Check Subtree
+
+T1 and T2 are two very large binary trees, with T1 much bigger than T2. Create an
+algorithm to determine if T2 is a subtree of T1. A tree T2 is a subtree of T1 if there exists a node n in Tl such that the subtree of n is identical to T2 . That is, if you cut off the tree at node n, the two trees would be identical.
+
++ Draw Example
+
+  ```mermaid
+  graph TD;
+  	50 --> 20
+  	50 --> 60
+  	20 --> 10
+  	20 --> 25
+  	60 --> 70
+  	10 --> 5
+  	10 --> 15
+  	70 --> 65
+  	70 --> 80
+  ```
+
+  The subtree starting from 70 is a subtree, while the following is not a subtree
+
+  ```mermaid
+  graph TD;
+  	70 --> 80
+  	70 --> 65
+  ```
+
+  
+
++ Brute Force
+
+  + Find all subtrees of T1 and compare T2 to each of them
+
++ Optimize + Conceptual algorithm walk through
+
+  + Improve: If no duplicate number in the tree traverse over T1, whenever see a node with the same value to root of T2, start to traverse them together recursively, check at each step whether T1.left = T2.left and T1.right = T2.right
+
++ Implement + Test
+
+  + ```java
+        boolean subtree(TreeNode T1, TreeNode T2) {
+            TreeNode cur = T1;
+            if(T2==null) return true;
+            if(T1==null) return false;
+            if(cur.data!=T2.data){
+                return subtree(T1.left, T2) && subtree(T1.right, T2);
+            }else {
+                return equal(T1, T2);
+            }
+        }
+        boolean equal(TreeNode first, TreeNode second){
+            if(first==null && second == null) return true;
+            if(first==null || second==null) return false;
+            if(first.data!=second.data) return false;
+            return equal(first.left,second.left) && equal(first.right,second.right);
+        }
+    ```
+
++ $O(n+m)$ in both space and time
+
+### 4.11 Random Node
+
+You are implementing a binary search tree class from scratch, which, in addition
+to insert, find, and delete, has a method getRandomNode() which returns a random node from the tree. All nodes should be equally likely to be chosen. Design and implement an algorithm for get RandomNode, and explain how you would implement the rest of the methods.
+
++ Draw Example
+
+  ```mermaid
+  graph TD;
+  	50 --> 20
+  	50 --> 60
+  	20 --> 10
+  	20 --> 25
+  	60 --> 70
+  	10 --> 5
+  	10 --> 15
+  	70 --> 65
+  	70 --> 80
+  ```
+
+  
+
++ Brute Force
+
+  + Choose random: copy all data to an array, and randomly choose from the array
+  + Or generate a random index and traverse to get the index
+  + Traverse down with certain probabilities of going left or right
+
++ Optimize + Conceptual algorithm walk through
+
+  + Tune the left-right probability to make the probabilities to each node equal:
+    + Cur node: 1/n, left node: $LeftSize*1/n$, right node: $RightSize*1/n$
+  + If we know the size at each node, then we can compute the traverse route using a randomly generated index from the size of root (reduces times of random number generation, which can be expensive)
+
++ Implement + Test
+
+  ```java
+  public class RandomTree_4_11 {
+      TreeNode root = null;
+      public int size(){return root==null? 0: root.getSize();}
+      public TreeNode getRandomNode(){
+          if(root==null) return  null;
+          Random random = new Random();
+          int i = random.nextInt(size());
+          return root.getIthNode(i);
+      }
+      public void insertInorder(int value){
+          if(root==null){
+              root = new TreeNode(value);
+          }else {
+              root.insertInOrder(value);
+          }
+      }
+  }
+  
+  class TreeNode{
+  
+      int data;
+      int size = 0;
+      public TreeNode left=null;
+      public TreeNode right=null;
+  
+      TreeNode(int data){
+          this.data = data;
+          this.size = 1;
+      }
+      public TreeNode getIthNode(int i){
+          int leftSize = left==null? 0: left.getSize();
+          if (i<leftSize){
+              return left.getIthNode(i);
+          }else if(i==leftSize){
+              return this;
+          }else {
+              return right.getIthNode(i-(leftSize+1));
+          }
+      }
+      public int getSize() {return size;}
+      public int getData() {return data;}
+  
+      public void insertInOrder(int d){
+          if(d<=data){
+              if(left==null){
+                  this.left = new TreeNode(d);
+              }else {
+                  left.insertInOrder(d);
+              }
+          }else {
+              if(right==null){
+                  this.right = new TreeNode(d);
+              }else {
+                  right.insertInOrder(d);
+              }
+          }
+          this.size++;
+      }
+  
+      public TreeNode find(int d){
+          if(d==data){return this;}
+          if(d<data){return left!=null? left.find(d) : null;}
+          return right!=null? right.find(d): null;
+      }
+  }
+  ```
+
+  
+
++ Tips
+
+  + Keep record of size in tree nodes is cheap if implemented with insert
+  + Generation of random number can be expensive
+  + Easy to find traverse path for node with certain index if size of nodes are known
+
+  
+
+### 4.12 Paths with Sum
+
+You are given a binary tree in which each node contains an integer value (which
+might be positive or negative). Design an algorithm to count the number of paths that sum to a given value. The path does not need to start or end at the root or a leaf, but it must go downwards (traveling only from parent nodes to child nodes)
+
++ Draw Example
+
+  + ```mermaid
+    graph TD;
+    	10  -->  5
+    	10 --> -3
+    	5 --> 3
+    	5 --> 2
+    	3 --> 4
+    	3 --> -2
+    	2 --> 1
+    	-3  --> 11
+    	
+    ```
+
+  + 18: 1
+
++ Brute Force
+
+  + Traverse though all paths and count the sum
+
++ Optimize + Conceptual algorithm walk through
+
+  + We don't need to start from the root every time, repetitive counting
+
+  + Go from top down, store the sum that leads to current node from root, stop counting as soon as sum equals or exceeds the target
+
+  + We only need to remember the sums along the current path for backtrack to save space. Can use recursion in this case
+
+  + countPath(node, target){
+
+    countPath(child, target-node.value)}
+
++ Implement + Test
+
+  + ```java
+        int pathCount = 0;
+        void countPaths(TreeNode node, int target)
+        {
+            if(node==null) {
+                if(target==0)pathCount++;
+                return;
+            }
+            if(node.left!=null && node.right!=null){
+                countPaths(node.left, target-node.data);
+                countPaths(node.right, target-node.data);
+                return;
+            }
+            if(node.left==null){
+                countPaths(node.right, target-node.data);
+                return;
+            }
+            if(node.right==null){
+                countPaths(node.left, target-node.data);
+                return;
+            }
+            if(target==node.data)pathCount++;
+        }
+    ```
+
++ Tips
+
+  + Pull numbers to increment out of recursion for simpler return
+  + When dealing with find elements to give a certain sum problem, recurse by decrementing sum by current element
+
