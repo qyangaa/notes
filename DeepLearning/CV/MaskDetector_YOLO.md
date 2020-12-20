@@ -1,6 +1,73 @@
-# Mask Detector With Pytorch YOLO
+# Mask Detector With Pytorch YOLO v3
 
-## Dataset
+## Introduction
+
+[Reference](https://medium.com/paperspace/tutorial-on-implementing-yolo-v3-from-scratch-in-pytorch-part-1-a0054d38ec78)
+
+### Basics of YOLO
+
++ Fully convolutional neural network
++ Invariant to size of input image, but constant image size helps with batch processing
++ 
+
+### YOLO v3 network Architecture
+
+![Image for post](https://miro.medium.com/max/2376/1*d4Eg17IVJ0L41e7CTWLLSg.png)
+
+[image reference](https://towardsdatascience.com/yolo-v3-object-detection-53fb7d3bfe6b)
+
++ **Input size**: 416*416
++ **Conv layers**: 75 convolutional layers with skip connections and upsampling layers
++ **Down sampling**: No pooling, use a conv layer with stride=2 instead, to prevent loss of low-level features
++ **Feature map**: stride = 32 before first feature map, dimension of feature map: is 13*13 (416/32 = 13). Each cell can predict 3 bounding boxes
++ **Detection layer**: 
+  + A conv layer with kernel size of $1*1*(B*(5+C))$: 
+    + $B$ the number of bounding boxes a cell on the feature map predicts, $B=3$ for YOLO v3.
+    + $5+C$: each bounding box have following attributes: class confidence+ x,y,w,h,confidence; $C=80$ for COCO.
+  + Each cell of the feature map predicts an object through on of its bounding boxes if center of the object falls in the receptive field of that cell.
+  + Confidence/ objectness score: ~ 1 for cells close to object center, ~0 far from object center
+  + Class confidences: softmax before v3, sigmoid since v3.  Because softmax is mutually exclusive, i.e. one object can't belong to multiple classes.
+  + 3 detection heads with different scales. $gridSize = 13, 26, 52$
+
+### Bounding Boxes, Anchor Boxes, Ground Truth Boxes
+
+![Image for post](https://miro.medium.com/max/736/1*a7seKlMjTN4yXvmTcTuVSw.png)
+
+[Image Reference](https://arxiv.org/abs/1804.02767)
+
++ Ground truth box: given by label ($g_x, g_y, g_w, g_h$)
++ Bounding boxes: the final prediction made by the network ($b_x, b_y, b_w, b_h$)
++ Anchor boxes: 
+  + Motivation: predicting width and height of bounding boxes directly leads to unstable gradients during training
+  + Solution:  predict offsets to predefined bounding boxes (log-space transforms)
++ Transformations
+  + Apply transforms to anchor boxes to obtain the prediction
+    + Predict ($t_x^p, t_y^p, t_w^p, t_h^p$)
+  + Do the same transformation on ground truth boxes:
+    + Find the anchor box with largest IoU with ground truth box $(w_a, h_a)$
+    + Transform ($x_g, y_g, w_g, h_g$) into ($t_x^g, t_y^g, t_w^g, t_h^g$) using that box,  $x_g$ here is in grid coordinate
+  + Train Prediction with transformed ground truth box
+  + To get real output, transform prediction back to  ($x_p, y_p, w_p, h_p$)  using the chosen bounding box
+    + $x_p=\sigma\left(t_{x}^p\right)+c_x$, same for y. $c_x$ is the index of column of current cell, which is equal to $\frac{x_a}{w_a}$ The transformation is sigma rather than linear as shown below. But they both guarantee that the prediction falls between 0 and 1. $x_p$ here is in grid coordinate
+    + $w_{p} = w_a e^{t_{w}}$, same for h
+
+$$
+\left\{\begin{aligned}
+\sigma(t_{x}^{p}) &=x_{p}-\frac{x_{a}}{w_{a}}, \sigma(t_{y}^{p})=y_{p}-\frac{y_{a}}{h_{a}} \\
+t_{w}^{p}=& \log \left(\frac{w_{p}}{w_{a}}\right), t_{h}^{p}=\log \left(\frac{h_{p}}{h_{a}}\right) \\
+\sigma(t_{x}^{g}) &=x_{g}-\frac{x_{a}}{w_{a}},\sigma(t_{y}^{g})=y_{g}-\frac{y_{a}}{h_{a}} \\
+t_{w}^{g}=& \log \left(\frac{w_{g}}{w_{a}}\right), t_{h}^{g}=\log \left(\frac{h_{g}}{h_{a}}\right)
+\end{aligned}\right.
+$$
+
+### Output processing
+
++ **Thresholding by objectness score:** ignore boxes below the threshold
++ **Non-maximum suppression**: remove redundant predictions
+
+## Code
+
+### Dataset
 
 + Face-mask dataset
 
@@ -50,3 +117,14 @@
     ```
 
     + name: face (no mask), face_mask(with mask)
+
+### Model
+
+[Reference](https://blog.paperspace.com/how-to-implement-a-yolo-v3-object-detector-from-scratch-in-pytorch-part-2/)
+
++ `config/yolov3.cfg` : configuration file that defines the model
++ `utils/parse_config.py`: function to parse config file into list of maps of model definition
++ `models.create_modules`: take parsed model_defs, and convert to a module list of layer blocks in the form of `nn.ModuleList()`
++ `models.YOLOLayer`: a head that deals with outputs of previous layers and generates loss based on anchors
++ `utils.build_targets`: convert ground truth to targets (intermediate values) for loss calculation
+

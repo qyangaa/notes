@@ -15,6 +15,13 @@ Get runtime by drawing out the recursive call tree.
 ### Dynamic Programming
 
 + Idea: take recursive algorithm and find the overlapping subproblems (repeated calls), cache the results for future recursive calls
++ Template:
+  + `if memorized.getCurrent is True: return memorized.getCurrent`
+  + iterate over subproblems:
+    + ` subProblemMax = f(subproblem, memorized)`
+    + `curmax = max(subproblemMax, curmax)`
+  + `memorized.add(someOperation(curmax))`
+  + `return curmax`
 
 #### Examples
 
@@ -481,18 +488,495 @@ Write a method to compute all permutations of a string whose characters are not 
 
 
 
+### 8.9 Parens
 
-
-p371
-
-
+ Implement an algorithm to print all valid (Le., properly opened and closed) combinations of n pairs of parentheses.
 
 + Draw Example
+  + 1: ()
+  + 2: ()(), (())
+  + 3:  ((())),(())(),()(()),(()()),()()(), 
+
 + Brute Force
+
+  + for each combination in n-1, add one parenthesis in every existing parenthesis, and one outside. Need to watch for duplicates (use HashSet for $O(1)$ insertion time)
+
 + Optimize + Conceptual algorithm walk through
+
+  + Avoid going through duplicates:
+    + Keep track of num left paren and num right paren
+    + Whenever have left parenthesis left, can always add a left parenthesis
+    + When have right parenthesis left, can insert if number of right is more than left
+  + Mathematical, number of ways to arrange n pairs =  $\frac{1}{n+1}\left(\begin{array}{c}
+    2 n \\
+    n
+    \end{array}\right)$, equivalent to the number of [Dyck words](https://en.wikipedia.org/wiki/Dyck_language), which can be counted with combinatorics and will be equal to [Catalan number](https://en.wikipedia.org/wiki/Catalan_number)
+  + 
+
 + Implement + Test
+
+  + Simple recursion:
+
+    ```java
+        HashSet<String> addParens(int count){
+            HashSet<String> list = new HashSet<String>();
+            if(count==0) {
+                list.add("");
+                return list;
+            }
+            for(String s: addParens(count-1)){
+                list.add("()"+s);
+                for(int i=0; i<s.length();i++){
+                    if(s.charAt(i)=='('){
+                        list.add(s.substring(0,i+1)+"()"+s.substring(i+1));
+                    }
+                }
+            }
+            return list;
+        }
+    ```
+
+  + Counting parens:
+
+    ```java
+    void addParen(ArrayList<String> list, int leftRem, int rightRem, char[] str, int index){
+        if(leftRem<0||rightREM<leftRem) return;//invalid
+        if(leftRem==0 && rightRem==0){
+            list.add(String.copyValueOf(str));//prevent changing original string
+        }else{
+            //two cases: add left or add right parens
+            str[index] = '(';
+            addParen(list, leftRem-1, rightRem, str, index+1);
+            str[index] = ')';
+            addParen(list, leftRem, rightRem-1, str, index+1);
+        }
+    }
+    ```
+
+    
+
 + Tips
 
+  + Use HashSet<> when need to avoid duplicates
+
+    + `for(String s: set){...}`
+    + `set.add(...)`
+
+  + Traverse over string: 
+
+    ```java
+    for(int i=0; i<s.length();i++){s.charAt(i)}
+    ```
+
+  + copy string value: `String.copyValueOf(str)`
+
+  + Condition for balanced parenthesis of same type: 
+
+    + Num left = Num right
+    + At any index, count parenthesis at or before that index: Num left>=Num right
 
 
-p354
+
+### 8.10 Paint Fill
+
+Implement the "paint fill" function that one might see on many image editing programs. That is, given a screen (represented by a two-dimensional array of colors), a point, and a new color, fill in the surrounding area until the color changes from the original color.
+
++ Draw Example
+
+  + For a single point, need to go 4 directions: (r-1,c); (r+1,c); (r, c-1);(r, c+1)
+
++ Optimize + Conceptual algorithm walk through
+
+  + Stop criteria: $screen[r][c] = newColor$
+
++ Implement + Test
+
+  ```java
+  enum Color{ Black, White, Red, Yellow, Green }
+  boolean fillPaint(Color[][] screen, int r, int c, Color newColor, Color oldColor){
+      if(screen[r][c] == newColor) return false;
+      if(r<0||r>=screen.length||c<0||c>=screen[0].length) return false;
+      if(screen[r][c]==oldColor){
+          screen[r][c] = newColor;
+          fillPaint(screen,r-1,c,newColor, oldCOlor);
+          fillPaint(screen,r+1,c,newColor, oldCOlor);
+          fillPaint(screen,r,c-1,newColor, oldCOlor);
+          fillPaint(screen,r,c+1,newColor, oldCOlor);
+      }
+      return true;
+  }
+  ```
+
+  
+
++ Tips
+
+  + `M.length, M[0].length` to get dimension of arrays 
+  + Recurse around a pixel:  go 4 directions: `(r-1,c); (r+1,c); (r, c-1);(r, c+1)`
+
+
+
+### 8.11 Coins
+
+Given an infinite number of quarters (25 cents), dimes (10 cents), nickels (5 cents), and pennies (1 cent), write code to calculate the number of ways of representing n cents.
+
++ Draw Example
+
+  + Only have 10,5,1 cents
+  + represent 10: $(10),(5,5),(5,1*5), (1*10)$
+  + 8: $(5,1*3), (1*8)$
+  + 4: $(1*4)$
+
++ Brute Force
+
+  + For N cents, possible senarios:
+    + $(25*N/25,..), (24*N/25,..)..(0*N/25,..)$
+    + '..' are given by:
+    + $coins(N-25*N/25,[10,5,1]), coins(N-24*N/25,[10,5,1])...coins(N,[10,5,1]),$
+
++ Optimize + Conceptual algorithm walk through
+
+  + To prevent counting repetitively, store in a map `int[][] map = {[N+1][num_types]: num_ways}`
+
++ Implement + Test
+
+  ```java
+      int make_change(int n) {
+          int[] coins = {25,10,5,1};
+          int[][] map = new int[n+1][coins.length]; //n+1: n=25,24..0
+          return make_change(n,coins,0,map);
+      }
+      int make_change(int amount, int[] coins, int index, int[][] map){
+          if(map[amount][index]>0) return map[amount][index];
+          if(index>= coins.length-1) return 1;//one combination if only one type of coins
+          int coinValue = coins[index];
+          int combs = 0;
+          for(int i = 0; i*coinValue<=amount; i++){
+              int amountRemaining = amount-i*coinValue;
+              combs += make_change(amountRemaining,coins,index+1, map);
+          }
+          map[amount][index] = combs;
+          return combs;
+      }
+  ```
+
+  
+
++ Tips
+
+  + when need to make map with 2 keys, use 2D array. (can use linked hashtable instead, less space, but less clarity in implementation)
+  + Store parameters of recursive call directly as keys
+  + rather than shrinking size of list during recursive call, pass full list and current index through recursive call, and increment/ decrement index rather than changing list.
+  + Make a new method with same name and pass memorization as parameter to remember things.
+
+
+
+### 8.12 Eight Queens
+
+Write an algorithm to print all ways of arranging eight queens on an 8x8 chess board so that none of them share the same row, column, **or diagonal**. In this case, "diagonal" means all diagonals, not just the two that bisect the board
+
++ Draw Example
+  <img src="../attachments/image-20201219101327740.png" alt="image-20201219101327740" style="zoom:50%;" />
+
++ Brute Force
+
+  + Recursion: put one on first row, then solve 7 queens on $7*7$ board minus the diagonal problem. Base case: 1 queen on $1*1$ board. If no such vacancy available, then no solution.
+  + Block off diagonals can take <=8 calls for each placement. And pass a 8*8 'available' matrix for each call, space consuming
+
++ Optimize + Conceptual algorithm walk through
+
+  + Implement an 'checkValid()' method to check whether is valid: still need to compare <=8 times for each placement. Same runtime. Only need to pass previous placement.
+
++ Implement + Test
+
+  ```java
+      int GRID_SIZE = 8;
+      void placeQueens(int row, Integer[] columns, ArrayList<Integer[]> results){
+          if(row==GRID_SIZE){
+              results.add(columns.clone());
+          }else {
+              for(int col = 0; col< GRID_SIZE; col++){
+                  if(checkValid(columns, row, col)){
+                      columns[row] = col;
+                      placeQueens(row+1, columns, results);
+                  }
+              }
+          }
+      }
+      boolean checkValid(Integer[] columns, int curRow, int curCol){
+          for(int preRow = 0; preRow<curRow; preRow++){
+              int preCol = columns[preRow];
+              if(curCol==preCol) return false;
+              int colDistance = Math.abs(preCol-curCol);
+              int rowDistance = curRow-preRow;
+              if(colDistance==rowDistance) return false;
+          }
+          return true;
+      }
+  ```
+
+  
+
++ Tips
+
+  + For placement on grid problem, use a checkValid() method to wrap the logic of validity.
+
+
+
+### 8.13 Stack of Boxes
+
+You have a stack of n boxes, with widths $w_i$, heights $h_i$ and depths $d_i$ The boxes
+cannot be rotated and can only be stacked on top of one another if **each box in the stack is strictly larger than the box above it in width, height, and depth**. Implement a method to compute the **height of the tallest possible stack**. The height of a stack is the sum of the heights of each box.
+
++ Draw Example
+
+  + [(5,5,4),(4,4,3),(2,3,2),(1,1,1)] (4,5,3): 4
+
++ Brute Force
+
+  + given `checkValid(Integer[] prev, Integer[] cur)`
+    + iterate over remaining boxes and if valid then increment height and recurse. Base case: no valid box remains `findTallest(ArrayList<Integer[]> remBoxes, Integer[] prev, int height)`
+
++ Optimize + Conceptual algorithm walk through
+
+  + Sort the box in any dimension ie. width, then when we recurse, we only start from boxes after the current one in sorted list. `sortedList = sort(Boxes)`, `findTallest(int prevIdx, int height)`
+  + Memorize the best solution starting from box[i] 
+
++ Implement + Test
+
+  ```java
+  class Box{
+      int width;
+      int height;
+      int depth;
+      Box(int width, int height, int depth){
+          this.width =width;
+          this.height = height;
+          this.depth = depth;
+      }
+  
+      public boolean checkValidTop(Box top){
+          if(this.width<=top.width) return false;
+          if(this.height<=top.height) return false;
+          if(this.depth<=top.depth) return false;
+          return true;
+      }
+  
+  }
+  
+  class BoxComparator implements Comparator<Box> {
+  
+      @Override
+      public int compare(Box o1, Box o2) {
+          return o2.height-o1.height;
+      }
+  }
+  
+  
+  public class StackofBoxes_8_13 {
+  
+      void sortBoxes(ArrayList<Box> boxes){
+          boxes.sort(new BoxComparator());
+          return;
+      }
+      int findTallest(ArrayList<Box> boxes){
+          sortBoxes(boxes);
+          int maxHeight = 0;
+          int[] heightList = new int[boxes.size()];
+          for(int i = 0; i < boxes.size(); i++){
+              int height = findTallest(boxes, i, heightList);
+              maxHeight = Math.max(maxHeight, height);
+          }
+          return maxHeight;
+      }
+      int findTallest(ArrayList<Box> boxes, int prevIdx, int[] heightList){
+          if(prevIdx<boxes.size() && heightList[prevIdx]>0) return heightList[prevIdx];//use memorized value
+          Box prevBox = boxes.get(prevIdx);
+          int maxHeight = 0;
+          //the following call counts for basecase (maxHeight=0)
+          for(int curIdx=prevIdx+1; curIdx<boxes.size(); curIdx++){
+              if(prevBox.checkValidTop(boxes.get(curIdx))){
+                  int height = findTallest(boxes, curIdx, heightList);
+                  maxHeight = Math.max(height, maxHeight);
+              }
+          }
+          maxHeight += prevBox.height;
+          heightList[prevIdx] = maxHeight;
+          return maxHeight;
+      }
+      public void test(){
+      }
+  }
+  ```
+
+  
+
++ Tips
+
+  + In recursion to find max, in each call:
+    + `if memorized.getCurrent is True: return memorized.getCurrent`
+    + iterate over subproblems:
+      + ` subProblemMax = f(subproblem, memorized)`
+      + `curmax = max(subproblemMax, curmax)`
+    + `memorized.add(someOperation(curmax))`
+    + `return curmax`
+  + Memorized list is global
+  + Return value of recursion function is always the result we want
+  + Always check first if current stated is in memory (before base case)
+
+### 8.14 Boolean Evaluation
+
+Given a boolean expression consisting of the symbols e (false), 1 (true), &
+(AND), I (OR), and A (XOR), and a desired boolean result value result, implement a function to count the number of ways of parenthesizing the expression such that it evaluates to result .The expression should be fully parenthesized (e.g (0)^(1)   )  but not extraneously (e.g., ( ( (0))^(1))    ).
+
++ Draw Example
+
+  + countEval("1^0|0|1", false) -> 2
+    countEval("0&0&0&1^1|0", true) - > 10
+
++ Brute Force
+
+  + 1^0|0|1 -> 0:
+
+    + 1^(0|0|1):   (0|0|1)->1
+      + 0|(0|1)  = 0|1 =1, +1
+      + (0|0)|1 = 0|1 = 1, +1
+    + (1^0) |(0|1) = 1|1 = 1 , not valid
+    + (1^0|0)|1 = 1, not valid
+
+  + 0&0&0&1^1|0 -> 1
+
+    + 0&(0&0&1^1|0) = 0, not valid
+    + (0&0)&(0&1^1|0) = 0, not valid
+    + (0&0&0)&(1^1|0) = 0, not valid
+    + (0&0&0&1)^(1|0)  = 0 ^ 1 = 1: (0&0&0&1) -> 0:
+      + (0)&0&0&1: 0&0&1->0 or 1
+        + (0) &(0&1), +1
+        + (0&1)&(1), +1
+      + (0&0)&(0&1):  +1
+      + (0&0&0)&1: 0&0&0->0 
+        + (0) &(0&0), +1
+        + (0&0)&(0), +1
+
+    + (0&0&0&1^1)|(0)  = 0 ^ 0: (0&0&0&1^1) -> 0:
+      + 0&(0&0&1^1) -> 0: 0&0&1^1-> 0 or 1:
+        +  0&(0&1^1) -> 0 or 1
+        + .....
+
+  + Base case: 
+
+    + if s.length()<=1 (single boolean): 
+      + if s==target: return 1
+      + else: return 0
+
+  + Recursion
+
+    + (s.length() is always odd, and even indices are booleans, odd indices are operator)
+    + counts = 0
+    + for i in odd_indices: 
+      + if operator = '&', target = 1:
+        + counts+= countEval(left, 1)* countEval(right, 1)
+      + if operator = '&', target = 0:
+        + counts+= countEval(left, 0)* countEval(right, 1)
+        + counts+= countEval(left, 1)* countEval(right, 0)
+        + counts+= countEval(left, 0)* countEval(right, 0)
+      + if operator = '|', target = 1:
+        + counts+= countEval(left, 1)* countEval(right, 1)
+        + counts+= countEval(left, 0)* countEval(right, 1)
+        + counts+= countEval(left, 1)* countEval(right, 0)
+      + if operator = '|', target = 0:
+        + counts+= countEval(left, 0)* countEval(right, 0)
+      + if operator = '^', target = 1:
+        + counts+= countEval(left, 0)* countEval(right, 1)
+        + counts+= countEval(left, 1)* countEval(right, 0)
+      + if operator = '^', target = 0:
+        + counts+= countEval(left, 1)* countEval(right, 1)
+        + counts+= countEval(left, 0)* countEval(right, 0)
+    + return counts
+
++ Optimize + Conceptual algorithm walk through
+
+  + Memorize countEval(expression, target) in map: {expression: [true counts, false counts]}
+  + Add to the beginning of the recursion. If in memo, return memo[s]. in memo: memo.get(s)[target]>=0
+  + For an expression of boolean length of n, the total counts is fixed: Catalan numbers for n operators: $C_{n}=\frac{(2 n) !}{(n+1) ! n !}$
+  + Then anytime we add to the expression for one type of counts (either true or false), we can fill in the other type by $C_n - foundCounts$
+
++ Implement + Test
+
+  ```java
+      HashMap<String, int[]> memo = new HashMap<String, int[]>();
+      boolean evalEquals(String eval, Boolean target){
+          if(eval.equals("1")) return target;
+          return !target;
+      }
+      static int fact(int i) {
+          if(i <= 1) {
+              return 1;
+          }
+          return i * fact(i - 1);
+      }
+      int catalan(int n){
+          return fact(2*n)/fact(n+1)/fact(n);
+      }
+  
+      int countEval(String eval, Boolean target){
+          int intTarget = target ? 1 : 0;
+          if(memo.containsKey(eval) && memo.get(eval)[intTarget]>=0) return memo.get(eval)[intTarget];
+          if(eval.length()<=1) return evalEquals(eval, target) ? 1: 0;
+          int counts = 0;
+          int length = eval.length();
+          for(int i=1; i<length; i+=2){
+              char operator = eval.charAt(i);
+              String left = eval.substring(0, i);
+              String right = eval.substring(i+1);
+              if(operator=='&' && target){
+                  counts+=countEval(left, true)*countEval(right,true);
+              }
+              else if(operator=='&'){
+                  counts+=countEval(left, true)*countEval(right,false);
+                  counts+=countEval(left, false)*countEval(right,true);
+                  counts+=countEval(left, false)*countEval(right,false);
+              }
+              else if(operator=='|' && target){
+                  counts+=countEval(left, true)*countEval(right,true);
+                  counts+=countEval(left, true)*countEval(right,false);
+                  counts+=countEval(left, false)*countEval(right,true);
+              }
+              else if(operator=='|'){
+                  counts+=countEval(left, false)*countEval(right,false);
+              }
+              else if(operator=='^' && target){
+                  counts+=countEval(left, true)*countEval(right,false);
+                  counts+=countEval(left, false)*countEval(right,true);
+              }
+              else if(operator=='^'){
+                  counts+=countEval(left, true)*countEval(right,true);
+                  counts+=countEval(left, false)*countEval(right,false);
+              }
+          }
+          int[] curCounts = new int[2];
+          curCounts[intTarget] = counts;
+          curCounts[1-intTarget] = catalan(length/2) -counts;
+          memo.put(eval, curCounts);
+          return counts;
+      }
+  ```
+
+  
+
++ Tips
+
+  + s.substring(start, end): include start not include end
+
+  + number of ways to parenthesize:  Catalan numbers for n operators: $C_{n}=\frac{(2 n) !}{(n+1) ! n !}$
+
+  + There is no factorial function in Java, implement on our own:
+
+    ```java
+    static int fact(int i) {
+        if(i <= 1) return 1;
+        return i * fact(i - 1);
+    }
+    ```
+
+    
