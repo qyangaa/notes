@@ -127,4 +127,14 @@ $$
 + `models.create_modules`: take parsed model_defs, and convert to a module list of layer blocks in the form of `nn.ModuleList()`
 + `models.YOLOLayer`: a head that deals with outputs of previous layers and generates loss based on anchors
 + `utils.build_targets`: convert ground truth to targets (intermediate values) for loss calculation
++ `models.Darknet`: put model configurations and layers together to detection model
+  + `route` and `shortcut` layers are defined here in `forward()`
+  + `yolo` layer generates `yolo_outputs` in `forward()`
 
+
+
+### Test Forward Pass
+
+[Reference](https://blog.paperspace.com/how-to-implement-a-yolo-v3-object-detector-from-scratch-in-pytorch-part-3/)
+
++ `model.py  __main__`: 
