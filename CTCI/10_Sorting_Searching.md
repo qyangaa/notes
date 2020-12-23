@@ -386,3 +386,240 @@ number of times, write code to find an element in the array. You may assume that
 
 + Tips
 
+
+
+### 10.4 Sorted Search No Size
+
+You are given an array-like data structure List y which lacks a size method. It does, however, have an element At (i) method that returns the element at index i in 0(1) time. If i is beyond the bounds of the data structure, it returns - 1. (For this reason, the data structure only supports positive integers.) Given a List y which contains sorted, positive integers, find the index at which an element x occurs. If x occurs multiple times, you may return any index.
+
++ Draw Example
+
++ Brute Force
+
+  + Go over the array to find size takes $O(n)$
+
++ Optimize + Conceptual algorithm walk through
+
+  + Go over array by l = 1,2,4,8...
+  + if a[l]==x, return l
+  + if a[l]>x or a[l]==-1, search from l/2 to l
+  + else: l*=2
+
++ Implement + Test
+
+  + ```java
+        int searchRecursive(int[] arr, int start, int end, int x) {
+            int idx = end-1;
+            if(idx==start){
+                if(arr[idx]==x) return idx;
+                return -1;
+            }
+            if(arr[idx]>x || arr[idx]==-1){
+                return binarySearch(arr, end/2, end, x);
+            }else{
+                return searchRecursive(arr, end,end*2, x);
+            }
+        }
+        int binarySearch(int[] arr, int start, int end, int x){
+            int mid;
+            int midVal;
+            while(start<=end){
+                mid = (start+end)/2;
+                midVal = arr[mid];
+                if(midVal==x) return mid;
+                if(midVal>x){
+                    end=mid;
+                }else {
+                    start=mid;
+                }
+            }
+            return -1;
+        }
+    ```
+
++ Tips
+
+  + Binary search iterative: `while(start<=end)`
+
+
+
+### 10.5 Sparse Search
+
+Given a sorted array of strings that is interspersed with empty strings, write a
+method to find the location of a given string.
+
++ Draw Example
+
+  + Input: ball, {"at","", "", "", "ball","", "", "", "car","", "", "", "dad"}
+    Output: 4
+
++ Brute Force
+
+  + Go over array takes $O(n)$ time
+
++ Optimize + Conceptual algorithm walk through
+
+  + Start, middle, end. If middle is empty, go down until find non-empty string
+  + The remaining is the same as binary search
+  + Modify string into int for convenience (can easily write a function to convert)
+    + {-1,1,-1,-1,-1,-1,2,-1,-1,-1,5,-1,-1,-1,8,-1,-1}
+
++ Implement + Test
+
+  ```java
+      int sparseSearch(int[] arr, int x )
+      {
+          if(arr.length==0) return -1;
+          int start = 0;
+          int end = arr.length-1;
+          int mid;
+          while(start<=end){
+              mid = (start+end)/2;
+              if(arr[mid]==x) return mid;
+              if(arr[mid]==-1){
+                  while (arr[mid]==-1 && mid>start) mid--;
+              }
+              if(arr[mid]!=-1){
+                  if(arr[mid]>x){
+                      end=mid;
+                  }else if(arr[mid]<x){
+                      start=mid;
+                  }else {
+                      return mid;
+                  }
+              }else{
+                  start = (start+end)/2;
+              }
+          }
+          return -1;
+      }
+  ```
+
+  
+
++ Tips
+
+### 10.6 Sort Big File
+
++ Draw Example
+  + Imagine you have a 20 GB file with one string per line. Explain how you would sort the file
++ Brute Force
+  + Put all strings into memory would be too big
++ Optimize + Conceptual algorithm walk through
+  + **External sort:**
+    + Load part of the files in memory (size x) each time
+    + Afterwards merge them one by one
++ Implement + Test
++ Tips
+
+### 10.7 Missing Int
+
+Given an input file with four billion non-negative integers, provide an algorithm to
+generate an integer that is not contained in the file. Assume you have 1 GB of memory available for this task.
+
++ Draw Example
+  + Simply means to search within large number of integers
+  + There are totally $2^{32}$ integers (4 billion), and $2^{31}$ non-negative integers (<4 billion). Thus Input file has duplicates. 
+  + 1GB  = 8 billion bits > 4 billion, can map each integer to a distinct memory location (bit vector, BV)
+  
++ Brute Force
+
++ Optimize + Conceptual algorithm walk through
+  
+  + Scan BV until the first index with has value of 0
+  + If only 10MB memory and all values are distinct, take in by blocks of ie. 0-1k. Count numbers of integers in that range, if the total number is <1000, then missing value must be in that range
+  
++ Implement + Test
+
+  + ```java
+    long numberOfInts((long) Integer.MAX_VALUE) +1;
+    byte[] bitfield = new byte[(int)(numberOfInts/8)];
+    void findOpenNumber() throws FileNotFoundException{
+        Scanner in = new Scanner(new FileReader(filename));
+        while (in.hasNextInt()){
+            int n = in.nextInt();
+            bitfield[n/8] |= 1<<(n%8);
+        }
+        for(int i=0; i<bitfield.length;i++){
+            for(int j=0;j<8;j++){
+                if((bitfield[i] & (1<<j))==0){
+                    System.out.println(i*8+j);
+                    return;
+                }
+            }
+        }
+        
+    }
+    ```
+
+  + 
+
++ Tips
+
+### 10.8 Find Duplicates
+
+You have an array with all the numbers from 1 to N, where N is at most 32,000. The
+array may have duplicate entries and you do not know what N is. With only 4 kilobytes ($4*8*2^{10}$ bits) of memory available, how would you print all duplicate elements in the array?
+
++ Draw Example
+
+  + Create bit vector (BitSet) of 32000 bits
+
++ Brute Force
+
++ Optimize + Conceptual algorithm walk through
+
++ Implement + Test
+
+  + ```java
+    class BitSet{
+        int[] bitset;
+        public BitSet(int size){
+            bitset = new int[(size>>5)+1];//divide by 32
+        }
+        boolean get(int pos){
+            int wordNumber = (pos>>5); //divide by 32
+            int bitNumber = (pos & 0x1F); // mod 32
+            return (bitset[wordNumber] & (1<<bitNumber))!=0;
+        }
+        void set(int pos){
+            int wordNumber = (pos>>5); //divide by 32
+            int bitNumber = (pos & 0x1F); // mod 32
+            bitset[wordNumber] |= 1<<bitNumber; 
+        }
+    }
+    
+    void checkDuplicates(int[] array){
+        BitSet bs = new BitSet(32000);
+        for(int i = 0; i< array.length; i++){
+            int num = array[i];
+            int num0 = num-1;
+            if(bs.get(num0)){
+                System.out.println(num;)
+            }else{
+                bs.set(num0);
+            }
+        }
+    }
+    
+    ```
+
+  + 
+
++ Tips
+
+  + Use BitSet to map integer to bits
+
+    ```java
+    int wordNumber = (pos>>5); //divide by 32
+    int bitNumber = (pos & 0x1F); // mod 32
+    (bitset[wordNumber] & (1<<bitNumber))!=0;// check if integer exists
+    bitset[wordNumber] |= 1<<bitNumber; //set integer exists
+    ```
+
+
+
+419
+
+
+
