@@ -1,4 +1,4 @@
-# Mask Detector With Pytorch YOLO v3
+
 
 ## Introduction
 
@@ -63,7 +63,18 @@ $$
 ### Output processing
 
 + **Thresholding by objectness score:** ignore boxes below the threshold
-+ **Non-maximum suppression**: remove redundant predictions
+
++ **Non-maximum suppression**: remove redundant predictions. [Reference](https://towardsdatascience.com/non-maximum-suppression-nms-93ce178e177c)
+  $$
+  \mathcal{B}=\left\{b_{1}, . ., b_{N}\right\}, \mathcal{S}=\left\{s_{1}, \ldots, s_{N}\right\}, N_{t}
+  $$
+  $\mathcal{B}$ is the list of initial detection boxes $\mathcal{S}$ contains corresponding detection scores $N_{t}$ is the $\mathrm{NMS}$ threshold. 
+
+  + Soft-NMS: instead of completely removing the proposals with high IOU and high confidence, reduce the confidences of the proposals proportional to IOU value
+
+  + <img src="../../attachments/image-20201222104834398.png" alt="image-20201222104834398" style="zoom: 50%;" />
+
+  
 
 ## Code
 
@@ -118,6 +129,8 @@ $$
 
     + name: face (no mask), face_mask(with mask)
 
++ `utils.datasets`: face_mask data sets that complies with YOLO input type.
+
 ### Model
 
 [Reference](https://blog.paperspace.com/how-to-implement-a-yolo-v3-object-detector-from-scratch-in-pytorch-part-2/)
@@ -133,8 +146,28 @@ $$
 
 
 
-### Test Forward Pass
+### Test Detection
 
 [Reference](https://blog.paperspace.com/how-to-implement-a-yolo-v3-object-detector-from-scratch-in-pytorch-part-3/)
 
-+ `model.py  __main__`: 
++ `model.py  __main__`: test forward pass
+
++ `utils.non_max_supression`: non_maximum suppression. 
+
++ `detectYOLO.py`: test detection with single image
+  ![image-20201222115020771](../../attachments/image-20201222115020771.png)
+
+  ```
+  	+ Label: 16, Conf: 0.99973
+  	+ Label: 1, Conf: 0.99780
+  	+ Label: 7, Conf: 0.88477
+  ```
+
+  
+
+
+
+### Training
+
+
+

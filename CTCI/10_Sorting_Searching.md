@@ -384,7 +384,5 @@ number of times, write code to find an element in the array. You may assume that
       }
   ```
 
-  
-
 + Tips
 
