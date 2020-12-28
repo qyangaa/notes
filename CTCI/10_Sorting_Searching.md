@@ -619,6 +619,199 @@ array may have duplicate entries and you do not know what N is. With only 4 kilo
 
 
 
+### 10.9 Sorted Matrix Search
+
+Given an M x N matrix in which each row and each column is sorted in ascending order, write a method to find an element.
+
++ Draw Example
+
+  + $$
+    \begin{array}{|c|c|c|c|}
+    \hline 15 & 20 & 40 & 85 \\
+    \hline 20 & 35 & 80 & 95 \\
+    \hline 30 & 55 & 95 & 105 \\
+    \hline 40 & 80 & 100 & 120 \\
+    \hline
+    \end{array}
+    
+    $$
+
+  + each elements are sorted with respect to the row and column that it is in. Not overall
+
++ Brute Force
+
+  + Find columns and rows whose range contains the target (add to a list of [row, start col, end col], then binary search each of them
+
++ Optimize + Conceptual algorithm walk through
+
+  + No need to binary search each, submatrix will be the same condition. So recursively:
+    + binary search target in:
+      + first row, eliminate columns right to index: c_end
+      + last row, eliminate columns left to index: c_start
+      + first column, eliminate rows down to index: r_end
+      + last column, eliminate rows upper to index: r_start
+    + Basecase:
+      + $c_{end}==c_{start}; r_{end}==r_{start}$
+  + Binary search is hard to implement, use linear search
+
++ Implement + Test
+
+  + ```java
+    boolean findElement(int[][] matrix, int elem){
+        int row=0;
+        int col = matrix[0].length-1;
+        while(row<matrix.length && col >=0){
+            if(matrix[row][col] == elem){
+                return true;
+            }else if(matrix[row][col]>elem){
+                col--;
+            }else{
+                row++
+            }
+        }
+        return false.
+    }
+    ```
+
+  + 
+
++ Tips
+
+### 10.10 Rank from Stream
+
+Imagine you are reading in a stream of integers. Periodically, you wish to be able to look up the **rank of a number x (the number of values less than or equal to x).** Implement the data structures and algorithms to support these operations. That is, implement the **method track(int x)**, which is called when each number is generated, and the method **getRankOfNumber(int x),** which returns the number of values less than or equal to x (not including x itself)
+
++ Draw Example
+
+  + Stream: 5,1,4,4,5,9,7,13,3
+    + rank(1) = 0
+    + rank(3) = 1
+    + rank(4) = 3
+
++ Brute Force
+
+  + Keep ordered array. Each time insert: binary search, ArrayList `add(index, element)` runs in $O(n)$ time. Each time call rank(): binary search. $O(\log n)$ for rank()
+  + Can we find $O(1)$ for rank() call? Map of {number, rank}, update is $O(n)$ 
+
++ Optimize + Conceptual algorithm walk through
+
+  + Binary search tree. Get rank for each node: in-order traversal. $O(n)$ in total, thus $O(1)$ on average for each node in update. $O(\log n)$ when look up.
+    + Insert: $O(\log n)$
+    + getRank: $O(\log n)$
+
+  
+
++ Implement + Test
+
+  + ```java
+    class RankNode{
+        public int left_size = 0;
+        public RankNode left, right;
+        public int data = 0;
+        public RankNode(int d){
+            data = d;
+        }
+    
+        public void insert(int d){
+            if(d<= data){
+                if(left!=null) left.insert(d);
+                else left = new RankNode(d);
+                left_size++;
+            }else {
+                if(right!=null) right.insert(d);
+                else right = new RankNode(d);
+            }
+        }
+    
+        public int getRank(int d){
+            if (d == data){
+                return left_size;
+            } else if (d<data){
+                if(left==null) return -1;
+                else return left.getRank(d);
+            }else {
+                if (right==null) return -1;
+                else return left_size + 1 + right.getRank(d);
+            }
+        }
+    }
+    ```
+
+  + 
+
++ Tips
+
+  +  ArrayList `add(index, element)` runs in $O(n)$ time.
+  + For fast `add(index, element)`  with other tracking capability, use binary search tree.
+  + Keep track of rank: binary search tree
+    + self.rank = self.left_size
+    + left.rank  = left.getRank
+    + right.rank = self.left_size + 1 + right.getRank
+
+### 10.11 Peaks and Valleys
+
+In an array of integers, a "peak" is an element which is greater than or equal
+to the adjacent integers and a "valley" is an element which is less than or equal to the adjacent integers. For example, in the array {5, 8, 6, 2, 3, 4, 6 }, {8, 6} are peaks and {5, 2} are valleys. Given an array of integers, sort the array into an alternating sequence of peaks and valleys.
+
++ Draw Example
+
+  + {5, 3, 1,3, 2} -> {5, 1,3,2, 3}
+
++ Brute Force
+
+  + any two numbers surrounding one number has to be greater than or smaller than the center number at the same time
+  + Sort $O(n\log n)$, find middle point, slice array into two half arrays, and then insert the second part into the first array $O(n)$.
+
++ Optimize + Conceptual algorithm walk through
+
+  + Look in a group of 3:, swap center with smaller of the outer two
+    + 5,3,1: swap 1,3 -> 5,1,3,3,2
+    + 3,3,2: swap 2,3 -> 5,1,3,2,3
+  + $O(n)$
+
++ Implement + Test
+
+  ```java
+      void sort(int[] array) {
+          for(int i = 1;i<array.length; i+=2){
+              int smallestIndex = minIndex(array, i-1, i, i+1);
+              swap(array, smallestIndex, i);
+          }
+      }
+      void swap(int[] array, int i, int j){
+          int temp = array[i];
+          array[i] = array[j];
+          array[j] = temp;
+      }
+      int minIndex(int[] array, int a, int b, int c){
+          int len = array.length;
+          int[] values = {findValue(array, a), findValue(array, b), findValue(array,c)};
+          int[] minRes = min(values);
+          return minRes[1];
+  
+      }
+      int findValue(int[] array, int index){
+          if(index>array.length) return Integer.MAX_VALUE;
+          return array[index];
+      }
+      int[] min(int[] array){
+          int[] res = {-1, Integer.MIN_VALUE};
+          for(int i=0; i<array.length; i++){
+              if (array[i]<res[1]) res = new int[]{i, array[i]};
+          }
+          return res;
+      }
+  
+  ```
+
+  
+
++ Tips
+
+  + In jave if want to find min. Need to implement from scratch
+
+
+
 419
 
 

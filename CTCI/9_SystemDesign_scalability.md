@@ -438,4 +438,204 @@ case, assume "duplicate" means that the URLs are identical.
     + Requires 4000 different machines
     + But fast due to parallelization
 
+
+
+### 9.5 Cache
+
+Imagine a web server for a simplified search engine. This system has **100 machines** to respond to search queries, which may then call out using **processSearch**(string query) to another cluster of machines to actually get the result. The **machine which responds to a given query is chosen at random**, so you cannot guarantee that the same machine will always respond to the same request. The method **processSearch is very expensive.** Design a caching mechanism to cache the results of the most recent queries. Be sure to explain how you would update the cache
+when data changes.
+
++ Assumptions: 
+
+  + all query other than `processSearch` happen on the initial machine
+  + number of queries is large
+  + calling between machines is quick
+  + result of query: ordered list of URLs, which has 50 character title and 200 character summary
+  + Most popular queries always appear in cache
+
++ System requirements
+
+  + efficient lookups given a key
+  + expiration of old data
+  + Update/ clearing cache when results for a query change
+
++ Steps
+
+  + Cache for single system: 
+    + linked list (queue) for keeping most recent data, but not fast lookup
+    + hash table fast lookup, but not ordered by time
+    + Combined: linked list store nodes, hash tables maps query to nodes
+  + Scale up to many machines, options:
+    + Each machine has its own cache: quick, less effective
+    + Each machine has a copy of cache: fast access, slow update (to N machines), N*space
+    + Each machine stores a segment of the cache, use hash function to assign machines: more machine-to-machine calls
+  + Update results when content change
+    + Content at a URL changes or ordering of results change
+      + Require instant refreshing: store a hash table from query to URL
+      + Not require instant refreshing: periodically crawl through the cache and update content
+    + New pages appear
+      + set "automatic time-out" to purge cache, so that it's periodically refreshed
+  + Optimization
+    + store small amount of very popular queries in all machines
+    + purge(update) data more frequently that are more time sensitive
+
++ Code
+
+  ```java
+  public class Cache{
+      public static int MAX_SIZE = 10;
+      public Node head, tail;
+      public HashMap<String, Node> map;
+      public int size = 0;
+      public Cache(){
+          map = new HashMap<String, Node>();
+      }
+      public void moveToFront(Node node){...}
+      public void moveToFront(String query){...}
+      public void removeFromList(Node node){...}
+      public String[] getResults(String query){
+          if(!map.containsKey(query)) return null;
+          Node node = map.get(query);
+          moveToFront(node);
+          return node.results;
+      }
+      public void insertResults(String query, String[] results){
+          if(map.containsKey(query)){
+              Node node = map.get(query);
+              node.results = results;
+              moveToFront(node);
+              return;
+          }
+          Node node = new Node(query, results);
+          moveToFront(node);
+          map.put(query, node);
+          
+          if(size>MAX_SIZE){
+              map.remove(tail.query);
+              removeFromList(tail);
+          }
+      }
+      
+  }
+  ```
+
+  
+
++ Tips
+
+  + General Cache API
+
+    ```java
+    getResults();
+    insertResults()
+    ```
+
+  + General queue API
+
+    ```java
+    head, tail;
+    move();
+    add();
+    remove();
+    ```
+
+  + Query caching process
+
+    + cacheMap[query] = index
+    + cache[index] = results
+    + queryMap[url] = query
+    + data(url) = content
+
+
+
+### 9.6 Sales Rank
+
+A large eCommerce company wishes to list the best-selling products, overall and by
+category. For example, one product might be the #1056th best-selling product overall but the #13th best-selling product under "Sports Equipment" and the #24th best-selling product under "Safety." Describe how you would design this system.
+
++ Scope 
+
+  + Only design the asked part, not entire eCommerce system
+  + meaning of sales rank: total sales over the last week
+  + each product can be in multiple categories, no subcategories
+
++ Assumption
+
+  + No need to be instantly up-to-date. 
+    + Up to an hour old for top 100 in each category
+    + Up to 1 day old for less popular items
+  + Precision is important for top 100 but not others
+  + categorizations are static and given in transaction
+
++ Major components
+
+  ```mermaid
+  graph LR
+  	A[Purchase System] --> |add order|B[database]
+  	B --> |sort|C[sales rank data]
+  	C --> D[frontend]
+  
+  ```
+
++ Key issues
+
+  + database stores each order: query all sales every hour is expensive
+  + Solution: store sales summary in tables:
+    + Table 1: product_id, total, day1, day2... (total number of days needed to remember)
+    + Table 2: product_id, category_id
+    + Problem 1: frequent db write (every order)
+    + Problem 2: joins are expensive
+  + Problem 1 Solution: Store purchases in cache and write to db periodically by batch (need to calculate)
+    + Problem 3 : Sort during incomplete batch write affects ranking precision
+  + Problem 3 Solution: 
+    + don't rank until all cache data are written to db
+    + divide cache by time, and rank all stored data only up to that time
+  + Problem 2 solution: 
+    + use only 1 table: product_id, category, total, day1, day2...
+    + With some repetition if product_id in multiple categories. But to rank, just need to sort category, then sales volume
+  + Problem 4: database queries might be expensive, solution:
+    + keep categories in different directory
+    + treat general category as another directory
+    + Scales well, can be distributed
+
+
+
+### 9.8 Pastebin
+
+Design a system like Pastebin, where a user can enter a piece of text and get a randomly generated URL for public access.
+
++ Scope
+
+  + No user accounts, edite document
+  + tracks analytics
+  + old documents get deleted
+  + security (not able to guess document URLs)
+  + frontend + API
+
++ Assumptions
+
+  + Heavy reads/ writes
+  + Some documents are accessed much more
+
++ Major components
+
+  ```mermaid
+  graph LR
+  	A[database] --> B[server with files]
+  	A --> C[server with files]
+  	A --> D[server with files]
+  ```
+
+  
+
+  + database: URL to files
+  + datastore: tracks analytics (every visit as a row)
+
++ Key issues
+
+  + generating URLs: random GUID, or 10-character sequence of letters and numbers
+  + Analytics: 
+    + store raw data from each visit: fast write, high flexibility, slow analysis, more storage
+    + store specific data required: saves space, slower write, less flexibility
+
 p393
