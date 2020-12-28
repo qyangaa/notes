@@ -43,6 +43,7 @@
   const second = [4,5,6];
   const combined = [...first,...second];//spread operator for array
   const combined = {...first,...second, locaion:'China'}; //spread operator for objects
+  first.filter(item=>item!=1); //delete item from array
   ```
 
 + Class:
@@ -62,4 +63,4 @@
   const teacher = new Teacher("Mosh");
   ```
 
-  
++ 
