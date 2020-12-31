@@ -174,3 +174,7 @@ First Trial on original PyTorch-YOLOv3 model:
 After 20 epochs:
 
 ![image-20201227184525365](../../attachments/image-20201227184525365.png)
+
+100 epochs using pre-trained weights:
+
+![image-20201231095657554](../../attachments/image-20201231095657554.png)

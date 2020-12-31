@@ -6,7 +6,33 @@ npm start
 ```
 
 + Bootstrap
+  
   + Get examples: https://getbootstrap.com/docs/4.0/examples/
+  
++ `npm i lodash`, `import _ from 'lodash'`
+
++ `npm i prop-types`: enforce type check for classes
+
+  ```jsx
+  ClassName.propTypes = {
+      item: PropTypes.number.isRequired,
+      ...
+  }
+  ```
+
++ `npm i` to set up imported folder
+
++ `npm i react-router-dom`
+
+  ```jsx
+  import { BrowserRouter } from `react-router-dom`
+  ```
+
+  
+
++ Query string: `npm i query-string`
+
++ schema description language and data validator: `npm install joi-browser`
 
 ## Shortcuts
 

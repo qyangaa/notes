@@ -26,6 +26,16 @@
   const func = param => return ...;
   ```
 
++ String: 
+
+  + Template literal
+  
+    ```jsx
+    {`/movies/:{movies._id}`}
+    ```
+    
+    
+  
 + Array
 
   ```java
@@ -43,8 +53,29 @@
   const second = [4,5,6];
   const combined = [...first,...second];//spread operator for array
   const combined = {...first,...second, locaion:'China'}; //spread operator for objects
-  first.filter(item=>item!=1); //delete item from array
+  
+  
   ```
+
+  + change value at index:
+
+    ```javascript
+  const index = array.indexOf(item);
+    array[index] = {...item};
+    array[index].value++;
+    this.setState({ array });
+    
+    ```
+    
+  + Filter
+
+    ```jsx
+    array.filter(item=>item!=1); //delete item from array
+    filtered = criteria? 
+        array.filter(m=>m.criteria===criteria): array;
+    ```
+
+    
 
 + Class:
 
@@ -63,4 +94,23 @@
   const teacher = new Teacher("Mosh");
   ```
 
-+ 
++ Math:
+
+  + `Math.ceil(..)`
+  
++ lodash
+
+  + `const pages = _.range(start, end, step);`
+  + `_.slice(items, startIndex)`
+  + `_.take()`
+  + wrap as lodash object: `_(items).fun(..).fun(..)..`
+
+### Control flow
+
++ For loop: 
+
+  ```jsx
+  for(let item of error.details) error[item.path[0]] = item.message;
+  ```
+
+  
