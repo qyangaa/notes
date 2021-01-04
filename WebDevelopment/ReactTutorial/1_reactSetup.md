@@ -34,6 +34,30 @@ npm start
 
 + schema description language and data validator: `npm install joi-browser`
 
++ Http service: `npm i axios`
+
++ Nice-looking toasts `npm i react-toastify`
+
++ Backend service runner: Postman
+
+
+
+### Node.js
+
+- delete **bcrypt** from the dependencies: `npm uninstall bcrypt`
+- install **bcryptjs**: `npm i bcryptjs`
+- replace instances of bcrypt in routes *auth.js* and *users.js* with:
+
+```
+const bcrypt = require('bcryptjs')
+```
+
+seed the vidly database with `node seed.js` and all three collections should appear. Still taking the course but when I reference the API from postman (`http://localhost:3900/api/movies`) I get the movies results back with a 200 status code.
+
+https://github.com/mosh-hamedani/vidly-api-node/issues/10
+
+mongod --port 27018
+
 ## Shortcuts
 
 `imrc`:`import React, { Component } from 'react';`

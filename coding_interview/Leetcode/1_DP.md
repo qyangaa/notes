@@ -1,4 +1,8 @@
-## 5 Longest Palindromic Substring
+https://leetcode.com/list/xlern30i/
+
+
+
+### 5 Longest Palindromic Substring
 
 Given a string `s`, return *the longest palindromic substring* in `s`.
 
@@ -218,5 +222,708 @@ class Solution:
         return R-L-1 #note here we expand both way, need to -1
     ```
     
+    
+
+### 53 Maximum Subarray
+
+Given an integer array `nums`, find the contiguous subarray (containing at least one number) which has the largest sum and return *its sum*.
+
+**Follow up:** If you have figured out the `O(n)` solution, try coding another solution using the **divide and conquer** approach, which is more subtle.
+
++ Example
+
+  + `[-2,1,-3,4,-1,2,1,-5,4]` -> 6
+  + `[1]` -> 1
+  + `[0]` -> 0
+  + `[-5]`-> -5
+  + `1<=len(nums)<=2e4`
+
++ Analysis
+
+  + Go over the array, store sum up to current index. If previous sum<0, reset sum to 0 and start from current index. Keep record of largest sum ever seen
+
++ Implementation [correct]
+
+  ```python
+  def maxSum(nums):
+      maxsum = nums[0]
+      cursum = nums[0]
+      if len(nums)==1:
+          return maxsum
+      for i in range(1,len(nums)):
+          if cursum<=0:
+              cursum=0
+          cursum+=nums[i]
+          maxsum = max(cursum, maxsum)
+      return maxsum
+      
+  ```
+
++ Divide and conquer: slower
+
+  + find max in to halves
+  + middle case: start at middle, expand on two sides, and record the maximum seen.
+
++ Tips
+
+  + Find max sum of contiguous subarray:
+
+    ```python
+    maxsum = nums[0]
+    cursum = nums[0]
+    for i in range(1,len(nums)):
+            if cursum<=0: #set to 0 if previous sum<0
+                cursum=0
+            cursum+=nums[i]
+            maxsum = max(cursum, maxsum)
+    ```
+
+
+
+### 55 Jump Game
+
+Given an array of non-negative integers `nums`, you are initially positioned at the **first index** of the array.
+
+Each element in the array represents your maximum jump length at that position.
+
+Determine if you are able to reach the last index.
+
++ Examples
+
+  + `nums = [2,3,1,1,4]`: true
+    + 1, 3
+  + `nums = [3,2,1,0,4]`: false
+    + always get to nums[3] and cannot move forward
+
++ Analysis
+
+  + Recursion
+
+    + Contraction direction: from top of array to the end
+
+    ```python
+    def canReach(index, s):
+        available_jumps = list(range(s[0]+1))
+        for jump in available_jumps:
+            if canReach(index+jump,s):
+                return True
+        return False
+    ```
+
+    + Store visited
+
+    ```python
+        def canJump(self, nums: List[int]) -> bool:
+            self.iterations = 0
+            self.visited = [-1 for _ in range(len(nums))]
+            return self.canReachFrom(0,nums)
+    
+        def canReachFrom(self,index, s):
+            self.iterations+=1
+            if self.visited[index] > -1:
+                return True if self.visited[index] == 1 else False
+            if s[index]>=len(s)-index-1:
+                self.visited[index] = 1
+                return True
+            max_jump = min(s[index], len(s)-index-1)
+            available_jumps = list(range(1,max_jump+1))
+            for jump in available_jumps:
+                if self.canReachFrom(index + jump, s):
+                    return True
+            self.visited[index] = 0
+            return False
+    ```
+
+    
+
+  + DP: reversed jump [slower]
+
+    + Expansion direction: from end of array to top
+    + Traverse direction: reversed jump starts from end location of last successful reversed jump
+    + Storage: visitedIndexs = set()
+    + This is actually slower than recursion because in recursion we only need to test available_jumps, but in reversed jump we need to test all possible jumps
+
+    ```python
+    def canReach(nums):
+        if len(nums) <= 1: return True
+        curIndex = len(nums) - 1
+        startIndexs = [curIndex]
+        while len(startIndexs) != 0:
+            curIndex = startIndexs.pop()
+            for reverseJump in range(1, curIndex+1):
+                endIndex = curIndex - reverseJump
+                if nums[endIndex] >= reverseJump:
+                    if endIndex == 0: return True
+                    startIndexs.append(endIndex)
+        return False
+                    
+    ```
+
+  + DP: turn recursion into iteration $O(n^2)$
+
+    ```python
+        def canReach(self, nums):
+            self.visited = [-1 for _ in range(len(nums))]
+            self.visited[-1] = 1
+            for i in range(len(nums)-1):
+                max_jump=min(i+nums[i],len(nums)-1)
+                self.visited[i] = 0
+                for jump in range(i+1,max_jump+1):
+                    print(i, jump)
+                    if self.visited[jump] == 1:
+                        self.visited[i] = 1
+                        return True
+            return self.visited[0]==1
+    ```
+
+  + Greedy:
+
+    + We only need one good jump position
+    + Iterate from right to left: once we see a position with `num[i]>len(num)-i-1`, this is a good position
+    + Find the right most good jump position R. If any position to the left L is also a good position, that that position must be able to jump to R because `nums[L]>R-L`
+    + Then start from this position and go back
+
+    ```python
+    def canJump(self, nums):
+        end = len(nums)-1
+        start = end-1
+        while start >= 0:
+            if nums[start]>=end-start:
+                end=start
+            start-=1
+        return end==0
+    ```
+
+  
+
+### 62 Unique Paths
+
+A robot is located at the top-left corner of a `m x n` grid (marked 'Start' in the diagram below).
+
+The robot can only move either down or right at any point in time. The robot is trying to reach the bottom-right corner of the grid (marked 'Finish' in the diagram below).
+
+How many possible unique paths are there?
+
++ Example:
+
+  + ![image-20210102091031700](../../attachments/image-20210102091031700.png)
+  + `m=3, n=2` -> 3
+  + `m=7,n=3`-> 28
+  + `m=3, n=3`-> 6
+
++ Analysis
+
+  + `[m,n]` and `[n,m]` gives same result
+
+  + Base cases: 
+
+    + `[1,1]`: 0
+    + `[2,1],[1,2]`: 1
+    + `[1,1]`: `f[2,1]+f[1,2]`
+
+  + Recursion:
+
+    ```python
+    numPaths(m,n):
+        return numPaths(m-1,n)+numPaths(m,n-1)
+    ```
+
+  + Memorization:
+
+    ```python
+    memo = {(m,n):num_paths}
+    numPaths(m,n):
+        if (m,n) or (n,m) in memo.keys(), return memo(m,n) or memo(n,m)
+    ```
+
+  + DP
+
+    + direction of expansion: `m++, n++`
+
+    ```python
+    def numPaths(m,n):
+        memo={(m,n): num_paths}
+        memo[(1,1)]=0
+        memo[(2,1)]=1
+        memo[(1,2)]=1
+        i = 2
+        while i<=m:
+            j = 2
+            while j<=n:
+                memo[(i,j)]=memo[(i-1,j)]+memo[(i,j-1)]
+                j+=1
+            i+=1
+        return memo[m,n]
+        
+    ```
+
+  + For each i, we only use the memorization from memo[(i-1)] and memo[(i)]. No need to store all rows
+
+    + Note: because we need to use a full row as memorization, we must initialize a full row
+
+    ```python
+    def uniquePaths(m,n):
+            if m==n==1: return 1
+            memoprev, memocur = [1 for _ in range(n)], [1 for _ in range(n)]
+            memoprev[0]=0
+            memocur[0]=1
+            i = 1
+            while i < m:
+                j = 1
+                while j < n:
+                    memocur[j] = memoprev[j] + memocur[j - 1]
+                    j += 1
+                memoprev = memocur
+                memocur[0]=1
+                i += 1
+            return memocur[-1]
+    ```
+
+  + Can also use factorial to calculate directly:
+
+    + in total we need to have m-1 steps down, n-1 steps right
+    + count all unique combinators (steps down are no different from each other, same for right)
+    + $\frac{(m-1+n-1)!}{(m-1)!(n-1)!}$
+
+    ```python
+    def uniquePaths(self, m: int, n: int) -> int:
+        from math import factorial as fact
+        return int(fact((m-1) + (n-1))/(fact(m-1) * fact(n-1)))
+    ```
+
+    
+
+### 70 Climbing Stairs
+
+You are climbing a staircase. It takes `n` steps to reach the top.
+
+Each time you can either climb `1` or `2` steps. In how many distinct ways can you climb to the top?
+
++ Examples:
+  + `n=2 -> 2`
+  + `n=3 -> 3`
+
++ Analysis
+
+  + Base case:
+
+    + `n=0 -> 1` 
+    + `n=1 -> 1`
+    + `n=2 -> 2`
+
+  + recursion
+
+    ```python
+    def climbStairs(n):
+        return climbStairs(n-1)+climbStairs(n-2)
+    ```
+
+  + Memorization:
+
+    ```python
+    memo=[0]*n
+    def climbStairs(n):
+        if memo[n]>0: return memo[n]
+        return climbStairs(n-1)+climbStairs(n-2)
+    ```
+
+  + DP:
+
+    ```python
+    def climbStairs(n):
+        if basecase: return basecase
+        memo=[0]*n
+        memo[0]=1
+        memo[1]=1
+        i = 2
+        while i<=n:
+            memo[i]=memo[i-1]+memo[i-2]
+        return memo[-1]
+    ```
+
+  + DP save space: we only use 1 and 2 steps ahead, no need to store the whole array
+
+    ```python
+    def climbStairs(n):
+        if n<=1: return 1
+        prev1=prev2=1
+        cur=prev1+prev2
+        i = 2
+        while i<=n:
+            cur=prev1+prev2
+            prev1, prev2 = cur, prev1
+            i+=1
+        return cur
+    ```
+
++ Tips:
+
+  + climbing stairs problem, Fibonacci problem, all use one pass method:
+
+    ```python
+    while i<=n:
+        cur=prev1+prev2
+        prev1, prev2 = cur, prev1
+        i+=1
+    ```
+
+
+
+### 91 Decode ways
+
+A message containing letters from `A-Z` can be **encoded** into numbers using the following mapping:
+
+```
+'A' -> "1"
+'B' -> "2"
+...
+'Z' -> "26"
+```
+
+To **decode** an encoded message, all the digits must be mapped back into letters using the reverse of the mapping above (there may be multiple ways). For example, `"111"` can have each of its `"1"`s be mapped into `'A'`s to make `"AAA"`, or it could be mapped to `"11"` and `"1"` (`'K'` and `'A'` respectively) to make `"KA"`. Note that `"06"` cannot be mapped into `'F'` since `"6"` is different from `"06"`.
+
+Given a **non-empty** string `num` containing only digits, return *the **number** of ways to **decode** it*.
+
+The answer is guaranteed to fit in a **32-bit** integer.
+
++ Example:
+
+  + ```
+    Input: s = "12"
+    Output: 2
+    Explanation: "12" could be decoded as "AB" (1 2) or "L" (12).
+    ```
+
+  + ```
+    Input: s = "226"
+    Output: 3
+    Explanation: "226" could be decoded as "BZ" (2 26), "VF" (22 6), or "BBF" (2 2 6).
+    ```
+
+  + ```
+    Input: s = "0"
+    Output: 0
+    Explanation: There is no character that is mapped to a number starting with 0. The only valid mappings with 0 are 'J' -> "10" and 'T' -> "20".
+    Since there is no character, there are no valid ways to decode this since all digits need to be mapped.
+    ```
+
+  + ```
+    Input: s = "1"
+    Output: 1
+    ```
+
++ Analysis
+
+  + Base cases
+
+    + `len(s)==1`:
+      + `s=="0"->0`
+      + else: ->1
+    + `len(s)==2`:
+      + `if 11<=int(s)<=26 && s!="20"`-> 2
+      + else: 1 or 0
+
+  + Recursion:
+
+    + each step, check if last 1 and last 2 characters give legal encoding
+
+    ```python
+    def numDecodings(s):
+        return isValid(s[-1])*numDecodings(s[:-1])+isValid(s[-2:])*numDecodings(s[:-2])
+    
+    def isValid(s):
+        if len(s)==0: return 0
+        if len(s)==1:
+            return 0 if s=="0" else 1
+        if len(s)==2:
+            if int(s)>=10 and int(s)<=26: return 1
+            else: return 0
+            
+    
+    ```
+
+  + Recursion with memorization:
+
+    ```python
+    memo={s: num_decodings}
+    ```
+
+  + DP: expand from last 1 and 2 characters
+
+    ```python
+    def numDecodings(s):
+        if basecase: return basecase
+        memo={idx: num_decodings}
+        l = len(s)-1
+        memo[l] = isValid(s[l])
+        memo[l-1] = isValid(s[l-1:])+isValid(l)*isValid(l-1)
+        i = len(s)-3
+        while i>0:
+            memo[i] = isValid(s[i:i+2])*memo[i+2]+isValid(s[i])*memo[i+1]
+            i-=1
+        memo[0] = isValid(s[0])*memo[1]
+        
+        return memo[0]
+    
+    ```
+
+  + DP save space: we are only using `memo[i+1], memo[i+2]`
+
+    ```python
+    def numDecodings(s):
+        if len(s)==1: return isValid(s)
+        l = len(s)-1
+        last2 = isValid(s[l])
+        last1 = isValid(s[l-1:])+isValid(s[l])*isValid(s[l-1])
+        if len(s)==2: return last1
+        i = len(s)-3
+        while i>=0:
+            cur = isValid(s[i:i+2])*last2+isValid(s[i])*last1
+            last1, last2=cur, last1
+            i-=1
+        return cur
+    
+    def isValid(s):
+        if len(s)==0: return 0
+        if len(s)==1:
+            return 0 if s=="0" else 1
+        if len(s)==2:
+            if int(s)>=10 and int(s)<=26: return 1
+            else: return 0
+            
+    ```
+
+    
+
+### 121  Best Time to Buy and Sell Stock
+
+Say you have an array for which the *i*th element is the price of a given stock on day *i*.
+
+If you were only permitted to complete at most one transaction (i.e., buy one and sell one share of the stock), design an algorithm to find the maximum profit.
+
+Note that you cannot sell a stock before you buy one.
+
+
+
++ Example
+
+  + ```
+    Input: [7,1,5,3,6,4]
+    Output: 5
+    Explanation: Buy on day 2 (price = 1) and sell on day 5 (price = 6), profit = 6-1 = 5.
+                 Not 7-1 = 6, as selling price needs to be larger than buying price.
+    ```
+
+  + ```
+    Input: [7,6,4,3,1]
+    Output: 0
+    Explanation: In this case, no transaction is done, i.e. max profit = 0.
+    ```
+
++ Analysis
+
+  + Find index i and j where j>i and `prices[j]-prices[i]` is maxed.
+
+  + Brutal force: `for i in range(len(prices))`test each j
+
+  + Note that when we repeat computation when we are scanning for `j`'s
+
+  + Recursion:
+
+    ```python
+    maxProfit(prices, i):
+        with_i = max(prices)-i
+        without_i = maxProfit(prices, i+1)
+        return max(with_i, without_i)
+    ```
+
+  + Stack:
+
+    + push if stack empty
+    + pop all if `price<stack[0]`
+    + pop top and push if `price>stack[top]`
+    + Keep a record of max `stack[top]-stack[0]`
+
+  + We are only using top and bottom of stack. Substitute with 2 integer variables instead
+
+    ```python
+    if len(prices)<1: return 0
+    max_profit = 0
+    bottom = prices[0]
+    top = bottom
+    for price in prices:
+        if price<bottom:
+            bottom=price
+            top=bottom
+        elif price>top:
+            top = price
+            max_profit = max(top-bottom, max_profit)
+    return max_profit
+    ```
+
++ Tips:
+
+  + when have order-constrained extrema problem, try stack first. If only use bottom and top of stack, substitute with 2 integer variables..
+
+
+
+### 139 word break
+
+Given a **non-empty** string *s* and a dictionary *wordDict* containing a list of **non-empty** words, determine if *s* can be segmented into a space-separated sequence of one or more dictionary words.
+
+**Note:**
+
+- The same word in the dictionary may be reused multiple times in the segmentation.
+- You may assume the dictionary does not contain duplicate words.
+
+
+
++ Example
+
+  + ```
+    Input: s = "leetcode", wordDict = ["leet", "code"]
+    Output: true
+    Explanation: Return true because "leetcode" can be segmented as "leet code".
+    ```
+
+  + ```
+    Input: s = "applepenapple", wordDict = ["apple", "pen"]
+    Output: true
+    Explanation: Return true because "applepenapple" can be segmented as "apple pen apple".
+                 Note that you are allowed to reuse a dictionary word.
+    ```
+
+  + ```
+    Input: s = "catsandog", wordDict = ["cats", "dog", "sand", "and", "cat"]
+    Output: false
+    ```
+
++ Analysis
+
+  + wordDict is a list. We need to check whether a word is in dict fast. So first convert it into a set `wordSet`, and find a `maxWordLen` and `minWordLen` for future use.
+
+  + Decoding problem similar to # 91 and # 70
+
+  + base case:
+
+    + if `s in wordSet: return True`
+    + if `len(s)<minWordLen: return False`
+
+  + Recursion
+
+    ```python
+    start = 0
+    wordSet
+    s
+    hasBreak(start):
+        if baseCase: return baseCase
+        for wordLen in range(minWordLen, maxWordLen+1):
+            if s[:wordLen] in wordSet && hasBreak(start+wordLen):
+                return True
+        return False
+    
+    ```
+
+  + Recursion with memory: we can store a truth array indexed by start:
+
+    ```python
+    memo[start] = [-1 for _ in len(s)]
+    
+    hasBreak(start):
+        if memo[start]!=-1: return memo[start]
+        if baseCase: return baseCase
+        for wordLen in range(minWordLen, maxWordLen+1):
+            if s[:wordLen] in wordSet && hasBreak(start+wordLen):
+                memo[start]=1
+                return True
+        memo[start]=0
+        return False
+    
+    ```
+
+  + DP with memory: goes in same direction 
+
+    + direction of expansion: wordLen
+    + direction of traverse: left to right of the string
+
+    ```python
+    memo[start] = [False for _ in range(len(s))] # can start from index
+    for wordLen in range(minWordLen, maxWordLen+1):
+        if s[:wordLen] in wordSet:
+            memo[wordLen]=True
+    
+    for wordLen in range(minWordLen, maxWordLen+1):
+        start=minWordLen
+        while start<len(s)-minWordLen:
+            if s[start:wordLen] in wordSet and memo[start]: 
+                memo[start+wordLen]=True
+            start+=wordLen
+    return memo[-1]
+    ```
+
+  + DP save space:
+
+    + note that we only use `memo[start: start+maxWordLen]` in each step. We only need a constant size array of size `maxWordLen`
+
+    + To do this we need to do traverse first then expand wordLen
+
+    + Each index offsets the memo array by 1
+
+    + We can skip all memo=0 index for next iteration
+
+    + if previous memo is 1, then copy that 1
+
+    + eg: applepenapple, ["a","apple","pen","app"], maxWordLen=5, minWordLen=1
+
+      |      | a    | p    | p    | l    | e    | p    | e    | n    | a    | p    | p    | l    | e    | a    |      |
+      | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+      | 0    | 1    | 1    | 0    | 1    | 0    | 1    |      |      |      |      |      |      |      |      |      |
+      | 1    |      | 1    | 0    | 1    | 0    | 1    | 0    |      |      |      |      |      |      |      |      |
+      | 2    |      |      |      | 1    | 0    | 1    | 0    | 0    | 0    |      |      |      |      |      |      |
+      | 3    |      |      |      |      |      | 1    | 0    | 0    | 1    | 0    | 0    |      |      |      |      |
+      | 4    |      |      |      |      |      |      |      |      | 1    | 1    | 0    | 1    | 0    | 1    |      |
+      | 5    |      |      |      |      |      |      |      |      |      | 1    | 0    | 1    | 0    | 1    | 0    |
+      | 6    |      |      |      |      |      |      |      |      |      |      |      | 1    | 0    | 1    | 0    |
+      | 7    |      |      |      |      |      |      |      |      |      |      |      |      |      | 1    | 1    |
+
+    ```python
+    memo = [False for _ in range(maxWordLen+1)]
+    memo[0] = True
+    start = 0
+    stringLen=len(s)
+    for wordLen in range(minWordLen, maxWordLen+1):
+        if s[:wordLen] in wordSet:
+            memo[wordLen]=True
+            if start==0:
+                start=wordLen
+    offset=start
+    while start<=stringLen-minWordLen:
+        memo=memo[offset:]+[False for _ in range(offset)]
+        copiedLength = maxWordLen-offset
+        offset=0
+        wordLen=minWordLen
+        while wordLen<=maxWordLen and start+wordLen<=stringLen:
+            if memo[wordLen] and offset==0: 
+                	newStart=start+wordLen
+                    wordLen = copiedLength
+        	if s[start:start+wordLen] in wordSet:
+            	memo[wordLen]=True
+            wordLen+=1
+       	offset=newStart-start
+        start=newStart
+    return memo[-1]
+    ```
+
+  + The above acceleration is making things more complicated. Use simple DP instead:
+
+    ```python
+    def wordBreak(self, s, wordDict):
+        memo=[True]
+        words=set(wordDict)
+        for i in range(1, len(s)+1):
+            memo += any(memo[j] and s[j:i] in words for j in range(i))
+        return memo[-1]
+    ```
+
     
 

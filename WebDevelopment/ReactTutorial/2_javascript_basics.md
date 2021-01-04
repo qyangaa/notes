@@ -77,22 +77,22 @@
 
     
 
-+ Class:
+### Class:
 
-  + `export default` allows import with `import Class from ..`
++ `export default` allows import with `import Class from ..`
 
-  ```javascript
-  import {Person} from './person'
-  
-  export default class Teacher extends Person{
-      constructor(name, degree){
-          super(name);
-          ...;
-      }
-      teach(){...;}
-  }
-  const teacher = new Teacher("Mosh");
-  ```
+```javascript
+import {Person} from './person'
+
+export default class Teacher extends Person{
+    constructor(name, degree){
+        super(name);
+        ...;
+    }
+    teach(){...;}
+}
+const teacher = new Teacher("Mosh");
+```
 
 + Math:
 
@@ -104,6 +104,7 @@
   + `_.slice(items, startIndex)`
   + `_.take()`
   + wrap as lodash object: `_(items).fun(..).fun(..)..`
++ Use `object[property]` to access computed properties
 
 ### Control flow
 
@@ -111,6 +112,16 @@
 
   ```jsx
   for(let item of error.details) error[item.path[0]] = item.message;
+  ```
+
+  
+
+### Module
+
++ import all functions as methods:
+
+  ```jsx
+  import * as userService from '../services/userService'
   ```
 
   

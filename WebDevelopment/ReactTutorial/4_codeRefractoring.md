@@ -4,6 +4,26 @@
 
 + Moving responsibility, use class component instead of simple functional component if needed.
 
++ organize import statement in some kind of structure, 
+
+  + first external libraries 
+  + second components 
+  + last CSS modules
+
++ If one name or string appears in multiple places then we need to refactor it. 
+
++ Bi-directional dependencies means that two modules import from each other, only make the last car module depend on the more core module. 
+
+  + To resolve the dependency reverse the functions. 
+
+  + For example a get function can be reversed to a set function called from the other side
+
+    ```jsx
+    http.setJwt(getJwt());
+    ```
+
+    
+
 
 
 ## Component Based
@@ -31,6 +51,12 @@
 
 - For a simple functional component destructing the props in the parameters rather than in the code block
 
-  
+### Authentication
 
-  
++ key "token"  should be stored in auth service only
++ All the local storage methods should be refactored into authservice
+
+
+
+
+
