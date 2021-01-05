@@ -927,3 +927,308 @@ Given a **non-empty** string *s* and a dictionary *wordDict* containing a list o
 
     
 
+### 152 Maximum Product Subarray
+
+Given an integer array `nums`, find the **contiguous** subarray within an array (containing at least one number) which has the largest product.
+
++ Example
+
+  + ```
+    Input: [2,3,-2,4]
+    Output: 6
+    Explanation: [2,3] has the largest product 6.
+    ```
+
+  + ```
+    Input: [-2,0,-1]
+    Output: 0
+    Explanation: The result cannot be 2, because [-2,-1] is not a subarray.
+    ```
+
++ Analysis
+
+  + base case: 
+
+    + `len(nums)==0` out 0 
+    + `len(nums)==1` out nums[0]
+    + `len(nums)==2`out `max(nums[0], nums[0]*nums[1], nums[1])`
+
+  + DP:
+
+    + direction of expansion: `len(subarray)+=1`
+    + direction of traversal: `i+=1`
+    + memory: `memo[i][j]=prod(start,end)`
+    + time and space: $O(n^2)$
+
+    ```python
+            length = len(nums)
+            memo = [[0 for _ in range(length)] for _ in range(length)]
+            maxProd = nums[0]
+            for i in range(length):  # len(subarray)==1
+                memo[i][i] = nums[i]
+                maxProd = max(nums[i], maxProd)
+            for subLen in range(2, length + 1):
+                for start in range(0,length - subLen+1):
+                    end = start + subLen - 1
+                    memo[start][end] = nums[end] * memo[start][end - 1]
+                    maxProd = max(memo[start][end], maxProd)
+            return maxProd
+    ```
+
+  + DP to save space: first iterate through the array, then iterate over length
+
+    ```python
+    length = len(nums)
+    maxProd = nums[0]
+    for i in range(length):
+        product = 1
+        for j in range(i,length):
+            product*=nums[j]
+            result = max(result, product)
+    return result
+    ```
+
+    
+
+  + Improvement to reduce time: $O(n)$, following conditions for `num[i]`
+
+    + positive: -> `prevMax*num[i]`
+    + negative: ->`max(prevMin*num[i], num[i])`
+    + zero: -> `num[i]`
+    + Then we only need to traverse once, and keep a record of `curMin, curMax`
+
+    ```python
+    length = len(nums)
+    maxProd = nums[0]
+    curMax = nums[0]
+    curMin = nums[0]
+    for i in range(1,length):
+        prevMax = curMax
+        prevMin = curMin
+        curMax = max(prevMax*nums[i], prevMin*nums[i], nums[i])
+        curMin = min(prevMax*nums[i], prevMin*nums[i], nums[i])
+        maxProd = max(curMax, maxProd)
+    return maxProd
+    
+    ```
+
+    
+
++ Tips:
+  + For finding contiguous subarray, it usually saves space to first iterate over array, then iterate over subarray size. 
+  + After find the solution, try to eliminate the iterations over subarray by memorizing results on the go during the first iteration
+
+
+
+### 198 House Robber
+
+max sum subarray with no adjacent elements. All elements between `[0,400]`
+
++ Examples:
+
+  + ```
+    Input: nums = [1,2,3,1]
+    Output: 4
+    Explanation: Rob house 1 (money = 1) and then rob house 3 (money = 3).
+                 Total amount you can rob = 1 + 3 = 4.
+    ```
+
+  + ```
+    Input: nums = [2,7,9,3,1]
+    Output: 12
+    Explanation: Rob house 1 (money = 2), rob house 3 (money = 9) and rob house 5 (money = 1).
+                 Total amount you can rob = 2 + 9 + 1 = 12.
+    ```
+
+  + `[2,1,1,2]=> 4`: note: can skip more than one house
+
++ Analysis
+
+  ```python
+          n = len(nums)
+          if n==0:
+              return 0
+          if n==1:
+              return nums[0]
+          last2 = 0
+          last1 = nums[0]
+          for i in range(1,n):
+              curMax = max(nums[i]+last2, last1) #legal robs up to current point
+              last2, last1  = last1, curMax
+          return curMax
+  ```
+
+  
+
+  
+
+### 213 House Robber II
+
+max sum subarray with no adjacent elements. Subarray is arranged in a circle (first and last element cannot appear together)
+
++ Example:
+
+  + ```
+    Input: nums = [2,3,2]
+    Output: 3
+    Explanation: You cannot rob house 1 (money = 2) and then rob house 3 (money = 2), because they are adjacent houses.
+    ```
+
+  + ```
+    Input: nums = [1,2,3,1]
+    Output: 4
+    Explanation: Rob house 1 (money = 1) and then rob house 3 (money = 3).
+    Total amount you can rob = 1 + 3 = 4.
+    ```
+
+  + ```
+    Input: nums = [0]
+    Output: 0
+    ```
+
+
+
++ Extend from simple house robber:
+
+  + take out the last element, then the remaining array is a problem of simple house robber
+  + we need to remember if `nums[0]`is taken, if it is taken, then we cannot take the last element. If not, we can. 
+  + Two passes of simpleHouseRobber: 
+
+  ```python
+      def rob(self, nums: List[int]) -> int:
+          n = len(nums)
+          if n<=0:
+              return 0
+          if n==1:
+              return nums[0]
+          return max(self.simpleHouseRobber(nums[:-1]), self.simpleHouseRobber(nums[1:]))
+      def simpleHouseRobber(self, nums):
+          n = len(nums)
+          if n<=0:
+              return 0
+          if n==1:
+              return nums[0]
+          last2 = 0
+          last1 = nums[0]
+          for i in range(1,n):
+              curMax = max(nums[i]+last2, last1) #legal robs up to current point
+              last2, last1  = last1, curMax
+          return curMax
+  ```
+
+  + Optimize time: try to do them in single pass
+
+  ```python
+      def rob(self, nums: List[int]) -> int:
+          n = len(nums)
+          if n <= 0:
+              return 0
+          if n == 1:
+              return nums[0]
+          if n == 2:
+              return max(nums[0], nums[1])
+          last2 = nums[0]
+          last1 = max(nums[1],nums[0])
+          last2Late= 0
+          last1Late = nums[1]
+          for i in range(2, n - 1):
+              curMax = max(nums[i] + last2, last1)
+              last2, last1 = last1, curMax
+              curMaxLate = max(nums[i] + last2Late, last1Late)
+              last2Late, last1Late = last1Late, curMaxLate
+          curMaxLate = max(nums[-1] + last2Late, last1Late)
+          return max(last1,curMaxLate)
+  ```
+
+  
+  + The above two solution are both $O(n)$ , the second solution is slightly faster, but first solution is more clear and concise, and saves space.
+
+
+
+### 300 Longest Increasing Subsequence
+
+Given an integer array `nums`, return the length of the longest strictly increasing subsequence.
+
+A **subsequence** is a sequence that can be derived from an array by deleting some or no elements without changing the order of the remaining elements. For example, `[3,6,2,7]` is a subsequence of the array `[0,3,1,6,2,2,7]`.
+
+
+
++ Example:
+
+  + ```
+    Input: nums = [10,9,2,5,3,7,101,18]
+    Output: 4
+    Explanation: The longest increasing subsequence is [2,3,7,101], therefore the length is 4.
+    ```
+
+  + ```
+    Input: nums = [0,1,0,3,2,3]
+    Output: 4 (0,1,2,3)
+    ```
+
+  + ```
+    Input: nums = [7,7,7,7,7,7,7]
+    Output: 1
+    ```
+
++ Analysis
+
+  + Recursion: each step is a combination of taking current element and not taking:
+
+    + branch for each taken/ not taken. $O(2^n)$
+
+    ```python
+    def lengthofLIS(nums, prevMax, curIdx):
+        if curIdx == len(nums): return 0
+        taken = 0
+        if nums[curIdx]>prevMax:
+            taken = 1+lengthofLIS(nums, nums[curIdx],curIdx+1)
+        notTaken = lengthofLIS(nums, prev,curIdx+1)
+        return max(taken, notTaken)
+    ```
+
+  + Recursion with memorization: `memo[prevMax, curIdx]`: $O(n^2)$
+
+    ```python
+    memo[i][j]
+    def lengthofLIS(nums, prevMax, curIdx):
+        if memo[prevMax, curIdx]>-1: return memo[prevMax, curIdx]
+        if curIdx == len(nums): return 0
+        taken = 0
+        if nums[curIdx]>prevMax:
+            taken = 1+lengthofLIS(nums, nums[curIdx],curIdx+1)
+        notTaken = lengthofLIS(nums, prev,curIdx+1)
+        return max(taken, notTaken)
+    ```
+
+  + DP: if we know the all max lengths before `i`,  we can try appending `i` to each elements before it and find the max result. $O(n^2)$
+
+  + DP: binary search (patient sort algorithm). With patient sort, the number of piles equal to the longest increasing sequence, because:
+
+    + each pile is a decreasing sequence
+    + patient sort always append to smaller pile first
+    + $O(n log n)$
+
+  ```python
+  last_digit = []
+  for num in nums:
+      insert_pos = bisect.bisect_left(last_digits,num)
+      if insert_pos>=len(last_digits):
+          last_digits.append(num)
+      else:
+          last_digits[insert_pos] = num
+  return len(last_digits)
+  ```
+
+  https://leetcode.com/problems/longest-increasing-subsequence/discuss/1000066/Python-O(nlogn)-with-patience-sort-explanation-faster-than-92.4
+
++ Tips:
+
+  + Useful for recursion:
+
+  ```python
+  len(array, curIdx) = 1+len(array, curIdx+1)
+  ```
+
+  
+
