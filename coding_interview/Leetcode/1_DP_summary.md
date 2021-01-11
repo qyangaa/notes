@@ -77,3 +77,70 @@
 |                                                              |                 |                     |                          |
 |                                                              |                 |                     |                          |
 
+
+
+
+
+## general method for coin change/ subset sum problem:
+
+ + | Nums \ Target                                                | 0    | 1    | 2    | 3    | 4    | Target |
+   | ------------------------------------------------------------ | ---- | ---- | ---- | ---- | ---- | ------ |
+   | 1                                                            |      |      |      |      |      |        |
+   | 2                                                            |      |      |      |      |      |        |
+   | 3                                                            |      |      |      |      |      |        |
+   | Remaining nums ( use if without replacement)                 |      |      |      |      |      |        |
+   | ways (sum)<br /> canSum (if subproblem gives true)<br /> min/max(if maximization or minimization problem) |      |      |      |      |      |        |
+
+   + ```python
+     def f(self,nums, target):
+         if target == 0: return True
+         memo = [True]
+         remaining = [nums]
+         for i in range(1, target + 1):
+             for num in nums:
+                 if num <= i:
+                     if memo[i - num] and num in remaining[i - num]:
+                         memo += [True]
+                         copy = [i for i in remaining[i - num]]
+                         copy.remove(num)
+                         remaining += [copy]
+                         break
+             else:
+                 memo += [False]
+                 remaining += [[-1]]
+     
+         return memo[-1]
+     ```
+
+
+
+## Buy and sell stock problem: State Machine
+
+[reference](https://www.thealgorists.com/Algo/DynamicProgramming/StateMachine/StockTradingWithCooldown)
+
+
+
+
+
+## Longest increasing subsequence - patient sort
+
+
+
++ DP: binary search (patient sort algorithm). With patient sort, the number of piles equal to the longest increasing sequence, because:
+
+  + each pile is a decreasing sequence
+  + patient sort always append to smaller pile first
+  + $O(n log n)$ 
+
+```python
+last_digit = []
+for num in nums:
+    insert_pos = bisect.bisect_left(last_digits,num)
+    if insert_pos>=len(last_digits):
+        last_digits.append(num)
+    else:
+        last_digits[insert_pos] = num
+return len(last_digits)
+```
+
+https://leetcode.com/problems/longest-increasing-subsequence/discuss/1000066/Python-O(nlogn)-with-patience-sort-explanation-faster-than-92.4

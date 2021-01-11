@@ -190,21 +190,21 @@ class Solution:
   + Find palindrome substrings with center expansion: 
 
     + each palindrome is a sub-palindrome centered at the same location expanded on both side by 1
-    
+
   + iterate over chars as center location, note cases when center is a char (odd length) and center is between chars (even length)
-    
+
     + DP without storage if only need to return extrema:
-    
+
       ```python
       for n in direction_of_traverse:
           for problem_size in direction_of_expansion:
               expanded_value = expand(sub_problem)
       ```
-    
+
       
-    
+
     + $O(n^2)$ time, $O(1)$ space.
-    
+
     ```python
     def findPalindromeExpand(self, s: str):
         length = len(s)
@@ -221,7 +221,7 @@ class Solution:
             print(s[L:R+1])
         return R-L-1 #note here we expand both way, need to -1
     ```
-    
+
     
 
 ### 53 Maximum Subarray
@@ -500,6 +500,7 @@ You are climbing a staircase. It takes `n` steps to reach the top.
 Each time you can either climb `1` or `2` steps. In how many distinct ways can you climb to the top?
 
 + Examples:
+
   + `n=2 -> 2`
   + `n=3 -> 3`
 
@@ -1015,6 +1016,7 @@ Given an integer array `nums`, find the **contiguous** subarray within an array 
     
 
 + Tips:
+
   + For finding contiguous subarray, it usually saves space to first iterate over array, then iterate over subarray size. 
   + After find the solution, try to eliminate the iterations over subarray by memorizing results on the go during the first iteration
 
@@ -1140,7 +1142,7 @@ max sum subarray with no adjacent elements. Subarray is arranged in a circle (fi
           return max(last1,curMaxLate)
   ```
 
-  
+
   + The above two solution are both $O(n)$ , the second solution is slightly faster, but first solution is more clear and concise, and saves space.
 
 
@@ -1232,3 +1234,487 @@ A **subsequence** is a sequence that can be derived from an array by deleting so
 
   
 
+### 303 Range Sum Query - Immutable
+
+Given an integer array `nums`, find the sum of the elements between indices `i` and `j` `(i ≤ j)`, inclusive.
+
+Implement the `NumArray` class:
+
+- `NumArray(int[] nums)` Initializes the object with the integer array `nums`.
+- `int sumRange(int i, int j)` Return the sum of the elements of the `nums` array in the range `[i, j]` inclusive (i.e., `sum(nums[i], nums[i + 1], ... , nums[j])`)
+
++ Example
+
+  + ```
+    Input
+    ["NumArray", "sumRange", "sumRange", "sumRange"]
+    [[[-2, 0, 3, -5, 2, -1]], [0, 2], [2, 5], [0, 5]]
+    Output
+    [null, 1, -1, -3]
+    
+    Explanation
+    NumArray numArray = new NumArray([-2, 0, 3, -5, 2, -1]);
+    numArray.sumRange(0, 2); // return 1 ((-2) + 0 + 3)
+    numArray.sumRange(2, 5); // return -1 (3 + (-5) + 2 + (-1)) 
+    numArray.sumRange(0, 5); // return -3 ((-2) + 0 + 3 + (-5) + 2 + (-1))
+    ```
+
+  + brutal: simply sum
+
+  + acceleration: use 2D array to memorize all sums of start-end pair
+
+  + More acceleration (assume read heavy): use 1D array to memorize leftSum (not inclusive) in all indexes. and sum in each interval is the `leftSum[right+1]-leftSum[left]`
+
+  ```python
+  class Solution:
+      def __init__(self, nums):
+          self.leftSums = [0]
+          curSum=0
+          for num in nums:
+              curSum+=num
+              self.leftSums+=[curSum]
+      def sumRange(self, i: int, j: int) -> int:
+          return self.leftSums[j+1]-self.leftSums[i]
+  ```
+
+  
+
+### 309 Best Time to Buy and Sell Stock with Cooldown
+
+Say you have an array for which the *i*th element is the price of a given stock **on day *i*.**
+
+Design an algorithm to find the maximum profit. You may complete **as many transactions as you like** (ie, buy one and sell one share of the stock multiple times) with the following restrictions:
+
+You may **not engage in multiple transactions** at the same time (ie, you must sell the stock before you buy again).
+
+**After you sell your stock, you cannot buy stock on next day. (ie, cooldown 1 day)**
+
++ Example
+
+  + ```
+    Input: [1,2,3,0,2]
+    Output: 3 
+    Explanation: transactions = [buy, sell, cooldown, buy, sell]
+    ```
+
++ Answer: State Machine for all buy and sell stock problems
+  [reference](https://www.thealgorists.com/Algo/DynamicProgramming/StateMachine/StockTradingWithCooldown)
+
+  + Three states:
+
+    
+
+    ```mermaid
+    graph LR
+    	hasStock --1.sell_addProfit--> justSold
+    	justSold --2.doNothing--> cooldownDone
+    	cooldownDone --3.doNothing--> cooldownDone
+    	cooldownDone --4.buy_reduceProfit--> hasStock
+    	hasStock --5.doNothing--> hasStock
+    ```
+
+  + DP relations: max profit on a day if we choose certain operation
+
+    ```python
+    # max(3,2)
+    coodownDone[day] = max(cooldownDone[day-1],justSold[day-1])
+    # max(4,5)
+    hasStock[day] = max(cooldownDone[day-1]-prices[day], hasStock[day-1])
+    # 1
+    justSold[day] = hasStock[day-1]+prices[day]
+    ```
+
+  + Base cases
+
+    ```python
+    hasStock[0]=0
+    cooldownDone[0]=0
+    justSold[0]=Integer.MIN_VALUE #selling on first day is not possible, use min_value for a maximization problem
+    ```
+
+  + Return value: we need to have no stock in hand on the last day
+
+    ```python
+    return max(cooldownDone[-1], justSold[-1])
+    ```
+
+  + DP
+
+    ```python
+    n = len(prices)
+    if n<=1: return 0
+    cooldownDone = [0]
+    hasStock = = [0]
+    justSold = = [-sys.maxint-1]
+    
+    for day in range(1,n):
+        coodownDone[day] = max(cooldownDone[day-1],justSold[day-1])
+        hasStock[day] = max(cooldownDone[day-1]-prices[day], hasStock[day-1])
+        justSold[day] = hasStock[day-1]+prices[day]
+    return max(cooldownDone[-1], justSold[-1])
+    
+    ```
+
+  + DP save space: we only use `[day-1]` values in each iteration
+
+    ```python
+    n = len(prices)
+    if n<=1: return 0
+    lastCooldownDone = 0
+    lastHasStock = = 0
+    lastJustSold = = -sys.maxint-1
+    
+    for day in range(1,n):
+        coodownDone= max(lastCooldownDone,lastJustSold)
+        hasStock = max(lastCooldownDone-prices[day], lastHasStock)
+        justSold = lastHasStock+prices[day]
+        lastCooldownDone, lastHasStock, lastJustSold = cooldownDone, hasStock, justSold
+    return max(lastCooldownDone, lastJustSold)
+    ```
+
+  + If want to record the optimal path
+
+    ```python
+    purchaseDays =[] # purchaseDays[i] = last Purchase day that would maximize profit fo day i
+    saleDays =[] #saleDays[i] = last sale day that would maximize profit fo day i
+    tempPurchaseDays =[] # tempPurchaseDay[i] gives the purchase day which maximizes hasStock state for day i
+    for day in range(1,n):
+        cooldownDone= max(lastCooldownDone,lastJustSold)
+        hasStock = max(lastCooldownDone-prices[day], lastHasStock)
+        justSold = lastHasStock+prices[day]
+        
+        if justSold>cooldownDone: #sell
+            saleDays+=[day]
+            purchaseDays+=[tempPurchaseDays[day-1]]
+        else: # did nothing
+            saleDays+= [saleDays[day-1]]
+            purchaseDays+=[tempPurchaseDays[day-1]]
+        if hasStock > lastHasStock: #buy
+            tempPurchaseDays+=[day]
+        else: # did nothing
+            tempPurchaseDays+=[tempPurchaseDays[day-1]]
+        
+        lastCooldownDone, lastHasStock, lastJustSold = cooldownDone, hasStock, justSold
+    ```
+
+
+
+### 322 Coin Change
+
+You are given coins of different denominations and a total amount of money *amount*. Write a function to compute the fewest number of coins that you need to make up that amount. If that amount of money cannot be made up by any combination of the coins, return `-1`. You may assume that you have an infinite number of each kind of coin.
+
++ Example
+
+  + ```
+    Input: coins = [1,2,5], amount = 11
+    Output: 3
+    Explanation: 11 = 5 + 5 + 1
+    ```
+
+  + ```
+    Input: coins = [2], amount = 3
+    Output: -1
+    ```
+
+  + ```
+    Input: coins = [1], amount = 0
+    Output: 0
+    ```
+
+  + ```
+    Input: coins = [1], amount = 1
+    Output: 1
+    ```
+
+  + ```
+    Input: coins = [1], amount = 2
+    Output: 2
+    ```
+
++ Analysis
+
+  + Base case:
+
+    + `len(coins)==1`: `amount%coins[0]==0? amount/coins[0] else -1`
+
+  + Recursion:
+
+    + Assume we have value of coins ordered from small to large
+
+    + Then 
+
+      ```python
+      coinChange(coins, amount):
+          if len(coins)==1:
+              if amount%coins[0]==0:
+                  return amount/couns
+              else:
+                  return -1
+          curValue=coins[-1]
+          curnum = int(amount/curValue)
+          res = sys.maxint
+          found=False
+          while curnum>=0:
+              prev = coinChange(coins[:-1],amount-curnum*curValue)
+              if prev>-1:
+              	res = min(res, curnum+prev)
+                  found=True
+          if not found: return -1
+          return res
+              
+      ```
+
+  + Recursion with Memorization: `memo[len(coins)][amount]`
+
+  + DP: from 0 to amount, each step, `memo[i]`is given by adding 1 to `memo[i-value]`for each value of coins
+
+    | Value | 0    | 1    | 2    | 3    | 4    | 5    |
+    | ----- | ---- | ---- | ---- | ---- | ---- | ---- |
+    | 1     | 0    | 1    | 2    | 2    | 3    | 3    |
+    | 2     |      |      | 1    | 2    | 2    | 3    |
+    | 5     |      |      | 0    | 0    | 0    | 1    |
+    | min   | 0    | 1    | 1    | 2    | 2    | 1    |
+
+    + We only need to keep a record of min values up to that point in each memo
+    + Note that we only look at `memo` up to `max(coins)`, we only need to keep an array of length with `max(coins)`. 
+
+    ```python
+        def coinChange(self, coins, amount) -> int:
+            memo = [0]
+            for i in range(1,amount+1):
+                curmin=sys.maxsize
+                for value in coins:
+                    if i >= value and memo[i - value]!=-1:
+                        curmin = min(curmin,1 + memo[i - value])
+                if curmin==sys.maxsize:
+                    memo+=[-1]
+                else:
+                    memo+= [curmin]
+            return memo[-1]
+    ```
+
+    
+
+### 338 Counting Bits
+
+Given a non negative integer number **num**. For every numbers **i** in the range **0 ≤ i ≤ num** calculate the number of 1's in their binary representation and return them as an array.
+
++ Examples
+
+  + ```
+    Input: 2
+    Output: [0,1,1]
+    ```
+
+  + ```
+    Input: 5
+    Output: [0,1,1,2,1,2]
+    ```
+
++ Analysis
+
+  + | 0    | 0    | out  | $2^n+k$: n | k    |
+    | ---- | ---- | ---- | ---------- | ---- |
+    | 1    | 01   | 1    | 0          | 1    |
+    | 2    | 10   | 1    | 1          | 0    |
+    | 3    | 11   | 2    | 1          | 1    |
+    | 4    | 100  | 1    | 2          | 0    |
+    | 5    | 101  | 2    | 2          | 1    |
+    | 6    | 110  | 2    | 2          | 2    |
+    | 7    | 111  | 3    | 2          | 3    |
+    | 8    | 1000 | 1    | 3          | 0    |
+    | 9    | 1001 | 2    | 3          | 1    |
+
+    + n: add 1
+    + k: add the value given by `memo[k]`
+
+  + Now we need to find the fastest way to calculate n and k. Note that n always increases, we can just use the previous n and add 1 if needed. And we can store the exponential directly so we don't need to calculate 2^n every time
+
+  ```python
+  countBits(num):
+      array=[0]
+      exponential=1 #2^n
+      for i in range(1,num+1):
+          if 2*exponential==i:
+              exponential*=2
+              array+=[1]
+          else:
+              array+=[1+array[i-exponential]]
+      return array
+  ```
+
+  + We actually don't need to calculate n, we shifts bits to left when multiply a number by 2 (adding 0 on the right). Then we can just take `memo[i//2]`
+
+  ```python
+  memo=[0]
+  for i in range(1,num+1):
+      memo+=[memo[i//2]+i%2]
+  return memo
+  ```
+
++ Tips:
+
+  + `count1s[n]=count1s[n//2]+n%2`
+
+
+
+### 337 Combination Sum IV
+
+Given an integer array with all positive numbers and no duplicates, find the number of possible combinations that add up to a positive integer target.
+
++ Example: 
+
+  + ```
+    nums = [1, 2, 3]
+    target = 4
+    
+    The possible combination ways are:
+    (1, 1, 1, 1)
+    (1, 1, 2)
+    (1, 2, 1)
+    (1, 3)
+    (2, 1, 1)
+    (2, 2)
+    (3, 1)
+    
+    Note that different sequences are counted as different combinations.
+    
+    Therefore the output is 7.
+    ```
+
++ Analysis
+
+  + This is similar to the coin change problem, but only need to count the ways
+
+  + | Target     | 0    | 1    | 2    | 3    | 4    | 5    |
+    | ---------- | ---- | ---- | ---- | ---- | ---- | ---- |
+    | 1          | 0    | 1    | 1    | 2    | 4    | 7    |
+    | 2          |      |      | 1    | 1    | 2    | 4    |
+    | 3          |      |      | 0    | 1    | 1    | 2    |
+    | ways (sum) | 1    | 1    | 2    | 4    | 7    | 13   |
+
+  + ```python
+    if target==0: return 0
+    memo=[1]
+    for i in range(1,target+1):
+        curWays=0
+        for num in nums:
+            if num<=i:
+            	curWays+=memo[i-num]
+        memo+=[curWays]
+    return memo[-1]
+    ```
+
+
+
+### 416 Partition Equal Subset Sum
+
+Given a **non-empty** array `nums` containing **only positive integers**, find if the array can be partitioned into two subsets such that the sum of elements in both subsets is equal.
+
++ Example
+
+  + ```
+    Input: nums = [1,5,11,5]
+    Output: true
+    Explanation: The array can be partitioned as [1, 5, 5] and [11].
+    ```
+
+  + ```
+    Input: nums = [1,2,3,5]
+    Output: false
+    Explanation: The array cannot be partitioned into equal sum subsets.
+    ```
+
++ Analysis
+
+  + The sum of each subsets must be totalsum/2
+
+  + Then the problem is equivalent to find a subset with sum of totalsum/2
+
+  + Recursion: $O(2^n)$  
+
+    ```python
+    nums
+    canSum(start, target):
+        curnum=nums[start]
+        if curnum==0:
+            return True
+        if curnum>target:
+            return False
+        else:
+            # take or not take
+            return canSum(nums[start+1:], target) and canSum(nums[start+1:], target-curnum)
+    ```
+
+  + Recursion with memorization: `memo[len(nums)][target]` 
+
+  + DP similar to last problem:
+  + | Target    | 0     | 1    | 2    | 3    | 4    |
+    | --------- | ----- | ---- | ---- | ---- | ---- |
+    | 1         | 0     | 1    | 0    | 0    | 1    |
+    | 3         |       |      | 0    | 1    | 1    |
+    | 4         |       |      | 0    | 0    | 1    |
+    | Remaining | 1,3,4 | 3,4  |      | 1,4  | 4    |
+    | canSum    | 1     | 1    | 0    | 1    | 1    |
+
+```python
+    def canPartition(self, nums) -> int:
+        if len(nums)<=1:
+            return False
+        if sum(nums)%2!=0:
+            return False
+        return self.canSum(nums, sum(nums)//2)
+
+    def canSum(self,nums, target):
+        if target == 0: return True
+        memo = [True]
+        remaining = [nums]
+        for i in range(1, target + 1):
+            for num in nums:
+                if num <= i:
+                    if memo[i - num] and num in remaining[i - num]:
+                        memo += [True]
+                        copy = [i for i in remaining[i - num]]
+                        copy.remove(num)
+                        remaining += [copy]
+                        break
+            else:
+                memo += [False]
+                remaining += [[-1]]
+
+        return memo[-1]
+
+```
+
+
+​    
+
++ Tips: general method for coin change/ subset sum problem:
+ + | Nums \ Target                                                | 0    | 1    | 2    | 3    | 4    | Target |
+    | ------------------------------------------------------------ | ---- | ---- | ---- | ---- | ---- | ------ |
+    | 1                                                            |      |      |      |      |      |        |
+    | 2                                                            |      |      |      |      |      |        |
+    | 3                                                            |      |      |      |      |      |        |
+    | Remaining nums ( use if without replacement)                 |      |      |      |      |      |        |
+    | ways (sum)<br /> canSum (if subproblem gives true)<br /> min/max(if maximization or minimization problem) |      |      |      |      |      |        |
+    
+    + ```python
+      def f(self,nums, target):
+          if target == 0: return True
+          memo = [True]
+          remaining = [nums]
+          for i in range(1, target + 1):
+              for num in nums:
+                  if num <= i:
+                      if memo[i - num] and num in remaining[i - num]:
+                          memo += [True]
+                          copy = [i for i in remaining[i - num]]
+                          copy.remove(num)
+                          remaining += [copy]
+                          break
+              else:
+                  memo += [False]
+                  remaining += [[-1]]
+      
+          return memo[-1]
+      ```
