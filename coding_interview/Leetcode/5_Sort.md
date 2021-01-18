@@ -113,6 +113,19 @@ Output: true
 
 
 
+### Merge Intervals
 
++ Merge Intervals:  greedy, sort by first, then check if second can merge
+  $$
+  \begin{aligned}
+  &\text { For example, }\\
+  &\text { Given }[1,3],[2,6],[8,10],[15,18]\\
+  &\text { return }[1,6],[8,10],[15,18]
+  \end{aligned}
+  $$
 
-### 
+```python
+
+```
+
+![image-20210115203854174](/home/arkyyang/files/notes/notes/attachments/image-20210115203854174.png)

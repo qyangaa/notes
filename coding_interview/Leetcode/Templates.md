@@ -18,11 +18,50 @@ max = sys.maxsize
 min = -sys.maxsize - 1
 ```
 
+### String
+
+```python
+s.isalpha() #if is letter
+s.isalnum() #determin if is alphanumeric
+s.lower() #to lower case
+
+# Operate on characters of string
+s = list(S)
+Operations...
+S = ''.join(s)
+```
+
+
+
+### List
+
+```python
+None in list  # check is non is in list
+all(v is None for v in l) # check if all items in list is none
+l.pop(idx)
+```
+
+
+
+
+
 ### Reverse Range:
 
 ```python
 for i in reversed(range(k)):
 ```
+
+
+
+### Counter
+
+```python
+# remove negative and zero counters
+c = collections.Counter(a=-2, b=0, c=3)
+c += collections.Counter()
+```
+
+
 
 
 
@@ -52,6 +91,7 @@ heapq.heappush(heap, item)
 item = heapq.heappop()
 size=len(heap)
 peakItem = heap[0]
+heapq.heappush(heap, (l.val,id(l), l)) # use id() if need to push non-comparable object
 ```
 
 
@@ -69,9 +109,407 @@ bisect.insort(a, x, lo=0, hi=len(a))
 
 
 
+### Permutation and combination
+
+```python
+from itertools import permutations  
+perm = list(permutations([1, 2, 3]))
+
+from itertools import combinations 
+comb = list(combinations([1, 2, 3], 2))
+```
+
+
+
+## Two Pointer
+
++ Application
+  + Sorted array/ linked list
+  + To find two (set of) numbers subject to some conditions
+
+### Start and end pointer
+
+```python
+A.sort()
+first, second = 0, len(A)-1
+while first<second:
+    if earlyStop: return result
+    if small: first+=1
+    if big: second-=1
+```
+
+#### Examples
+
++ Pivot sort
+
+  ```python
+  while first<second:
+      while first<second and nums[first]<=p: first+=1
+      while first<second and nums[second]>=p: second-=1
+      nums[first],nums[second]=nums[second],nums[first]
+      first+=1
+      second+=1
+  ```
+
+  
+
+## Sort
+
+### $O(n^2)$ Algorithms
+
+```python
+def bubbleSort(nums):
+    for i in range(len(nums)):
+        for j in range(1,len(nums)-i):
+            if nums[i]>nums[j]:
+                nums[i], nums[j] = nums[j], nums[i]
+# best O(n)
+def bubbleSort(nums):
+    for i in range(len(nums)):   
+        swapped=False
+        for j in range(1,len(nums)-i):
+            if nums[i]>nums[j]:
+                nums[i], nums[j] = nums[j], nums[i]
+                swapped=True
+        if not swapped: break
+```
+
+```python
+def insertSort(nums):
+    for i in range(1, len(nums)):
+        for j in reversed(range(1,i+1)):
+            if nums[j-1]>nums[j]:
+                nums[j-1],nums[j]=nums[j],nums[j-1]
+# best O(n)                
+def insertSort(nums):
+    for i in range(1, len(nums)):
+        temp = nums[i]
+        for j in reversed(range(1,i+1)):
+            if temp<nums[j-1]
+                nums[j] = nums[j-1]     
+            else:
+                break
+        nums[j] = temp
+```
+
+```python
+def selectSort(nums):
+    for i in range(len(nums)-1):
+        minVal = nums[i]
+        minIdx = i
+        for j in range(i+1,len(nums)):
+            if nums[j]<minVal:
+                minVal=nums[j]
+                minIdx=j
+        nums[minIdx] = nums[i]
+        nums[i]=minVal
+```
+
+
+
+### $O(n\log n)$ Algorithms
+
++ Merge Sort
+
+```python
+def mergeSort(nums, l, r):
+    if l<r:
+        m = l+(r-l)//2
+        mergeSort(nums,l,m)
+        mergSort(nums,m+1,r)
+        merge(nums,l,m,r)
+def merge(nums,l,m,r):
+    i,j = l,m+1
+    res=[]
+    while i<=m and j<=r:
+        if nums[i]<=nums[j]:
+            res.append(nums[i])
+            i+=1
+        else:
+            res.append(nums[j])
+            j+=1
+    while i<=m:
+        res.append(nums[i])
+        i+=1
+    while j<=r:
+        res.append(nums[j])
+        j+=1
+    return res
+```
+
+Question: merge in place $O(n)$ time?
+
++ https://stackoverflow.com/questions/2571049/how-to-sort-in-place-using-the-merge-sort-algorithm
+
+```python
+void wmerge(Key* xs, int i, int m, int j, int n, int w) {
+    while (i < m && j < n)
+        swap(xs, w++, xs[i] < xs[j] ? i++ : j++);
+    while (i < m)
+        swap(xs, w++, i++);
+    while (j < n)
+        swap(xs, w++, j++);
+}  
+```
+
+
+
++ QuickSort
+
+```python
+def quickSort(nums, begin, end):
+    if begin>end: return
+    pivot = partition(nums, begin, end)
+    quickSort(nums,begin,pivot-1)
+    quickSort(nums, pivot+1, end)
+def partition(nums, begin, end):
+    pivot=nums[begin]
+    while begin<end:
+        while begin<end and nums[end]>=pivot:
+            end-=1
+        nums[begin] = nums[end]
+        while begin<end and nums[begin]<=pivot:
+            begin+=1
+       	nums[end] = nums[begin]
+    nums[begin] = pivot
+    return begin
+```
+
+
+
+### Bucket Sort
+
++ $O(max(n,range))$ , good when length of array is much larger than range of the numbers
+
+```python
+count = [0]*numRange
+for num in nums:
+    count[num]+=1
+res=[]
+for i, val in enumerate(count):
+    res+=[i]*val
+```
+
+
+
+
+
+## Linked List
+
++ Get, set, add(idx), remove(idx): $O(n)$
+
++ Head is special case (use dummy head)
+
+  + ```python
+    dummy = ListNode(-1)
+    dummy = head
+    pre = dummy
+    ... return dummy.next
+    ```
+
++ Tips
+
+  + Check whether `head==null`
+  + Check null when using while (`node!=None`for all `node.next` to access)
+    + `node.next?: node.next.next`
+  + draw out movement of (fast-slow) pointers and calculate relationship between their path length
+  + Check assumptions about: size, index range, tail
+
+```python
+class ListNode:
+    def __init__(self, val_):
+        self.val = val_
+        self.next = None
+
+def add(head, idx, value):
+    dummy = ListNode(-1)
+    dummy.next = head
+    pre = dummy
+    while idx>0:
+        if not pre: return ERROR
+        pre=pre.next
+    node = ListNode(value)
+    head, pre.next, node.next =dummy.next, node, pre.next
+
+def length(head):
+    res = 0
+    cur=head
+    while cur:
+        cur=cur.next
+        res+=1
+    return length
+
+def goto(head, index):
+    cur = head
+    while index>0:
+        if not cur: return ERROR
+        cur=cur.next
+        index-=1
+    return cur
+```
+
+### Type 1: get length then find
+
++ k'th node from the end
+
+  ```PYTHON
+  length = length(head)
+  index = length-k
+  goto(head, index)
+  ```
+
+### Type 2: fast-slow pointers
+
++ k'th node from the end
+
+  ```python
+  first = head
+  while k>0:
+      first=first.next
+  second = head
+  while first:
+      first=first.next
+      second=second.next
+  return second
+  ```
+
++ Middle node: test even length and odd length, should end at `idx = (len-1)//2`
+
+  ```python
+  fast=slow=head
+  while fast.next and fast.next.next: # check both
+      fast = fast.next.next
+      slow = slow.next
+  return slow
+  ```
+
++ detect cycle
+
+  ```python
+  if not head: return False
+  fast=slow=head
+  while fast:
+      if not fast.next: return False # checked here
+      if fast.next==slow: return True
+      fast = fast.next.next
+      slow = slow.next
+  ```
+
+### List Modification
+
++ If need remove, stand at pre, look at pre.next and pre.next.next
+
++ remove duplicates
+
+  ```python
+  if not head: return head
+  pre = head
+  while pre.next:
+      if pre.val==pre.next.val:
+          pre.next = pre.next.next
+      else:
+          pre = pre.next
+  return head
+  ```
+
++ reverse list: use a cyclic method: `pre; cur-> cur.next` becomes `pre<-cur; cur.next` then renames to `..<-pre; cur`
+
+  ```mermaid
+  graph LR;
+   cur-->pre;
+   pre --> cur.next;
+   cur.next-->cur;
+  
+  ```
+
+  ```mermaid
+  
+  ```
+
+  
+
+  ```python
+  pre=None # have to start from None, else list have cycle
+  cur = head
+  while cur!=None:
+      pre, cur.next, cur = cur, pre, cur.next
+  return pre
+  ```
+
++ Delete node: If head is not accessible, we can only delete next node, not current node
+
+  ```python
+  if not node: return
+  if not node.next: 
+      node=null
+      return
+  node.val = node.next.val
+  node.next = node.next.next
+  ```
+
+
+
+
+
+
+## Stack
+
++ Valid parantheses
+
+```python
+pair = []
+n = s.length()
+if n==0: return True
+left2right = {'(':')','[':']','{':'}'}
+for i in range(n):
+    if s[i]==in left2right.keys(): 
+        pair.append(s[i])
+    else:
+        last = pair.pop(-1)
+        if left2right[s[i]]!=last: return False
+return len(pair)==0 # important to check if there are pars left
+```
+
 
 
 ## Recursion
+
+### Summary
+
++ 1 subproblem: Factorial, sum of Linked List, remove linked list element
++ OR(subproblems): Maze, Sudoku, DFS
++ AND(subproblems): Knapsack, permutations, combinations, eight queen print, kSum
+
+### Vanilla Recursion (to find one path)
+
+```python
+def recursion(matrix, index, target, path):
+    if not isLegal(matrix, index) or inPath(index, path): return False # or return []
+    if isTarget(index, target): return True # or return path
+    
+    for nextIdx in directions:
+        path.add(index)
+        if recursion(matrix, nextIdx, target, path): return True # or return path
+        path.remove(index)
+    return False
+```
+
+### Recursion with backtracking (to find all paths)
+
+```python
+def recursion(matrix, index, results): # results: list of results
+    if baseCase: #index == len(matrix)-1
+        saveResult(matrix, results)
+        return
+    for nextIdx in indexes:
+        if isLegal(matrix, nextIdx):
+            mark(nextIdx)
+            recursion(matrix, nextIndex, results) #results passed as reference
+            unmark(nextIdx)
+    return results            
+```
+
+
 
 ### Recursion with memory
 
@@ -84,6 +522,216 @@ def helper(i,j,..):
     return memo[(i,j)]
 return helper(n,m)
 ```
+
+### Basic Examples
+
++ greatest common divisor: 
+
+  ```python
+  def gcd(x,y): (x>y)
+      if y==0: return x
+      return gcd(y, x%y)
+  ```
+
++ Climb building: 1 or 2 stairs a time, print all ways
+
+  ```python
+  def climb(n, preWay):
+      if n==1: 
+          print(preWay+" 1")
+      	return
+      if n==2:
+          print(preWay+" 2")
+          print(preWay+" 1 1")
+          return
+      preWay1 = preWay+" 1"
+      climb(n-1,preWay1)
+      preWay2 = preWay+" 2"
+      climb(n-1,preWay2)
+  ```
+
++ Towers of Hanoi: (n-1) from A to B, n'th from A to C, (n-1) from B to C
+
+  ```python
+  # number of steps
+  def hanoi(n):
+      if n==1: return 1
+      return 2*hanoi(n-1)+1
+  # Print all steps
+  def hanoi(n, start, mid, end):
+      if n==1:
+          print(Start+ "->"+end)
+          return
+      hanoi(n-1, start, end, mid)
+      print(Start+ "->"+ end)
+      hanoi(n-1, mid, start, end)
+  ```
+
++ Remove element from Linked List
+
+  ```python
+  if not head: return head
+  newHead = remove(head.next, val)
+  if head.val==val:
+      return newHead
+  else:
+      head.next=newHead
+      return head
+  ```
+
+  
+
++ Reverse Linked List
+
+  ```python
+  if not head or not head.next: return head
+  newHead = reverse(head.next)
+  head.next.next = head # point next to current
+  head.next = null
+  return newHead
+  ```
+
+  
+
+  
+
+### Permutation
+
+```python
+def permute(idx, prevPath, res):
+    if idx==len(s):
+        res.append(prevPath)
+    
+    for c in s: # The only difference from combination: search for all, and check if used
+        if c in prevPath: continue  
+        permute(idx+1, prevPath+c, res)
+```
+
+
+
+### Combination
+
++ Sorting is required to prevent duplication for list with duplications
+
+```python
+def combination(idx, prevPath, res):
+    if len(prevPath)==num: # length of returning list
+        res.append(prevPath.copy())
+        return
+    if idx>=n: #length of provided number range
+        return
+    # if use current or not
+    combination(idx+1, prevPath+[idx], res)
+    combination(idx+1, prevPath,res)
+    return
+```
+
+```python
+def combination(idx, prevPath, res):
+    if idx==len(s) or baseCase():
+        res.append(prevPath)
+        return
+
+    for nextIdx in nextSteps: # items to the right, or current children, e.g. range(idx, len(items))
+        cur = items[nextIdx]
+        combination(nextIdx+1, prevPath+cur, res)
+    return
+
+path=[] # or ""
+res=[]
+combination(0, path, res)
+return res
+```
+
+```python
+# Backtracking, can be slower, but saves some memory (may not be much)
+def combination(idx, prevPath, res):
+    if idx==len(s) or baseCase():
+        res.append(prevPath.copy())
+        return
+
+    for nextIdx in nextSteps:
+        cur = items[nextIdx]
+        prevPath.append(cur) # doesn't work for string
+        combination(nextIdx+1, prevPath, res)
+        prevPath.pop()
+    return
+```
+
+
+
+### 0-1 Knapsack
+
+```python
+def knapsack(weights, target, idx):
+    if target==0: return True
+    if target<0 or idx>=len(weight): return False
+    return knapsack(weights, target-weights[idx], idx+1) or 
+knapsack(weights, target idx+1)
+```
+
+### Maze
+
+```python
+# See if can reach
+def dfs(maze, start, end,visited):
+    if start==end: return True
+    if illegal(start): return False
+    visited.add(start)
+    for nextIdx in directions:
+        if dfs(maze, nextIdx, end, visited):
+            return True
+    return False
+
+# Print Path
+def dfs(maze, start, end,prevPath, visited):
+    if start==end: 
+        print(prevPath)
+        return True
+    if illegal(start): return False
+    visited.add(start)
+    for nextIdx in directions:
+        if dfs(maze, nextIdx, end, prevPath+maze[nextIdx], visited):
+            return True
+    return False
+```
+
+
+
+### N queens
+
+```python
+def dfs(row, path, res):
+    if row==n:
+        savePath(path, res)
+        return
+    for col in range(n):
+        if isLegal(row, col, path):
+            path.append(col)
+            dfs(row+1, path, res)
+            del path[-1]
+    return
+
+def savePath(path, res):
+    cur = []
+    for loc in path:
+        cur.append('.'*loc+'Q'+'.'*(n-loc-1))
+    res.append(cur)
+    return
+
+def isLegal(row, col, path):
+    for i in range(row):
+        if path[i]==col or abs(path[i]-col)==abs(i-row):
+            return False
+    return True
+
+path=[]
+res=[]
+dfs(0,path,res)
+return res
+```
+
+
 
 
 
@@ -102,13 +750,13 @@ return memo[n][m]
 
 ### 1D, depend on $O(1)$ sub problem
 
-![img](https://lh3.googleusercontent.com/43Zea3QY9VVzbIn71FtJbD_YxHEhh7fJJ8yKUis_1nLaEBkS-HR5xcScnP4Ahi-DwN_9VPNMGImphO4XDniFpiisDSOpFzQOuG71dynu-yHlIptyNQqbH4m4FiDWINem9itImyNGnQRRLYzzriZhngalAHv3u-o96H4e4oypO_p6i7gOw6PxuanbjkabHhM4PRruF8Yn23lzbRwRXVljrKzIxMqsM5lIc3sLvl6s7G5kPIBOq4K6DudtvvAD9yHn3OWWK1jgx5Yo6cp7mIzPOhDxAda7mdGurNd-r_S1V11k0TMCwfjRBswUormh2bpJjSZMp5OIwsEU6ZMdmk_ZtQND31V6WSugw_fvW3b1gW-1h9umyig2wxKrjbesXm_MvKD3jYDRuiYK2q_AgWeLdS3lgRAAxNSmBk6LOkJeabmBEC-30ZhA24LLoKLuOBCtLV9-GpMwEcZ0o57vA46yhDneEs4Oby20E1UAh6QaGatVRR5QyAkWn7JPzvtVB34Twr7T0YbC6qh0gB5xvTP-yMPjViAUXyT4CRVXC_JpkudCXFdGnHE0BV6ovxNrkYkEtQeItF8Uflu9XuGreNNWHuwShvwMV7G7wT8UF1HX07gonVHkTG5dugfcSHdCjRYB3jqqj1zvjPm8A-TIqk4pgV-tJDSXjQ9kxZgFF-orqnUMaa7slQZk9I1XPHrG=w1068-h802-no?authuser=0)
+
+
+
 
 ### 1D, depend on $O(n)$ subproblem
 
-![img](https://lh3.googleusercontent.com/6oUrB9T1_flXYOb1OPCi19SLIJCLPvnFDi6Y4xxPFZs5M9HixOns1BQggvBk5d92zHA4AABgymlJpRQvkC49PLWv9VfEQJfmWXmHvFf_mLvLuOYGVY5fZP5PotCh6bnfWa2ufDpBo0jurQljypX8G3bif906BP8XfzEsu92Ev3y_lv_P2IQ__fZZXVD5z0SY6Qamrb80BtqMlptN0HG1PS9xaeATqQ1jjDF_4F-9B25g3O-DgrEZbsZaNayTA1VfB9x-fpVbhpL_ALo-L7BrwklUaIXa9hIvQLRe0GMbB2odianzpxKXwR5u1AWglq4E95BgnoioZS8gseyl5NZJoSbWPtAcS6M9nnSuy2uYMMw1GUvm-RpbG12GySPLvJeTkDd4Bz_cLBwBg8jhqux0Bwjs_KIotx60kdj8-5A-F9Zu3ahZKeWMwN4kKcTvjPBN4_-AeRgVz2B5_M-_-Pj8eYMQNeBN8xL7LppjsWHbkV5536ErRvUsxC-r1Ctck5JB5FoVk67TwKuoIZF5fnZJfqijh-jRAj8PQd6R4PFt796FbmKRTHfq4FlSByicqE2sVAGx8lfCw0KSH4ziFy1tUN7fF7CzmTMg44um_flPif8aUhxMieznXI8EsJusLiDX6MmT3vPrR9g23IiR1VgWkYA3ES50uOguA48pv7UjjiOEGBFVQ_sKzj8DstE8=w1068-h802-no?authuser=0)
 
-![img](https://lh3.googleusercontent.com/earWR1Hb9E2qnWIaugEi68LpmajQPWIogPTihKGOr55QqO3RiqYZZHCQ_72Q9eGFkOvAswBpjMML55-5v7hHPlGTBf7yfOg10ZajMd6jIR6KoJLEyA5fD8MJcpkU_sEr49T9RbT-356nqYndHP3RaTBpDMenMPihOmzHdyKMirfRzRVq05Dpb1HHI2Z6gvUE1Gu3taiuh6PEdH02XfA8KLJK7cQ4FP-Vs9F1OcogP4HpRK-WRhf0UcOKjjtrK8NfMc1qeX1j7GfUxL_MWG-d__DyEIxt0jYedWiYO7-ziUqeZn9J-yo9t4j3vsYNrFDqpXGa0aUSWR9N7ZykCxeZMElUlofK2Nq5nkUqaJD3tyiNPQwLMb6CxSDaxgseT8fRLPYGbop7xNuRDW01GpC5NIlI4yPeTPenqdIkSON7CKLfevADuPiu548cWXsW_nmaFL0npctOWZ1SFARiPFr6OoKJQklvH3ilzre12CGb_JswDE7FLoai7h2CKb6FgmCiEJGpKPFED0SNSxVqBE2XCSltVK0zwQUSBCgcWo64Rk8PgprmSbKNteOlDjaxu6YxJt6_n64DWJKCQz7RqBIsm16M30xEVWsPLb2f4nDHC1E1sdAC0WDgg4yYoscTvnvmvS-VE1RCKJ_Ml5JH8me3tFBLi99teUKOO6xQT1tPsMPcKbxL2s0gWz5743DO=w1068-h802-no?authuser=0)
 
 #### 1D, 2 sets of sub-problems
 
@@ -139,17 +787,9 @@ for i in range(n):
 
 #### 1D, multiple states
 
-![img](https://lh3.googleusercontent.com/t8-DlGALJk2qmD9S1o71K-pKJ-WtQY8bMoVTeoLKhv05JVBnaSn_qGj5QKXxcJgyLQwnJnc0PxKuAtFyhNje2NfAaeIHypM0j0VN1Ml8cZwsiKqb1snkFl4jmlyPmD5P9-5g5Apa7x6jSo-2TwHhlA9Fyeo3WTXTEPDz9gl3Yh-GHj0EQ6d4GVr6-ZWufacZec9FdeIke6_TigMg60qukiclrP0Qweh7WyBHJGN_CzHduXArMdI9ERXLA07o021AMrY02H5RoCreWSTshltV3Joa3Q9K_G-uoe166ECqkbkADwI7WTYFvtJ7L7fKwFVsaSwdU-VyTDmmaJuAhCDUQo7M4Ezc8DOEmGcBziwZXh1MuvUMVZT0H2XJ4NsuBoTZKvowpNMVaJAtHFRza7DRsRQtfL-DHnNK770RbOtQ_6i4s8gPPdRXcjJ0AtQtm0gkY0zpTcLzW1Ev3vkON4hVv_wvvDqcruJvXTMCkWOyTxPOhkV_lVODm11-1qUf8c_WfAUTeyJgKTFpJ9eRsDNTqIBtuYybkLxT7gxZBS3nqSF1KRPu26HBCos45xK7RNFy6E4uDM4WEruhNJ_HQxdc_Cp1rV5t1Nh_dhIikxYYjmyOelmVMESWD0ZJ2eyjkWSxk8_GSUZk1YFmImql4-UDIFyEuFlXb-bGTMAjynfxG_o4Y6yKPhDCxqYFc4oB=w1068-h802-no?authuser=0)
-
 ### 2D
 
-![img](https://lh3.googleusercontent.com/mY0fD3DUCLerrRC9R5K3XqHYEew-zcXcBE5axZtRWZ_23OyqxkjNzKFM0uEOx-H5E_n_6XBfPMHH37gVtW9TZgepdkPGoDEawEU8S0ezHIE3A6DmsCT1U6gj909Kf1ahQymnCUdP-OiQuAy3y2G6X0y_-gE71TFFtriHF4TM3UkNUntRc2oPXep0djz8peeX1g9dJVFBtLAcPOrN_At2A9lcNIfwv52IAViaIJiDcxO26bl_WOBBHhX6GwWOWUEkWYzbVkigN0a1G7udsgGHQ5U0-WrtPsDO2QCEgID6KUvjkTr-pByoCbAIBxc_rOHVzYaEaJgTUJMzJqjvlvHeXnCC2t2oT65QBxAlDUx-NEymJFbqEB3eoHfE0cG-L6qe8R9ra40gFeTAmp34aefpEdgcMesvVNfXiYPtOfgg4Vg_MLvJRrOdJdf9QGq4auhM4NU7ev7TV4OZVoWutiZltbEkFFK34CSJNTtxxhrHUyfsZcqAryox0hdBI7DXbuyYrWj64EY5yUYRzu2YVQOrlofo1dhyRQ8IFPGT60SWUJ3GQoeK0stASV95UuvrYyu20sGRuJP0kEqd-oHJh9kK4yR20vLm9qPAJrjMQd-whFqvhe8E6TuYm7G-vUhQclb1UHjtgQsDS5by6EjX1iVevd3JCdzkUlHnhKjM55sijn5V5n4UFeJt65GVemya=w1068-h802-no?authuser=0)
 
-![img](https://lh3.googleusercontent.com/JSDxYM5P_MH055zMS1A59xsriiq7doOnS3rcyoDH91y95AAJxtrpBMdEUDC7IpNNW3Rs7xs8EH-hawzMN11vjeCh_FtQjcxV-sKqOKfm56FmduSn4XGbZ6TKJJVZ2K9tyHmy1DX9KrEnCbkywd7xaFNYkvAgMiVoljKAs3q1UYuaWr-uDuOLcIk0dpXL13ShBbLua2FM5LWIVGSyJbn0H6fOKVMrqbDAxh50y6X-ySus1mKkaLHtX6RM2jh-I-QP1mJjjj3fzeE0AL0i2mLpUkSgI35aU4dYl5cUqoHb_tysd_TyMjWS6VYLp2vhJ1GF3xOgzorwSGdup-mqgz5VMnNMrcucS3M3gjG9ZyOiv7iObqhsYfrfh7dr3SoBx72XcWj36cYAu3GhfA7wt5bDCNFUw9mtsg1FM1WPBYHPNJllQvOr8iq3BKI_U_s2wX_MtfxM1en0JFxQ2lnsvqCal4JlwmOING3pNsv3c0c-BXwxOrCt8EdwqZ1rgXWmcnJEL_j1lozcDwUvlwWETyss2yEqxkEIJejSE74V_Q0AvvWN_JKc4-jXSVzGlcaTAPR36ReMSSiEU1A9npLFS6WtD_hIQcvZBYqVjDsU6gaKvqlKpxCDxaFLyOAxZmMbcXqqvULgfmarOJXVGQwJ9gBtAwBWNRgoDw-mlTimlk_7e_LmwAAlk_MnlcBwMGyB=w1068-h802-no?authuser=0)
-
-![img](https://lh3.googleusercontent.com/WPfaeEpIDElMluzwr37muFJ4SsJO4YIfWvnLd2xVwgayM_Id79PZ331b7aSO_6l9s0U4hO3YkWSuj549D1T7gjUXJ64_4s708mm10AnLvvIijgEeCA8fK-cxZTrjZxnai07J7MihZ_tuCH34-mlhIwsJibDY05wuf_jOmI67syZECTKdnVoW3OASOj0tJYIeNK2Qwg9jD98UJphp8k-2DcoftRzRYdjcPIIVDC-pL4Qwgpd0zJjffqQ5SBF9fFt7YlnEBmJbbkI0Zx0A6XxHheims4fIUEP1A4_GbgvyCVqI0D9X0rcLjaaXeTUE47VpCjFi9W7tILj0zBg7k__eHjoERYhbgc8SeHbuwZ7llXJ7qHFKI0-5yPEB2m0glya7kmb9rWc2O7hTAwitdKc0ekDoYv_KOmEP9UUWRDlzeYZmO2zSDTFqQXvIwPkYouIANT87RI0D9vhRTm6ig6BkPYs4Pis6hGf49hGvNrWFMXdhSXlu1e4RVvMxtoLwblBVUQry7FQgGr1-q4JLNiEuM1rCiBis2W-w66wkMPWl1EvxNP3DPbtkf2_Y5jxHwifas0RxT4etDfht5Cp2NWwWHtDbfthzO-Nkei3ckFJsdskZQOE--2QGS_DVopouEKlt1Sy4VE5V3-aMF-0dr0djiUJbJ3CI9ARk3q8mt1bAX8uCFEePWRxh5Id8otwR=w1068-h802-no?authuser=0)
-
-![img](https://lh3.googleusercontent.com/zqDSmcl7dkDDSTHwUzt-O_vj_INOOMARb7x2t-eSQPsABAYqUDChC0nu6SshP4G6SR9Iue-Gv2Zz9kPzKRZ2r9BckrZ6MOK70YZMMjaVjcHmADHYQVitX45pB4mviA87KuhWvM0Nt2xocur-gcrg9ZtHWbRzWIJQ_ro4rrVFh2_KIpeJIIP8R5-7wsM-fVfuR77KhNk1Dp7_VV6kzONjMRceOmmB2WRe4zg-uXgeOshXiHfttOXnieXmHd82ijbfQWBcio6mrrop0SrAisQzBamhe_T0Yh2FMP7rnEnHEPi793N1RmvYtqE5-fDvsEjw_SRSzB3V5Mp0oW0Nz4ATpYbSGlJ4ogdri0n-fQs1r92f8ZaX1JQOgINbpJfvciGJqeCGYncMo5DQKOlclN0XOc1bdpy5Kj2MIHs8YUtHMPiVmQrSshma3YrV-TjjCKuV4Q4gfvJUjcgpdIF-7-8ilPvf0DHOb2xSqDeGhkKO3ECEQnSQUoZeawlqpm8JzafaxmP3GvZisIeKybZ56-e4-1nWudQv1Xhgi0Gbzn6_63Ke4BZ8RWWUlfSxmd1qLmARlMqQultUzh2QBe2CPpGImNXOpWw1fP5EhWDxyjuOrtXtpbreT-NCd8SPPFG2VBT_uGnoenJTrZqfs4k9IVLvM4N-roFmvEtyGLRh0mMHM2QhnelLV3oZylfW9TFd=w1068-h802-no?authuser=0)
 
 ## Search
 
@@ -218,7 +858,7 @@ def search(A, l, r):
 
 [TODO]
 
-![img](https://lh3.googleusercontent.com/Jj46SK33fgXW1K55p7HRtkhc3UQCRa9WnMGtaoda1A6WULM4Q5agIE0gMkKHcc7Ccj_ntxWhGbJ_14qbWA45ottfV9Sg7iCujSBnhSw_BEnOfxbvMLpLeOpl6e3HsSIsBGogVsQBjO9Xm2L31NOprTilpzzHh-vf7hQ-uMvhOTNakaC8oyEUd9PvmyBFfInEgT0pLTxSXlOEiskn1VSoRTXbAc-_-gqNWR3O8I5JnlpMoBbfkzj6zemrAwCQUadxjDs4c7x3bjg2f3Hnx6Y2rbHhDXvrDur1r4umU7nMXI1am-0McrMs5ol6kFFIRRRRIRbRGSqBsuPaCZn8pVkReTtjOTPKbfKYzEKZWFBWWu6paQtLTwOz6IxJ85hNxYQADmWev8R4eO-bt6PAXhxX9O7wv5SuwuRvGwLtiC9r_aij3x1-ypZ0Dx_JN2LuWSZqkhWeombhSpqwo6MH7Og6nKFymV46enJ1pw_uRZyafAjAwoganOVHQZxsunyaxTzIC5sa5Lre7xCkcRs_YQJIAUj6EVCox1E18_sabIpsGdDEDGrIvszjNSEjOf2Wz2GlT1nFVwgVU4lfsGA0phqfq1HJLYwPfyI57X6XBXn1zeFaaDQMKg-yTdiF4tyVEQZhfR-Cgp_KXR8JONjP68sHb3kooFRgeb6heId8lAT5CROQvh64ghpL1YDYqPy_=w1068-h802-no?authuser=0)
+
 
 
 
@@ -226,7 +866,7 @@ def search(A, l, r):
 
 ### DFS & BFS
 
-+ grid:
+#### Grid
 
 ```python
 if not A return False
@@ -251,8 +891,8 @@ def BFS(i,j):
     seen=()
     queue = deque((i,j))
     while queue:
-        cur = queue.popleft()
-        for d in directions:
+        r,c = queue.popleft()
+        for d in [(r+1,c),(r-1,c),(r,c+1),(r,c-1)]:
             if illegal(d): 
                 seen.append(d) #prevent reuse
                 continue
@@ -275,7 +915,7 @@ def earlyStop(i,j):
 
 
 
-#### Example
+##### Example
 
 + 79 word search in grid - DFS with backtracking
 
@@ -327,6 +967,113 @@ def earlyStop(i,j):
       if A[i][j]=='0': return True
       return False
       
+  ```
+
++ 542 01 matrix BFS
+
+  ```python
+  n,m=len(M),len(M[0])
+  queue=deque((i,j,0) for i in range(n) for j in range(m) if M[i][j]==0)
+  ans=[[0 for _ in range(m)] for _ in range(n)]
+  while queue:
+      r,c,d = queue.popleft()
+      for dr,dc in [(0,1),(0,-1),(-1,0),(1,0)]:
+          i,j=r+dr, j+dj
+          if 0<=i<n and 0<=j<m and matrix[i][j]==1:
+              matrix[i][j]=0
+              queue.append((i,j,d+1))
+  return ans
+          
+  ```
+
++ 37 sudoku solver
+
+  ```python
+  def islegal(i,j,num):
+      if num in board[i]: return False
+      for row in board: 
+          if num==row[j]: return False
+      for row in board[i//3*3:i//3*3+3]:
+          if num in row[j//3*3:j//3*3+3]: return False
+     	return True
+  
+  def findVacant():
+      for i in range(9):
+          for j in range(9):
+              if board[i][j]==".": return i,j
+      return -1,-1
+  
+  def canSolve():
+      i,j=findVacant()
+      if i==-1 and j==-1: return True #no more vacancy
+      
+      for num in range(1,10):
+          if islegal(i,j,str(num)):
+              board[i][j]=str(num)
+              if canSolve(): return True
+              board[i][j]='.' #backtrack
+      return False
+  
+  canSolve()
+              
+  ```
+
+  
+
+#### Combination/ Permutation
+
+```python
+def DFS(n,item,result):
+    if illegal: return
+    if found: result.append(item)
+    for cur in curChoices:
+        DFS(n-1,item+cur,result)
+    return
+
+def BFS(items):
+    if not items: return []
+    for item in items:
+        temp = []
+        for cur in curChoices:
+            temp.append(item+cur)
+        ans = temp
+   return ans
+
+def permute(nums):
+    if len(nums)<=1: return [nums]
+    res=[]
+    for i,num in enumerate(nums): #pick one to start
+        for right in permute(nums[0:i]+nums[i+1:]): #recurse on all remaining nums
+            res.append([num]+right)
+    return res
+
+
+def combine(items, n):
+    if n==1: return [[item] for item in items]
+    if len(items)<n: return[]
+    res=[]
+    for i,item in enumerate(items):
+        for right in combine(items[i+1:],n-1):
+            res.append([item]+right)
+    return res
+```
+
+##### Examples
+
++ 22 Generate parentheses (n pairs)
+
+  ```python
+  dfs(l,r,item,result):
+      if r<l: return #illegal parantheses
+      if l==0 and r==0: result.append(item) #legal final result
+      if l>0: dfs(l-1,r,item+'(',result)
+      if r>0: dfs(l,r-1,item+')',result)
+  
+  if n==0:
+      return []
+  result=[]
+  dfs(n,n,'',result)
+  return result
   ```
 
   
@@ -431,5 +1178,420 @@ def f(p, q):
       
   ```
 
+
+
+
+## Graph
+
+### Convert List of edges to Adjacency List
+
+```python
+graph = defaultdict(list)
+for edge in edges:
+    graph[edge[0]].append(edge[1])
+    graph[edge[1]].append(edge[0]) # undirected
+```
+
+
+
+### Find Cycle
+
++ With backtracking
+
+```python
+def hasCycle(cur, graph, path, visited):
+    if path[cur]: return True
+    if visited[cur]: return False
+    path[cur]=True
+    ret = False
+    for child in graph[cur]:
+        ret = hasCycle(child, graph, path)
+        if ret: break #not return directly because we need to backtrack
+    path[cur] = False #backtrack
+    visited[cur] = True
+    return ret
+
+def inCycle(s,t, visited=set()):
+    if s in visited: return False
+    visited.add(s)
+    if s==t: return True
+    return any(inCycle(nei, t) for nei in graph[s])
+
+def findCycle(cur, path):
+    if cur in path: return path
+    if cur in visited: return []
+    visited.add(cur)
+    path.append(cur)
+    ret = []
+    for child in graph[cur]:
+        ret = findCycle(child, path)
+        if ret: return ret
+        return ret
+```
+
+
+
+### Topological Sort
+
+```python
+class GNode:
+    def __init__(self):
+        self.inDegrees=0
+        self.outNodes=[]
+
+graph=defaultdict(GNode)
+totalDeps = 0
+for first, second in prerequisites:
+    graph[first].outNodes.append(second)
+    graph.second.inDegrees+=1
+    totalDeps+=1
+
+# find no inDegree nodes to start with
+start = deque()
+for index, node in graph.items():
+    if node.inDegrees ==0:
+        start.append(index)
+        
+res=[]
+while start:
+    cur = start.pop()
+    res.append(cur)
+    for child in graph[cur].outNodes:
+        graph[child].inDegrees-=1
+        removedEdges+=1
+        if graph[child].inDegrees=0:
+            start.append(child)
+
+return res
+```
+
+### Graph
+
+```python
+visited=set()
+ans
+for node in nodes:
+    if node in visited: continue
+    dfs(node)
+    f(ans)
+return ans
+
+def dfs(node):
+    if node in visited: return
+    visited.add(node)
+    for child in node.children:
+        dfs(child)
+        
+def dfsFindPath(s,t,res,visited):
+    # -1: no path
+    if s in visited: return -1
+    if s==t: return res
+    if not graph[s]: return -1 #s has no children
+    visited.add(s)
+    temp=res
+    for child in graph[s]:
+        if not child: temp=-1
+        temp=dfsFindPath(child,t,res+[child], visited)
+        if temp!=-1: break
+    return temp
+
+def bfs(node):
+    queue = deque(node)
+    while queue:
+        cur = queue.pop()
+        for child in cur.children:
+            visited.add(child)
+            f(child)
+            queue.append(child)
+
+def bfsFindShortestPath(s,t):
+    q=[(s,0)]
+    visited=set()
+    while q:
+        cur, d = q.pop(0)
+        visited.add(cur)
+        if cur==t: return d
+        for child in cur.children:
+            if legal:
+                q.append((child, d+1))
+    return -1
+```
+
+##### Example
+
++ 547 friend circles (adjacency matrix)
+
+  ```python
+  if not M: return 0
+  n = len(M)
+  visited = [False]*n
+  ans = 0
+  for i in range(n):
+      if visited[i]: continue
+      dfs(M,i,n,visited)
+      ans+=1
+  return ans
+  
+  def dfs(M,cur,n,visited):
+      if visited[cur]: return
+  	visited[cur] = True
+      for i in range(n):
+          if M[cur][i] and not visited[i]:
+              dfs(M,i,n,visited)
+  ```
+
+#### Bipartite Graph
+
+```python
+color={}
+for node in range(len(graph)):
+    if node not in color:
+        stack=[node]
+        color[node]=0
+        while stack:
+            cur=stack.pop()
+            for child in graph[cur]:
+                if child not in color:
+                    stack.append(child)
+                    color[child]=color[cur]^1
+                elif color[cur]==color[child]: 
+                    return False
+        return True
+```
+
+
+
+### Union Find
+
+```python
+def find(x):
+    while parent[x]!=x:
+        x=parent[x]
+    return x
+
+def union(x,y):
+    parent[find(x)] = find(y)
+    
+    
+def DSU: #for set size of max 1001
+    def __init__(self):
+        self.par=range(1001)
+        self.rank=[0]*1001
+        
+    def find(self,x):
+        if self.par!=x:
+            # path compression
+            self.par[x]=self.find(self.par[x])
+        return self.par[x]
+    
+    def union(self,x,y):
+        #xr, yr: rank of parent (depth of tree)
+        xr,yr=self.find(x), self.find(y)
+        if xr==yr: 
+            return False
+        elif self.rank[xr]<self.rank[yr]:
+            self.par[xr]=yr
+        elif self.rank[xr]>self.rank[yr]:
+            self.par[yr]=xr
+        else: 
+            self.par[yr]=xr
+            self.rank[xr]+=1
+        return True
+    
+    def unionWithoutRank(self,x,y):
+        self.par[self.find(x)]=self.find(y)
+```
+
+
+
+## DS Implementation
+
+### ArrayList
+
++ Data: array `data[]`
++ Initialization: capacity
++ Operations: access, length, add, remove, resize. Always check bound (length, capacity)
+
+### Stack
+
++ push, pop, peek $O(1)$
++ usage: recursion, DFS
+
+### Queue
+
++ add (offer), remove(poll), peek (element)
++ usage: BFS, multi task queue
+
+```java
+public boolean add(String item){
+    if(size==capacity){
+        Exception
+    } else{
+        elementData[rear] = item;
+        rear = (rear + 1) % capacity; //circular use of array
+        size++;
+        return true;
+    }
+}
+```
+
++ Implement queue using 2 stacks
+
+```java
+public void push(int x){
+    stack2.push(x);
+}
+public int pop(){
+    reorder();
+    return stack1.pop()
+}
+public int peek(){
+    reorder();
+    return stack1.peek();
+}
+public void reorder(){
+    if (stack1.isEmpty){
+        while (!stack2.isEmpty()){
+            stack1.push(stack2.pop());
+        }
+    }
+}
+```
+
++ Max Stack
+
+```java
+class MaxStack{
+    Stack<Integer> elements;
+    Stack<Integer> maxElements;
+    public MaxStack(int capacity){
+        elements = new Stack<>(capacity);
+        maxElements = new Stack<>(capacity);
+    }
+    public int size(){return elements.size()}
+    public int pop(){
+        maxElements.pop();
+        return elements.pop();
+    }
+    public int max(){return maxElements.peek()}
+    public void push(int value){
+        int curMax;
+        if (elements.size()==0){
+            curMax = Integer.MIN_VALUE;
+        }else{
+            curMax = maxElements.peek();
+        }
+        elements.push(value);
+        if(curMax>value){
+            maxElements.push(curMax);
+        }else{
+            maxElements.push(value);
+        }
+    }
+    public int peek(){
+        return elements.peek();
+    }
+}
+```
+
++ MaxQueue
+
+```python
+from collections import deque
+class MyQueue:
+    # Initialize your data structure here. 
+    def __init__(self):
+        self.queue = deque()
+        self.maxqueue = deque()
+        self.maxPos = 0
+    
+    # Push element x to the back of queue
+    def push(self, x):
+        if self.queue and x>=self.maxqueue[0]:
+            while self.maxqueue:
+                self.maxPos+=1
+                self.maxqueue.popleft()
+        self.maxqueue.append(x)
+        self.queue.append(x)
+        return  
+    
+    # Removes the element from in front of queue and returns that element. 
+    def pop(self):
+        if not self.queue: return -1
+        if self.maxPos==0:
+            self.maxqueue.popleft()
+        else:
+            self.maxPos-=1
+        return self.queue.popleft()
+    
+    
+    # Get the front element
+    def peek(self):
+        return self.queue[0]
+    
+    
+    # Returns whether the queue is empty
+    def empty(self):
+        return not self.queue
+        
+    
+
+    # Returns the maximal value in this queue
+    def max(self):
+        if not self.maxqueue:
+            return -1
+        return self.maxqueue[0]
+
+def check(q):
+    res = q.max()
+    ans = max(list(q.queue))
+    print(list(q.queue),res, res==ans)
+    return res==ans
+    
+# q = MyQueue()
+# l = [1,2,5,5,4,5]
+# for i in l:
+#     q.push(i)
+#     check(q)
+# while q.queue:
+#     q.pop()
+#     check(q)
+```
+
+
+
+### HashMap
+
++ put, get, containsKey, remove, keySet, entrySet
++ Collision:
+  + Avoid: expand space (when load factor > c)
+  + resolve collision: open hashing (linked list), closed hashing (next available linear scan)
+
+
+
++ hashCode: hash function that calculates hash value
+
+  ```python
+  def hashCode()
+      if not attr: ...
+      return f(attr)
+  ```
+
   
 
++ equals(): check whether two objects are the same
+
+  + no two equal keys in one hashmap
+  + when equals() is overridden, hashCode should be overridden accordingly
+
+  ```python
+  def equals(self, obj):
+      if self==obj: return True
+      if not obj || class(obj)!=class(self): return False
+      # for all attributes
+      if self.attr and obj.attr and self.attr!=obj.attr: return False
+      ...
+      return True
+  ```
+
+  
