@@ -1,3 +1,5 @@
+
+
 ## Tools
 
 ### Math
@@ -632,7 +634,7 @@ def combination(idx, prevPath, res):
         res.append(prevPath)
         return
 
-    for nextIdx in nextSteps: # items to the right, or current children, e.g. range(idx, len(items))
+    for nextIdx in nextSteps: # items to the right, or current children, e.g. range(idx, len(items)), must include current idx
         cur = items[nextIdx]
         combination(nextIdx+1, prevPath+cur, res)
     return
@@ -797,17 +799,28 @@ for i in range(n):
 
 + Time complexity: $O(log(r-1)*(f(m)+g(m)))$
 + returns left most element where g(m) holds
++ Upper bound: `m=m=l+(r-l)//2;l=m+1 `
++ Lower bound: `m=m=l+(r-l+1)//2;r=m-1`
 
 ```python
+### Upper bound (smallest number >= result)
 def search(A, l, r):
      while l<r: # l<=r for [l,r]
             m=l+(r-l)//2 #to prevent overflow
-            if f(m): return # early stopping critera
-            if g(m): #interface critera
+            if A[m]==target: return # early stopping critera
+            if A[m]>target: #interface critera
                 r=m # r=m-1 for [l,r]
             else:
-                l=m+1
-     return if f(l).. # or not found
+                l=m+1 #always move left up, upper bound
+     return l  # or not found
+
+### Lower bound (biggest number <= result)
+def search(A,l,r):
+    while l<r:
+    	m=l+(r-l+1)//2
+        if A[m]>target: r=m-1 #move right down, lower bound
+        else: l=m
+    return l #always return l
 ```
 
 #### Examples - simple g(m)
@@ -853,6 +866,37 @@ def search(A, l, r):
           else: l=m+1
       return l
   ```
+
++ Search in rotated array: good to draw
+
+  <img src="/home/arkyyang/files/notes/notes/attachments/image-20210118205856339.png" alt="image-20210118205856339" style="zoom:50%;" />
+
+  ```python
+  m = l+(r-l)//2
+  if A[l]>A[m]:
+      if A[m]<target<A[r]: l=m+1
+      else: r=m
+  else:
+      if A[m]>target>A[l]: r=m
+      else: l=m+1
+  return A[l]==target
+  ```
+
++ sqrt
+
+  ```python
+  def sqrt(x): #floor (biggest number <= result)
+      if x<=1: return x
+      l, r = 0, x//2+1
+      while l<r:
+          m = l+(r-l+1)//2 #here we want the lower bound(floor)
+          if m*m==x: return m
+          if m*m<x:l=m
+          else: r=m-1
+      return l
+  ```
+
+  
 
 #### Examples - complex g(m)
 
@@ -1082,7 +1126,82 @@ def combine(items, n):
 
 ## Binary Tree
 
-### One root
+### Basics
+
++ Depth (of node): # edges to root
++ Height: longest path to leaf
++ Types:
+  + ![image-20210118200855665](/home/arkyyang/files/notes/notes/attachments/image-20210118200855665.png)
+
++ Properties:
+  + at most $2^i$ nodes at level $i$
+  + at most $ceil(2^{k+1})-1$ nodes for height $k$ tree
+  + Complete tree: height $\log_2{(n+1)}-1$ for $n$ nodes
+  + parent index $k$, children $2k+1, 2k+2$
++ Traversal:
+  + BFS: LevelOrder
+  + DFS: pre/ in/ post  order
+
+### LevelOrder Traversal
+
+```python
+queue=deque([root])
+while queue:
+    cur = queue.popleft()
+    f(cur)
+    if cur.left: queue.append(cur.left)
+    if cur.right: queue.append(cur.right)
+```
+
+<img src="/home/arkyyang/files/notes/notes/attachments/image-20210118201529133.png" alt="image-20210118201529133" style="zoom:25%;" />
+
+#### LevelOrder record level
+
+```python
+### two queues: empty a queue when finish a level
+queue=deque([root])
+level=0
+while queue:
+    level+=1
+    queue2 = deque()
+    while queue:
+        cur = queue.popleft()
+        f(cur)
+        if cur.left: queue2.append(cur.left) #new level to new queue
+    	if cur.right: queue2.append(cur.right)
+    queue=queue2
+    
+### add null at end of each level
+queue=deque([root,None])
+level=0
+while queue:
+    cur = queue.popleft()
+    if not cur: #level ends
+        level+=1
+        queue.append([None])
+    else:
+        f(cur)
+        if cur.left: queue.append(cur.left)
+        if cur.right: queue.append(cur.right)
+            
+### count size
+queue=deque([root])
+level, curLevelNum=0,1
+while queue:
+    level+=1
+    nextLevelNum=0
+    while curLevelNum!=0:
+        curLevelNum-=1
+        cur = queue.popleft()
+        f(cur)
+        if cur.left: queue.append(cur.left), nextLevelNum++1
+        if cur.right: queue.append(cur.right), nextLevelNum++1
+    curLevelNum = nextLevelNum
+```
+
+### DFS
+
+#### One root
 
 ```python
 def f(root):
@@ -1093,7 +1212,7 @@ def f(root):
     return g(root, l, r)
 ```
 
-#### Examples
+##### Examples
 
 + 104 max depth
 
@@ -1116,6 +1235,31 @@ def f(root):
       if not root.left: return 1+r
       if not root.right: return 1+l
       return min(l,r)+1
+  
+  ### or:
+  def minDepth(root):
+      if not root: return 0
+      if not root.left and not root.right: return 1
+      if root.left and root.right: 
+          return min(minDepth(root.left),minDepth(root.right))+1
+      if root.left: return minDepth(root.left)+1
+      if root.right: return minDepth(root.right)+1
+  
+  ### Faster with BFS
+  if not root: return 0
+  queue=deque([root])
+  minDepth=0
+  while queue:
+      minDepth+=1
+      queue2 = deque()
+      while queue:
+          cur = queue.popleft()
+          if not cur.left and not cur.right:
+              return minDepth
+          if cur.left: queue.append(cur.left)
+          if cur.right: queue.append(cur.right)
+      queue=queue2
+  return minDepth
   ```
 
 + 112 Path Sum
@@ -1127,9 +1271,23 @@ def f(root):
       l = pathSum(root.left, sum-root.val)
       r = pathSum(root.right, sum-root.val)
       return l or r
+  
+  ### Print results
+  def pathSum(root, sum, path, results):
+      if not root: return
+      if not root.left and not root.right: 
+          if root.val==sum:
+              path.append(root.val)
+              results.append(path.copy())
+              path.pop()
+      	return
+      path.append(root.val)
+      pathSum(root.left, sum-root.val, path, results)
+      pathSum(root.right, sum-root.val, path, results)
+      path.pop()
   ```
 
-### Two roots
+#### Two roots
 
 ```python
 def f(p, q):
@@ -1140,7 +1298,7 @@ def f(p, q):
     return g(p,q,l,r)
 ```
 
-#### Examples
+##### Examples
 
 + 100 Same Tree
 
@@ -1164,7 +1322,7 @@ def f(p, q):
       return p.val==q.val and l and r
   ```
 
-+ 951 Flip equivilant binary trees (can either flip or not flip)
++ 951 Flip equivalent binary trees (can either flip or not flip)
 
   ```python
   def f(p,q):
@@ -1177,6 +1335,55 @@ def f(p, q):
       return p.val==q.val and ((l1 and r1) or (l2 and r2))
       
   ```
+
+### BST
+
++ Find:
+
+```python
+def find(root, target):
+    cur = root
+    while cur:
+        if cur.val==target: return True
+        if value<target: cur=cur.left
+        else: cur=cur.right
+    return False
+
+def add(root, value):
+    if not root: root=TreeNode(value), return True
+    cur = root
+    while cur:
+        if cur.val==value: return False
+        if value<cur.val:
+            if cur.left: cur=cur.left
+            else: cur.left=TreeNode(value), return True
+        else:
+            if cur.right: cur = cur.right
+            else: cur.right=TreeNode(value), return True
+    return False
+
+### Remove: 
+#if only one child: replace cur with that child
+#if two childs, use right most node in left tree, or left most node in right tree
+def remove(node): #returns head after removal
+    if not node.left and not node.right: return None
+    if not node.left: return node.right
+    if not node.right: return node.left
+    node.val = findAndRemove(node)
+    return node
+
+def findAndRemove(node):
+    if not node.left.right:
+        result = node.left.val #copy left to cur
+        node.left = node.left.left #link to left's child
+        return result
+    node = node.left
+    while node.right.right:
+        node = node.right
+    result = node.right.val
+    node.right = node.right.left
+    return result
+```
 
 
 
@@ -1594,4 +1801,29 @@ def check(q):
       return True
   ```
 
-  
+
+### Binary Tree
+
+```java
+class TreeNode{
+    int val;
+    TreeNode left;
+    TreeNode right;
+    
+    public TreeNode(int val_){
+        val=val_;
+        left=null;
+        right=null
+    }
+}
+```
+
+### Graph
+
+```java
+class GraphNode{
+    int val;
+    List<GraphNode> neighbors;
+}
+```
+
