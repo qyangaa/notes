@@ -1212,6 +1212,44 @@ def f(root):
     return g(root, l, r)
 ```
 
+#### Find Path
+
+##### Recursion
+
+```python
+def findPath(root, path, res):
+    if not root: return
+    path += root.val
+    if not root.left and not root.right: 
+        res.append(path)
+    else:
+        findPath(root.left, path, res)
+        findPath(root.right, path, res)
+path, res=[], []
+findPath(root, path, res)
+return res
+```
+
+##### Iteration
+
+```python
+if not root: return []
+res, stack = [], [[root, [root.val]]]
+while stack:
+    cur, path = stack.pop()
+    if not cur.left and not cur.right:
+        res.append(path)
+    if cur.left:
+        stack.append([cur.left, path+[cur.left.val]])
+    if cur.right:
+        stack.append([cur.right, path+[cur.right.val]])
+return res
+```
+
+
+
+
+
 ##### Examples
 
 + 104 max depth
