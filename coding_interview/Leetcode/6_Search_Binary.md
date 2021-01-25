@@ -385,3 +385,216 @@ class Solution:
                 
 ```
 
+
+
+### 50. Pow(x, n)
+
+Medium
+
+Implement [pow(*x*, *n*)](http://www.cplusplus.com/reference/valarray/pow/), which calculates *x* raised to the power *n* (i.e. xn).
+
+ 
+
+**Example 1:**
+
+```
+Input: x = 2.00000, n = 10
+Output: 1024.00000
+```
+
+**Example 2:**
+
+```
+Input: x = 2.10000, n = 3
+Output: 9.26100
+```
+
+**Example 3:**
+
+```
+Input: x = 2.00000, n = -2
+Output: 0.25000
+Explanation: 2-2 = 1/22 = 1/4 = 0.25
+```
+
++ Recursion:
+
+  + ```python
+    class Solution:
+        def myPow(self, x: float, n: int) -> float:
+            if n==1: return x
+            if n==0: return 1
+            if n<0: return 1/self.myPow(x,-n)
+            sqrt = self.myPow(x,n//2)
+            if n%2==1:
+                return sqrt*sqrt*x
+            else:
+                return sqrt*sqrt
+    ```
+
+  + ```python
+    N = n
+    if N<0: x,N = 1/x, -N
+    ans, curProd = 1, x
+    while N>0:
+        if N%1==1: ans*=curProd
+        curProd*=curProd
+        N=N//2
+    return ans
+    ```
+
+### 367. Valid Perfect Square
+
+Easy
+
+Given a **positive** integer *num*, write a function which returns True if *num* is a perfect square else False.
+
+**Follow up:** **Do not** use any built-in library function such as `sqrt`.
+
+**Example 1:**
+
+```
+Input: num = 16
+Output: true
+```
+
+**Example 2:**
+
+```
+Input: num = 14
+Output: false
+```
+
+ 
+
+```python
+class Solution:
+    def isPerfectSquare(self, num: int) -> bool:
+        if num<=1: return True
+        l,r = 0, num//2+1
+        while l<r:
+            m=l+(r-l)//2
+            sqr = m*m
+            if sqr == num:
+                return True
+            if sqr>num:
+                r=m
+            else:
+                l=m+1
+        return False
+```
+
+
+
+### 719. Find K-th Smallest Pair Distance
+
+Hard
+
+Given an integer array, return the k-th smallest **distance** among all the pairs. The distance of a pair (A, B) is defined as the absolute difference between A and B.
+
+**Example 1:**
+
+```
+Input:
+nums = [1,3,1]
+k = 1
+Output: 0 
+Explanation:
+Here are all the pairs:
+(1,3) -> 2
+(1,1) -> 0
+(3,1) -> 2
+Then the 1st smallest distance pair is (1,1), and its distance is 0.
+```
+
+
++ Heap: time limite exceeded
+```python
+class Solution:
+    def smallestDistancePair(self, nums: List[int], k: int) -> int:
+        nums.sort()
+        n = len(nums)
+        heap=[]
+        for i in range(0, n-1):
+            for j in range(i+1, n):
+                heapq.heappush(heap, nums[j]-nums[i])
+        
+        while k>1:
+            heapq.heappop(heap)
+            k-=1
+        return heapq.heappop(heap)
+```
+
++ TODO: watch 
+
+### 287. Find the Duplicate Number
+
+Medium
+
+Given an array of integers `nums` containing `n + 1` integers where each integer is in the range `[1, n]` inclusive.
+
+There is only **one repeated number** in `nums`, return *this repeated number*.
+
+ 
+
+**Example 1:**
+
+```
+Input: nums = [1,3,4,2,2]
+Output: 2
+```
+
+**Example 2:**
+
+```
+Input: nums = [3,1,3,4,2]
+Output: 3
+```
+
+**Example 3:**
+
+```
+Input: nums = [1,1]
+Output: 1
+```
+
+**Example 4:**
+
+```
+Input: nums = [1,1,2]
+Output: 1
+```
+
+ 
+
++ Sort: nlog(n), we want to do better than this
+
++ set: space n, time n
+
+  + ```python
+    numsSet = set()
+    for i in nums:
+        if i in numsSet: return i
+        else:
+            numsSet.add(i)
+    return
+    ```
+
+  + 
+
++ Each index except for one appears among the numbers. The list can be seen as an index-> nums[index] graph. And the repetition can be found at the entrance of the cycle. To find entrance of cycle:
+
+  + ```python
+    fast=slow = nums[0]
+    while True:
+        fast = nums[nums[fast]]
+        slow = nums[slow]
+        if slow==fast: break
+    slow = nums[0]
+    while slow!=fast:
+        slow = nums[slow]
+        fast = nums[fast]
+    return fast
+    ```
+
+  + 

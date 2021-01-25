@@ -45,6 +45,12 @@ l.pop(idx)
 
 
 
+### Set
+
+```python
+set2 & set1 # intersection
+```
+
 
 
 ### Reverse Range:
@@ -94,6 +100,7 @@ item = heapq.heappop()
 size=len(heap)
 peakItem = heap[0]
 heapq.heappush(heap, (l.val,id(l), l)) # use id() if need to push non-comparable object
+heapq.nsmallest(n, iterable, key=None)
 ```
 
 
@@ -397,6 +404,24 @@ def goto(head, index):
       slow = slow.next
   ```
 
++ Find cycle entrance
+
+  ```python
+  fast=slow=head
+  while fast: # slow-fast until meet
+      if not fast.next: return False
+      if slow==fast: break
+      slow=slow.next
+      fast = fast.next.next
+  fast = head
+  while slow!=fast: # slow-slow until meet
+      slow = slow.next
+      fast = fast.next
+  return fast
+  ```
+
+  
+
 ### List Modification
 
 + If need remove, stand at pre, look at pre.next and pre.next.next
@@ -593,9 +618,9 @@ return helper(n,m)
   return newHead
   ```
 
-  
++ 
 
-  
+
 
 ### Permutation
 
@@ -735,6 +760,90 @@ return res
 
 
 
+## Recursion - DP
+
+#### Subset Sum
+
++ true or false:
+
+  + Recursion
+
+  ```python
+  def subsetSum(nums, target, index):
+      if target==0: return True
+      if index>=len(nums): return False
+      cur = target - nums[index]
+      return subsetSum(nums, target-cur, index+1) or subsetSum(nums, target, index+1)
+  ```
+
+  + DP: `[1,2,4],5`
+
+    + -> remaining
+    + v: use numbers until index
+    + content: whether has sum
+
+    |        | 0    | 1    | 2    | 3              | 4    | 5             |
+    | ------ | ---- | ---- | ---- | -------------- | ---- | ------------- |
+    | 0      | T    | F    | F    | F              | F    | F             |
+    | 1`[1]` | T    | T    | F    | F              | F    | F             |
+    | 2`[2]` | T    | T    | T    | (`[1][3-1]`) T | F    | F             |
+    | 3`[5]` | T    | T    | T    | T              | F    | (`[2][5-5]`)T |
+
+    
+
+  ```python
+  def subsetSum(nums, target):  
+      dp = [[False for _ in range(target)]for _ in range(nums)]
+      dp[0][:]=[True for _ in range(target)]
+      dp[:][0]=[False for _ in range(nums)]
+      for index in range(1,nums):
+          for curTarget in range(1,target):
+              cur = nums[index]
+              if curTarget >= cur:
+                  dp[index][target]=dp[index-1][target] or dp[index-1][target-cur]
+              else:
+                  dp[index][target]=dp[index-1][target]
+      return dp[-1][-1]
+      
+      
+  # Reduce space use
+  def subsetSum(nums, target):  
+      dp = [False for _ in range(target)]
+      dp[0] = True
+      for index in range(1,nums):
+          for curTarget in range(1,target):
+              cur = nums[index]
+              if curTarget >= cur:
+                  dp[target]=dp[target] or dp[target-cur]
+              else:
+                  dp[index][target]=dp[target]
+      return dp[-1]
+  ```
+
+  
+
++ Save Paths:
+
+  + Recursion
+
+  ```python
+  def subsetSum(nums, target, index=0, path=[], res):
+      if not nums or index==len(nums):
+          return
+      if target==0:
+          res.append(path.copy())
+      	return
+      cur = nums[index]
+      if target>cur:
+          path.append(cur)
+          subsetSum(target-cur, index+1, path, res)
+          path.pop()
+      subsetSum(target, index+1, path, res)
+  	return    
+  ```
+
+  
+
 
 
 ## DP
@@ -803,40 +912,30 @@ for i in range(n):
 + Lower bound: `m=m=l+(r-l+1)//2;r=m-1`
 
 ```python
-### Upper bound (smallest number >= result)
-def search(A, l, r):
-     while l<r: # l<=r for [l,r]
-            m=l+(r-l)//2 #to prevent overflow
-            if A[m]==target: return # early stopping critera
-            if A[m]>target: #interface critera
-                r=m # r=m-1 for [l,r]
-            else:
-                l=m+1 #always move left up, upper bound
-     return l  # or not found
-
-### Lower bound (biggest number <= result)
-def search(A,l,r):
+### Upper bound: right most index of target + 1
+# l: smallest idx>val
+# l-1: largest idx <= val
+l = 0, r = len(A) # open right
     while l<r:
-    	m=l+(r-l+1)//2
-        if A[m]>target: r=m-1 #move right down, lower bound
-        else: l=m
-    return l #always return l
+        m=l+(r-l)//2
+        if A[m]>val: #smallest index satifies this inequality
+            r=m
+        else: l=m+1
+    return l
+
+### Lower bound: left most index of target (inclusive)
+# l: smallest idx >=val
+# l-1: largest idx<val
+l = 0, r = len(A)
+    while l<r:
+        m=l+(r-l)//2
+        if A[m]>=val:
+            r=m
+        else: l=m+1
+    return l
 ```
 
 #### Examples - simple g(m)
-
-+ Find bound [...)
-
-  ```python
-  def f(A, val, l, r): #l = 0, r = len(A)-1
-      while l<r:
-          m=l+(r-l)//2
-          if A[m]>val: #find right most+1. A[m]>=val to find left most
-              r=m
-          else: l=m+1
-      return l
-  
-  ```
 
 + 69  `floor(sqrt(x))`
 

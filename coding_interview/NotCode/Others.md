@@ -1,0 +1,19 @@
+- Operating System
+  - thread, process, 
+  - lock, deadlock,
+  -  inter-process/thread communication, 
+  - virtual memory
+- Networkthread
+  - bandwidth, 
+  - latency, 
+  - protocol, 
+  - DNS, 
+  - IP Address,
+  -  TCP/IP
+  - UDP
+- Others
+  - Inverted index, 
+  - precision rate, recall rate, 
+  - A/B test 
+  - Trie Tree, Winner Tree, Loser Tree, etc.
+- Design Pattern
