@@ -214,3 +214,33 @@ return list(res)
 return list(set2 & set1)
 ```
 
+
+
+
+
+
+
+## Tree
+
+### 1339
+
+![image-20210128183207393](/home/arkyyang/files/notes/notes/attachments/image-20210128183207393.png)
+
+### 1676
+
+129
+
+
+
+DFS
+
+Matrix: 
+
+
+
+DP:
+
++ When result is sparse, recursion (top down) might be faster than bottom up DP.
+
+1594
+

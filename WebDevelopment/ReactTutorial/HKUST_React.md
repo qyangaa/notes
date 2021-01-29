@@ -452,6 +452,65 @@ Example
 
 
 
+### Fetch
+
++ The Fetch API is a modern replacement for XMLHttpRequest
+  + Provides an interface for fetching resources (including across the network)
+  + Promise based
++ Fetch Abstractions
+  - Request: Represents a resource request 
+  - Response: Represents the response to a request 
+  - Headers: Represents response/request headers, allowing you to query them and take different actions depending on the results
+  - Body: Provides methods relating to the body of the response/request, allowing you to declare what its content type is and how it should be handled
+
+```javascript
+//Installation
+npm install cross-fetct
+
+//Get data (deal with errors)
+fetch(baseUrl + 'dishes')
+	.then(response => {
+    	if(response.ok){
+            return response;
+        }
+    	else{
+            var error = new Error('Error'+ response.status+":"+response.statusText);
+            error.response = response;
+            throw error;
+        }
+    },
+    error=>{
+		var errmess = new Error(error.message);
+    	throw errmess;
+    })
+	.then(response => response.json())
+	.then(data => console.log(data))
+	.catch(error=> console.log(error.message));
+
+//Post data
+fetch(baseUrl + 'comments',{
+    method: 'POST',
+    body: JSON.stringify(newComment),
+    headers:{
+        'Content-Type':'application/json'
+    },
+    credentials:'same-origin'
+})
+
+// In action
+export const fetchDishes = () => (dispatch) =>{
+    dispatch(dishesLoading(true));
+    
+    return fetch(baseUrl + 'dishes')
+    		.then( response => response.json())
+    		.then( dishes => dispatch(addDishes(dishes)));
+}
+```
+
++ Alternatives
+  + Axios
+  + Superagent
+
 
 
 ## react forms
@@ -499,3 +558,38 @@ Example
 
 ![image-20210122190950732](/home/arkyyang/files/notes/notes/attachments/image-20210122190950732.png)
 
+
+
+
+
+## React Animation
+
++ React Animation Components
+  + A set of react components implemented using reacttransition-group 
+  + Provides drop in GPU accelerated animations and wrappers for group effects 
+  + Animation components
+    + Fade, Transform, FadeTransform
+  + Wrapper components
+  - Stagger, Random, Loop
++ Libraries: 
+  + React-transition-group
+    + Components supported:
+      + Transition
+      + CSSTransition
+      + TransitionGroup
+  + React-animation-components
+    - Manages a set of <Transition> components in a list
+    - Automatically toggles the in prop for the components
++ Transition
+  + Basics
+    + Used to animate the mounting and unmounting of a component 
+    + The in prop is used to toggle the transition state
+      + When true the component begins the sequence of entering $\rightarrow$ entered state
+      + Timeout specifies the duration spent in the entering state
+    + entering, entered, exiting, exited 
+  + CSSTransition
+    + Uses the in prop to decide when to apply the transition classes 
+    + Example:
+      <CSSTransition key=\{this.props.location.key\} classNames="page"
+      timeout $=\{300\}>$
+      - Should define .page-enter, .page-enter-active, .page-exit, . page-exitactive CSS classes

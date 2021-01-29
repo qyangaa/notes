@@ -610,3 +610,431 @@ The right boundary is nodes [1,3,6,10].
 The leaves are nodes [4,7,8,9,10].
 Unioning the sets together gives [1,2,3,4,6,7,8,9,10], which is [1,2,4,7,8,9,10,6,3] in counter-clockwise order.
 ```
+
+
+
+
+
+### OA Find Maximum in a Tree
+
+```python
+import sys
+
+def findMax(root):
+    if not root: return 0
+    curMax = -sys.maxsize-1
+    stack = [root]
+    while stack:
+        cur = stack.pop()
+        curMax = max(cur.val, curMax)
+        if cur.left:
+            stack.append(cur.left)
+        if cur.right:
+            stack.append(cur.right)
+    return curMax
+    
+```
+
+```Java
+// Answer:    
+static int findMax(TreeNode node)
+    {
+        if (node == null)
+            return Integer.MIN_VALUE;
+ 
+        int res = node.val;
+        int lres = findMax(node.left);
+        int rres = findMax(node.right);
+ 
+        if (lres > res)
+            res = lres;
+        if (rres > res)
+            res = rres;
+        return res;
+    }
+```
+
+
+
+### 108. Convert Sorted Array to Binary Search Tree
+
+Easy
+
+Given an array where elements are sorted in ascending order, convert it to a height balanced BST.
+
+For this problem, a height-balanced binary tree is defined as a binary tree in which the depth of the two subtrees of *every* node never differ by more than 1.
+
+**Example:**
+
+```
+Given the sorted array: [-10,-3,0,5,9],
+
+One possible answer is: [0,-3,9,-10,null,5], which represents the following height balanced BST:
+
+      0
+     / \
+   -3   9
+   /   /
+ -10  5
+```
+
+```python
+    if not nums: return None
+    if len(nums) == 1:
+        return TreeNode(nums[0])
+    midIdx = len(nums)//2
+    node = TreeNode(nums[midIdx])
+    node.left = self.sortedArrayToBST(nums[:midIdx])
+    node.right = self.sortedArrayToBST(nums[midIdx+1:])
+    return node
+```
+
+
+
+
+
+### 938. Range Sum of BST
+
+Easy
+
+Given the `root` node of a binary search tree, return *the sum of values of all nodes with a value in the range `[low, high]`*.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2020/11/05/bst1.jpg)
+
+```
+Input: root = [10,5,15,3,7,null,18], low = 7, high = 15
+Output: 32
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2020/11/05/bst2.jpg)
+
+```
+Input: root = [10,5,15,3,7,13,18,1,null,6], low = 6, high = 10
+Output: 23
+```
+
+ 
+
+```python
+    def inOrder(node, res):
+        if not node: return
+
+        inOrder(node.left, res)
+        if low<=node.val<=high:
+            res[0] += node.val
+        inOrder(node.right,res)
+
+        return
+
+
+    res = [0]        
+    inOrder(root, res)
+
+    return res[0]
+```
+
+
+
+### 669. Trim a Binary Search Tree
+
+Medium
+
+Given the `root` of a binary search tree and the lowest and highest boundaries as `low` and `high`, trim the tree so that all its elements lies in `[low, high]`. Trimming the tree should **not** change the relative structure of the elements that will remain in the tree (i.e., any node's descendant should remain a descendant). It can be proven that there is a **unique answer**.
+
+Return *the root of the trimmed binary search tree*. Note that the root may change depending on the given bounds.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2020/09/09/trim1.jpg)
+
+```
+Input: root = [1,0,2], low = 1, high = 2
+Output: [1,null,2]
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2020/09/09/trim2.jpg)
+
+```
+Input: root = [3,0,4,null,2,null,null,1], low = 1, high = 3
+Output: [3,2,null,1]
+```
+
+**Example 3:**
+
+```
+Input: root = [1], low = 1, high = 2
+Output: [1]
+```
+
+**Example 4:**
+
+```
+Input: root = [1,null,2], low = 1, high = 3
+Output: [1,null,2]
+```
+
+**Example 5:**
+
+```
+Input: root = [1,null,2], low = 2, high = 4
+Output: [2]
+```
+
+ 
+
+```python
+    def trim(node):
+        if not node: return None
+        if node.val>high: return trim(node.left)
+        if node.val<low: return trim(node.right)
+        node.left = trim(node.left)
+        node.right = trim(node.right)
+        return node
+    return trim(root)
+```
+
+
+
+\449. Serialize and Deserialize BST
+
+Medium
+
+180192Add to ListShare
+
+Serialization is converting a data structure or object into a sequence of bits so that it can be stored in a file or memory buffer, or transmitted across a network connection link to be reconstructed later in the same or another computer environment.
+
+Design an algorithm to serialize and deserialize a **binary search tree**. There is no restriction on how your serialization/deserialization algorithm should work. You need to ensure that a binary search tree can be serialized to a string, and this string can be deserialized to the original tree structure.
+
+**The encoded string should be as compact as possible.**
+
+ 
+
+**Example 1:**
+
+```
+Input: root = [2,1,3]
+Output: [2,1,3]
+```
+
+**Example 2:**
+
+```
+Input: root = []
+Output: []
+```
+
+ 
+
+
+
+```python
+class Codec:
+    def serialize(self, root):
+        """
+        Encodes a tree to a single string.
+        """
+        def postorder(root):
+            return postorder(root.left) + postorder(root.right) + [root.val] if root else []
+        return ' '.join(map(str, postorder(root)))
+
+    def deserialize(self, data):
+        """
+        Decodes your encoded data to tree.
+        """
+        def helper(lower = float('-inf'), upper = float('inf')):
+            if not data or data[-1] < lower or data[-1] > upper:
+                return None
+            
+            val = data.pop()
+            root = TreeNode(val)
+            root.right = helper(val, upper)
+            root.left = helper(lower, val)
+            return root
+        
+        data = [int(x) for x in data.split(' ') if x]
+        return helper()
+```
+
+
+
+### 426. Convert Binary Search Tree to Sorted Doubly Linked List
+
+Medium
+
+Convert a **Binary Search Tree** to a sorted **Circular Doubly-Linked List** in place.
+
+You can think of the left and right pointers as synonymous to the predecessor and successor pointers in a doubly-linked list. For a circular doubly linked list, the predecessor of the first element is the last element, and the successor of the last element is the first element.
+
+We want to do the transformation **in place**. After the transformation, the left pointer of the tree node should point to its predecessor, and the right pointer should point to its successor. You should return the pointer to the smallest element of the linked list.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2018/10/12/bstdlloriginalbst.png)
+
+```
+Input: root = [4,2,5,1,3]
+
+
+Output: [1,2,3,4,5]
+
+Explanation: The figure below shows the transformed BST. The solid line indicates the successor relationship, while the dashed line means the predecessor relationship.
+```
+
+**Example 2:**
+
+```
+Input: root = [2,1,3]
+Output: [1,2,3]
+```
+
+**Example 3:**
+
+```
+Input: root = []
+Output: []
+Explanation: Input is an empty tree. Output is also an empty Linked List.
+```
+
+**Example 4:**
+
+```
+Input: root = [1]
+Output: [1]
+```
+
+ 
+
+```python
+class Solution:
+    def treeToDoublyList(self, root: 'Node') -> 'Node':
+        if not root: return None
+        
+        def inOrder(root):
+            if not root.left:
+                first = root
+            else:
+                first, leftLast = inOrder(root.left)
+                root.left = leftLast
+                leftLast.right = root
+            if not root.right:
+                last = root
+            else:
+                rightFirst, last = inOrder(root.right)
+                rightFirst.left = root
+                root.right = rightFirst
+            
+            return first, last
+        
+        first, last = inOrder(root)
+        first.left = last
+        last.right = first
+        return first
+```
+
+
+
+### 99. Recover Binary Search Tree
+
+Hard
+
+You are given the `root` of a binary search tree (BST), where exactly two nodes of the tree were swapped by mistake. *Recover the tree without changing its structure*.
+
+**Follow up:** A solution using `O(n)` space is pretty straight forward. Could you devise a constant space solution?
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2020/10/28/recover1.jpg)
+
+```
+Input: root = [1,3,null,null,2]
+Output: [3,1,null,null,2]
+Explanation: 3 cannot be a left child of 1 because 3 > 1. Swapping 1 and 3 makes the BST valid.
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2020/10/28/recover2.jpg)
+
+```
+Input: root = [3,1,4,null,null,2]
+Output: [2,1,4,null,null,3]
+Explanation: 2 cannot be in the right subtree of 3 because 2 < 3. Swapping 2 and 3 makes the BST valid.
+```
+
+ 
+
++ 
+
++ ```python
+  if right<root and left>root:
+      swap(left, right)
+  elif left>root:
+      swap(left, root)
+  elif right<root:
+      swap(right, root)
+  
+  
+  ```
+
+
+
++ Recursion: technically $O(n)$ memory worst
+
+```python
+import sys
+
+class Solution:
+    def recoverTree(self, root: TreeNode) -> None:
+        """
+        Do not return anything, modify root in-place instead.
+        """
+        LR = [None,None]
+        LRnodes = [None, None] 
+        
+        def minMax(root):
+            if not root: return sys.maxsize, -sys.maxsize-1
+            
+            minL, maxL = minMax(root.left)
+            minR, maxR = minMax(root.right)
+            
+            if maxL>minR:
+                LR[0], LR[1] = maxL, minR
+            elif maxL> root.val:
+                LR[0], LR[1] = maxL, root.val
+            elif minR < root.val:
+                LR[0], LR[1] = root.val, minR
+            
+            return min(minL, minR, root.val), max(maxL, maxR, root.val)
+        
+        def findNode(node, val):
+            if not node: return None
+            if node.val == val: return node
+            return findNode(node.left, val) or findNode(node.right, val)
+        
+
+        
+        _, _ = minMax(root)
+        LRnodes[0] = findNode(root, LR[0])
+        LRnodes[1] = findNode(root, LR[1])
+        
+        LRnodes[0].val, LRnodes[1].val = LRnodes[1].val, LRnodes[0].val
+        
+        return
+```
+
+
+

@@ -1145,94 +1145,7 @@ max sum subarray with no adjacent elements. Subarray is arranged in a circle (fi
 
   + The above two solution are both $O(n)$ , the second solution is slightly faster, but first solution is more clear and concise, and saves space.
 
-
-
-### 300 Longest Increasing Subsequence
-
-Given an integer array `nums`, return the length of the longest strictly increasing subsequence.
-
-A **subsequence** is a sequence that can be derived from an array by deleting some or no elements without changing the order of the remaining elements. For example, `[3,6,2,7]` is a subsequence of the array `[0,3,1,6,2,2,7]`.
-
-
-
-+ Example:
-
-  + ```
-    Input: nums = [10,9,2,5,3,7,101,18]
-    Output: 4
-    Explanation: The longest increasing subsequence is [2,3,7,101], therefore the length is 4.
-    ```
-
-  + ```
-    Input: nums = [0,1,0,3,2,3]
-    Output: 4 (0,1,2,3)
-    ```
-
-  + ```
-    Input: nums = [7,7,7,7,7,7,7]
-    Output: 1
-    ```
-
-+ Analysis
-
-  + Recursion: each step is a combination of taking current element and not taking:
-
-    + branch for each taken/ not taken. $O(2^n)$
-
-    ```python
-    def lengthofLIS(nums, prevMax, curIdx):
-        if curIdx == len(nums): return 0
-        taken = 0
-        if nums[curIdx]>prevMax:
-            taken = 1+lengthofLIS(nums, nums[curIdx],curIdx+1)
-        notTaken = lengthofLIS(nums, prev,curIdx+1)
-        return max(taken, notTaken)
-    ```
-
-  + Recursion with memorization: `memo[prevMax, curIdx]`: $O(n^2)$
-
-    ```python
-    memo[i][j]
-    def lengthofLIS(nums, prevMax, curIdx):
-        if memo[prevMax, curIdx]>-1: return memo[prevMax, curIdx]
-        if curIdx == len(nums): return 0
-        taken = 0
-        if nums[curIdx]>prevMax:
-            taken = 1+lengthofLIS(nums, nums[curIdx],curIdx+1)
-        notTaken = lengthofLIS(nums, prev,curIdx+1)
-        return max(taken, notTaken)
-    ```
-
-  + DP: if we know the all max lengths before `i`,  we can try appending `i` to each elements before it and find the max result. $O(n^2)$
-
-  + DP: binary search (patient sort algorithm). With patient sort, the number of piles equal to the longest increasing sequence, because:
-
-    + each pile is a decreasing sequence
-    + patient sort always append to smaller pile first
-    + $O(n log n)$
-
-  ```python
-  last_digit = []
-  for num in nums:
-      insert_pos = bisect.bisect_left(last_digits,num)
-      if insert_pos>=len(last_digits):
-          last_digits.append(num)
-      else:
-          last_digits[insert_pos] = num
-  return len(last_digits)
-  ```
-
-  https://leetcode.com/problems/longest-increasing-subsequence/discuss/1000066/Python-O(nlogn)-with-patience-sort-explanation-faster-than-92.4
-
-+ Tips:
-
-  + Useful for recursion:
-
-  ```python
-  len(array, curIdx) = 1+len(array, curIdx+1)
-  ```
-
-  
++ 
 
 ### 303 Range Sum Query - Immutable
 
@@ -1470,30 +1383,32 @@ You are given coins of different denominations and a total amount of money *amou
 
     | Value | 0    | 1    | 2    | 3    | 4    | 5    |
     | ----- | ---- | ---- | ---- | ---- | ---- | ---- |
-    | 1     | 0    | 1    | 2    | 2    | 3    | 3    |
-    | 2     |      |      | 1    | 2    | 2    | 3    |
-    | 5     |      |      | 0    | 0    | 0    | 1    |
+    | 1     | 0    | 1    | 2    | 3    | 4    | 5    |
+    | 2     | 0    | 1    | 1    | 2    | 2    | 3    |
+    | 5     | 0    | 1    | 1    | 2    | 2    | 1    |
     | min   | 0    | 1    | 1    | 2    | 2    | 1    |
 
-    + We only need to keep a record of min values up to that point in each memo
-    + Note that we only look at `memo` up to `max(coins)`, we only need to keep an array of length with `max(coins)`. 
-
     ```python
-        def coinChange(self, coins, amount) -> int:
-            memo = [0]
-            for i in range(1,amount+1):
-                curmin=sys.maxsize
-                for value in coins:
-                    if i >= value and memo[i - value]!=-1:
-                        curmin = min(curmin,1 + memo[i - value])
-                if curmin==sys.maxsize:
-                    memo+=[-1]
+       import sys
+    
+    class Solution:
+        def coinChange(self, coins: List[int], amount: int) -> int:
+            if not coins or not amount: return 0
+            dp = [0]* (amount+1)
+            for i in range(amount+1):
+                if i%coins[0]==0:
+                    dp[i] = i//coins[0]
                 else:
-                    memo+= [curmin]
-            return memo[-1]
+                    dp[i] = sys.maxsize
+                    
+            for i in range(1,len(coins)):
+                for j in range(1,amount+1):
+                    if j>=coins[i]:
+                        dp[j] = min(dp[j-coins[i]]+1,dp[j])
+            return dp[-1] if dp[-1]!=sys.maxsize else -1
     ```
 
-    
++ 
 
 ### 338 Counting Bits
 
@@ -1718,3 +1633,1328 @@ Given a **non-empty** array `nums` containing **only positive integers**, find i
       
           return memo[-1]
       ```
+
+
+
+### 1143. Longest Common Subsequence
+
+Medium
+
+246930Add to ListShare
+
+Given two strings `text1` and `text2`, return the length of their longest common subsequence.
+
+A *subsequence* of a string is a new string generated from the original string with some characters(can be none) deleted without changing the relative order of the remaining characters. (eg, "ace" is a subsequence of "abcde" while "aec" is not). A *common subsequence* of two strings is a subsequence that is common to both strings.
+
+ 
+
+If there is no common subsequence, return 0.
+
+ 
+
+**Example 1:**
+
+```
+Input: text1 = "abcde", text2 = "ace" 
+Output: 3  
+Explanation: The longest common subsequence is "ace" and its length is 3.
+```
+
+**Example 2:**
+
+```
+Input: text1 = "abc", text2 = "abc"
+Output: 3
+Explanation: The longest common subsequence is "abc" and its length is 3.
+```
+
+**Example 3:**
+
+```
+Input: text1 = "abc", text2 = "def"
+Output: 0
+Explanation: There is no such common subsequence, so the result is 0.
+```
+
++ Go over one string, for each index:
+  + find corresponding index in another string (starting from current index)
+    + if not found starting from current index: find before current index
+    + If not found overall, then do nothing
+  + maintain a curIdx found in the previous step
+  + increment length if curIdx increasing, change to 0 if decreasing
+
+
+
++ Solution:
++ Each cell represents one subproblem. For example, the below cell represents the subproblem `lcs("attag", "gtgatcg")`.
+
+
+
+![Cell where first letter is same, showing +1 into new cell](https://leetcode.com/problems/longest-common-subsequence/Figures/1143/bottom_up_same_letter.png)
+
+subproblem that removes the first letter off the first word, and then the subproblem that removes the first letter off the second word. In the grid, these are subproblems immediately right and below.
+
+![Cell where first letter is same, showing +1 into new cell](https://leetcode.com/problems/longest-common-subsequence/Figures/1143/bottom_up_different_letter.png)
+
+```python
+class Solution:
+    def longestCommonSubsequence(self, text1: str, text2: str) -> int:
+        
+        dp = [[0]*(len(text2)+1) for _ in range(len(text1)+1)]
+        for i in reversed(range(len(text1))):
+            for j in reversed(range(len(text2))):
+                if text1[i]==text2[j]:
+                    dp[i][j]=1+dp[i+1][j+1]
+                else:
+                    dp[i][j]=max(dp[i+1][j], dp[i][j+1])
+
+            
+        
+        return dp[0][0]
+```
+
+
+
+
+
+### 1092. Shortest Common Supersequence
+
+Hard
+
+Given two strings `str1` and `str2`, return the shortest string that has both `str1` and `str2` as subsequences. If multiple answers exist, you may return any of them.
+
+*(A string S is a subsequence of string T if deleting some number of characters from T (possibly 0, and the characters are chosen anywhere from T) results in the string S.)*
+
+ 
+
+**Example 1:**
+
+```
+Input: str1 = "abac", str2 = "cab"
+Output: "cabac"
+Explanation: 
+str1 = "abac" is a subsequence of "cabac" because we can delete the first "c".
+str2 = "cab" is a subsequence of "cabac" because we can delete the last "ac".
+The answer provided is the shortest such string that satisfies these properties.
+```
+
+
+
+```python
+    len1 = len(str1)
+    len2 = len(str2)
+    dp_str = ['']*(len2+1)
+    for j in range(len2+1):
+        dp_str[j] = str2[:j]
+
+
+    for i in range(1, len1+1):
+        prev = list(dp_str)
+        for j in range(1, len2+1):
+            cur1 = str1[i-1]
+            cur2 = str2[j-1]
+            dp_str[0] = str1[:i]
+
+            if cur1 == cur2:
+                dp_str[j] = prev[j-1]+cur1
+            elif len(prev[j]) > len(dp_str[j-1]):
+                dp_str[j] = dp_str[j-1]+cur2
+            else:
+                dp_str[j] = prev[j]+cur1  
+
+    return dp_str[-1]
+```
+
+
+
+### 174. Dungeon Game
+
+Hard
+
+The demons had captured the princess (**P**) and imprisoned her in the bottom-right corner of a dungeon. The dungeon consists of M x N rooms laid out in a 2D grid. Our valiant knight (**K**) was initially positioned in the top-left room and must fight his way through the dungeon to rescue the princess.
+
+The knight has an initial health point represented by a positive integer. If at any point his health point drops to 0 or below, he dies immediately.
+
+Some of the rooms are guarded by demons, so the knight loses health (*negative* integers) upon entering these rooms; other rooms are either empty (*0's*) or contain magic orbs that increase the knight's health (*positive* integers).
+
+In order to reach the princess as quickly as possible, the knight decides to move only rightward or downward in each step.
+
+ 
+
+**Write a function to determine the knight's minimum initial health so that he is able to rescue the princess.**
+
+For example, given the dungeon below, the initial health of the knight must be at least **7** if he follows the optimal path `RIGHT-> RIGHT -> DOWN -> DOWN`.
+
+| -2 (K) | -3   | 3      |
+| ------ | ---- | ------ |
+| -5     | -10  | 1      |
+| 10     | 30   | -5 (P) |
+
+ 
+
++ Dijstra's algorithm for weighted shortest path
+
++ Find max min-health path, return min-health+1
+
+
+
+```python
+class Solution(object):
+    def calculateMinimumHP(self, dungeon):
+        """
+        :type dungeon: List[List[int]]
+        :rtype: int
+        """
+        if not dungeon: return 1
+        rows, cols = len(dungeon), len(dungeon[0])
+        dp = [[float('inf')]*cols for _ in range(rows)]
+
+        
+        
+        def get_min_health(curCell, ni, nj):
+            if ni>=rows or nj >=cols:
+                return float('inf')
+            nextCell = dp[ni][nj]
+            return max(1, nextCell-curCell)
+        
+        for i in reversed(range(rows)):
+            for j in reversed(range(cols)):
+                cur = dungeon[i][j]
+                right_health = get_min_health(cur, i, j+1)
+                down_health = get_min_health(cur, i+1, j)
+                next_health = min(right_health, down_health)
+                if next_health != float('inf'):
+                    min_health = next_health
+                else: 
+                    min_health = 1 if cur>=0 else (1-cur)
+                
+                dp[i][j] = min_health
+                
+        return dp[0][0]
+                
+```
+
+
+
+
+
+### 63. Unique Paths II
+
+Medium
+
+A robot is located at the top-left corner of a `m x n` grid (marked 'Start' in the diagram below).
+
+The robot can only move either down or right at any point in time. The robot is trying to reach the bottom-right corner of the grid (marked 'Finish' in the diagram below).
+
+Now consider if some obstacles are added to the grids. How many unique paths would there be?
+
+An obstacle and space is marked as `1` and `0` respectively in the grid.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2020/11/04/robot1.jpg)
+
+```
+Input: obstacleGrid = [[0,0,0],[0,1,0],[0,0,0]]
+Output: 2
+Explanation: There is one obstacle in the middle of the 3x3 grid above.
+There are two ways to reach the bottom-right corner:
+1. Right -> Right -> Down -> Down
+2. Down -> Down -> Right -> Right
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2020/11/04/robot2.jpg)
+
+```
+Input: obstacleGrid = [[0,1],[0,0]]
+Output: 1
+```
+
+ ```python
+class Solution(object):
+    def uniquePathsWithObstacles(self, obstacleGrid):
+        """
+        :type obstacleGrid: List[List[int]]
+        :rtype: int
+        """
+        if not obstacleGrid: return 0
+        rows, cols = len(obstacleGrid), len(obstacleGrid[0])
+        
+        dp = [[0]*cols for _ in range(rows)]
+
+        for i in range(rows):
+            if obstacleGrid[i][0]!=1:
+                dp[i][0] = 1
+            else:
+                break
+        
+        for j in range(cols):
+            if obstacleGrid[0][j]!=1:
+                dp[0][j] = 1
+            else:
+                break
+        
+        for i in range(1,rows):
+            for j in range(1,cols):
+                if obstacleGrid[i][j]==1:
+                    dp[i][j]=0
+                else:
+                    dp[i][j] = dp[i-1][j]+dp[i][j-1]
+        
+        return dp[-1][-1]
+ ```
+
+
+
+```python
+        if not obstacleGrid or obstacleGrid[0][0]==1 : return 0
+        rows, cols = len(obstacleGrid), len(obstacleGrid[0])
+        
+        dp = [0]*cols
+
+        
+        for j in range(cols):
+            if obstacleGrid[0][j]!=1:
+                dp[j] = 1
+            else:
+                break
+        
+        for i in range(1,rows):
+            if obstacleGrid[i][0]==1 or dp[0]==0:
+                dp[0]=0
+            else:
+                dp[0]=1
+            for j in range(1,cols):
+                if obstacleGrid[i][j]==1:
+                    dp[j]=0
+                else:
+                    dp[j] = dp[j]+dp[j-1]
+        
+        return dp[-1]
+                
+```
+
+
+
+### 64. Minimum Path Sum
+
+Medium
+
+Given a `m x n` `grid` filled with non-negative numbers, find a path from top left to bottom right, which minimizes the sum of all numbers along its path.
+
+**Note:** You can only move either down or right at any point in time.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2020/11/05/minpath.jpg)
+
+```
+Input: grid = [[1,3,1],[1,5,1],[4,2,1]]
+Output: 7
+Explanation: Because the path 1 → 3 → 1 → 1 → 1 minimizes the sum.
+```
+
+**Example 2:**
+
+```
+Input: grid = [[1,2,3],[4,5,6]]
+Output: 12
+```
+
+ 
+
+```python
+class Solution:
+    def minPathSum(self, grid: List[List[int]]) -> int:
+        if not grid: return 0
+        rows, cols = len(grid), len(grid[0])
+        
+        dp = [[0]*cols for _ in range(rows)]
+        dp[0][0] = grid[0][0]
+        
+        
+        for i in range(1,rows):
+            dp[i][0]= dp[i-1][0]+grid[i][0]
+            
+        for j in range(1, cols):
+            dp[0][j] = dp[0][j-1]+grid[0][j]
+            
+        for i in range(1,rows):
+            for j in range(1, cols):
+                dp[i][j] = grid[i][j] + min(dp[i-1][j],dp[i][j-1])
+        
+        return dp[-1][-1]
+```
+
+```python
+class Solution:
+    def minPathSum(self, grid: List[List[int]]) -> int:
+        if not grid: return 0
+        rows, cols = len(grid), len(grid[0])
+        
+        for i in range(1,rows):
+            grid[i][0] += grid[i-1][0]
+            
+        for j in range(1, cols):
+            grid[0][j] += grid[0][j-1]
+            
+        for i in range(1,rows):
+            for j in range(1, cols):
+                grid[i][j] += min(grid[i-1][j],grid[i][j-1])
+        
+        return grid[-1][-1]
+```
+
+
+
+
+
+
+
+### 300 Longest Increasing Subsequence
+
+Given an integer array `nums`, return the length of the longest strictly increasing subsequence.
+
+A **subsequence** is a sequence that can be derived from an array by deleting some or no elements without changing the order of the remaining elements. For example, `[3,6,2,7]` is a subsequence of the array `[0,3,1,6,2,2,7]`.
+
+
+
++ Example:
+
+  + ```
+    Input: nums = [10,9,2,5,3,7,101,18]
+    Output: 4
+    Explanation: The longest increasing subsequence is [2,3,7,101], therefore the length is 4.
+    ```
+
+  + ```
+    Input: nums = [0,1,0,3,2,3]
+    Output: 4 (0,1,2,3)
+    ```
+
+  + ```
+    Input: nums = [7,7,7,7,7,7,7]
+    Output: 1
+    ```
+
++ Analysis
+
+  + Recursion: each step is a combination of taking current element and not taking:
+
+    + branch for each taken/ not taken. $O(2^n)$
+
+    ```python
+    def lengthofLIS(nums, prevMax, curIdx):
+        if curIdx == len(nums): return 0
+        taken = 0
+        if nums[curIdx]>prevMax:
+            taken = 1+lengthofLIS(nums, nums[curIdx],curIdx+1)
+        notTaken = lengthofLIS(nums, prev,curIdx+1)
+        return max(taken, notTaken)
+    ```
+
+  + Recursion with memorization: `memo[prevMax, curIdx]`: $O(n^2)$
+
+    ```python
+    memo[i][j]
+    def lengthofLIS(nums, prevMax, curIdx):
+        if memo[prevMax, curIdx]>-1: return memo[prevMax, curIdx]
+        if curIdx == len(nums): return 0
+        taken = 0
+        if nums[curIdx]>prevMax:
+            taken = 1+lengthofLIS(nums, nums[curIdx],curIdx+1)
+        notTaken = lengthofLIS(nums, prev,curIdx+1)
+        return max(taken, notTaken)
+    ```
+
+  + DP: if we know the all max lengths before `i`,  we can try appending `i` to each elements before it and find the max result. $O(n^2)$
+
+    + ```python
+      curMax = 0
+      for j in range(i):
+          if nums[i]>nums[j]:
+              curMax = max(curMax, dp[j]+1)
+      ```
+
+    + 
+
+  
+
+  |      |      | 10   | 9    | 2    | 5    | 3    | 7    | 101  | 18   |
+  | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+  |      |      | 0    | 1    | 2    | 3    | 4    | 5    | 6    | 7    |
+  |      |      | 1    |      |      |      |      |      |      |      |
+  |      |      | 1    | 1    |      |      |      |      |      |      |
+  |      |      | 1    | 1    | 1    |      |      |      |      |      |
+  |      |      | 1    | 1    | 1    | 2    |      |      |      |      |
+  |      |      | 1    | 1    | 1    | 2    | 2    |      |      |      |
+  |      |      | 1    | 1    | 1    | 2    | 2    | 3    |      |      |
+  |      |      | 1    | 1    | 1    | 2    | 2    | 3    | 4    |      |
+  |      |      | 1    | 1    | 1    | 1    | 2    | 3    | 4    | 4    |
+
+  ```python
+  import sys
+  
+  class Solution:
+      def lengthOfLIS(self, nums: List[int]) -> int:
+          if not nums: return 0
+          
+          
+          length = len(nums)
+          dp = [sys.maxsize]*length
+          dp[0] = 1
+          res = 1
+          for i in range(1,length):
+              curMax = 0
+              for j in range(i):
+                  if nums[i]>nums[j]:
+                      curMax = max(dp[j]+1, curMax)
+              dp[i] = max(curMax, 1)
+              res = max(res, dp[i])
+              
+          return res
+  ```
+
+  
+
+  + DP: binary search (patient sort algorithm). With patient sort, the number of piles equal to the longest increasing sequence, because:
+
+    + each pile is a decreasing sequence
+    + patient sort always append to smaller pile first
+    + $O(n log n)$
+
+  ```python
+  last_digit = []
+  for num in nums:
+      insert_pos = bisect.bisect_left(last_digits,num)
+      if insert_pos>=len(last_digits):
+          last_digits.append(num)
+      else:
+          last_digits[insert_pos] = num
+  return len(last_digits)
+  ```
+
+  https://leetcode.com/problems/longest-increasing-subsequence/discuss/1000066/Python-O(nlogn)-with-patience-sort-explanation-faster-than-92.4
+
++ Tips:
+
+  + Useful for recursion:
+
+  ```python
+  len(array, curIdx) = 1+len(array, curIdx+1)
+  ```
+
+  
+
+### 516. Longest Palindromic Subsequence
+
+Medium
+
+Given a string s, find the longest palindromic subsequence's length in s. You may assume that the maximum length of s is 1000.
+
+**Example 1:**
+Input:
+
+```
+"bbbbab"
+```
+
+Output:
+
+```
+4
+```
+
+One possible longest palindromic subsequence is "bbbb".
+
+ 
+
+**Example 2:**
+Input:
+
+```
+"cbbd"
+```
+
+Output:
+
+```
+2
+```
+
+One possible longest palindromic subsequence is "bb".
+
++ 
+
++ 
++ 
++ for subsequence
+
+`dp[start][end]`
+
+```python
+    if not s: return 0
+    n = len(s)
+
+    dp = [[0]*n for _ in range(n)]
+    for i in range(n):
+        dp[i][i]=1
+
+    for i in range(n-1, -1, -1):
+        for j in range(i+1,n):
+            if s[i]==s[j]:
+                dp[i][j]= dp[i+1][j-1]+2
+            else:
+                dp[i][j] = max(dp[i+1][j], dp[i][j-1])
+
+    return dp[0][-1]
+```
+
+
+
+### 746. Min Cost Climbing Stairs
+
+Easy
+
+On a staircase, the `i`-th step has some non-negative cost `cost[i]` assigned (0 indexed).
+
+Once you pay the cost, you can either climb one or two steps. You need to find minimum cost to reach the top of the floor, and you can either start from the step with index 0, or the step with index 1.
+
+**Example 1:**
+
+```
+Input: cost = [10, 15, 20]
+Output: 15
+Explanation: Cheapest is start on cost[1], pay that cost and go to the top.
+```
+
+
+
+**Example 2:**
+
+```
+Input: cost = [1, 100, 1, 1, 1, 100, 1, 1, 100, 1]
+Output: 6
+Explanation: Cheapest is start on cost[0], and only step on 1s, skipping cost[3].
+```
+
+
+
+**Note:**
+
+1. `cost` will have a length in the range `[2, 1000]`.
+2. Every `cost[i]` will be an integer in the range `[0, 999]`.
+
+|      | 1    | 100  | 1    | 1    | 1    | 100  | 1    | 1    | 100  | 1    |
+| ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- | ---- |
+| 0    | 1    |      |      |      |      |      |      |      |      |      |
+| 0    | 1    | 100  |      |      |      |      |      |      |      |      |
+| 0    | 1    | 100  | 2    |      |      |      |      |      |      |      |
+| 0    | 1    | 100  | 2    | 3    |      |      |      |      |      |      |
+| 0    | 1    | 100  | 2    | 3    | 3    | 100  | 4    | 5    | 100  | 6    |
+|      |      |      |      |      |      |      |      |      |      |      |
+|      |      |      |      |      |      |      |      |      |      |      |
+
+
+
+
+
+### 256. Paint House
+
+Medium
+
+There is a row of *n* houses, where each house can be painted one of three colors: red, blue, or green. The cost of painting each house with a certain color is different. You have to paint all the houses such that no two adjacent houses have the same color.
+
+The cost of painting each house with a certain color is represented by a `*n* x *3*` cost matrix. For example, `costs[0][0]` is the cost of painting house 0 with the color red; `costs[1][2]` is the cost of painting house 1 with color green, and so on... Find the minimum cost to paint all houses.
+
+ 
+
+**Example 1:**
+
+```
+Input: costs = [[17,2,17],[16,16,5],[14,3,19]]
+Output: 10
+Explanation: Paint house 0 into blue, paint house 1 into green, paint house 2 into blue.
+Minimum cost: 2 + 5 + 3 = 10.
+```
+
+**Example 2:**
+
+```
+Input: costs = []
+Output: 0
+```
+
+**Example 3:**
+
+```
+Input: costs = [[7,6,2]]
+Output: 2
+```
+
+ 
+
+```python
+    if not costs: return 0
+    n = len(costs)
+    dp = [[0,0,0] for _ in range(n)]
+    dp[0] = costs[0]
+
+    for i in range(1, n):
+        dp[i][0] = costs[i][0]+min(dp[i-1][1],dp[i-1][2])
+        dp[i][1] = costs[i][1]+min(dp[i-1][0],dp[i-1][2])
+        dp[i][2] = costs[i][2]+min(dp[i-1][1],dp[i-1][0])
+
+    return min(dp[-1][0], dp[-1][1],dp[-1][2])
+```
+
+
+
+### 87. Scramble String
+
+Hard
+
+We can scramble a string s to get a string t using the following algorithm:
+
+1. If the length of the string is 1, stop.
+2. If the length of the string is > 1, do the following:
+   - Split the string into two non-empty substrings at a random index, i.e., if the string is `s`, divide it to `x` and `y` where `s = x + y`.
+   - **Randomly** decide to swap the two substrings or to keep them in the same order. i.e., after this step, `s` may become `s = x + y` or `s = y + x`.
+   - Apply step 1 recursively on each of the two substrings `x` and `y`.
+
+Given two strings `s1` and `s2` of **the same length**, return `true` if `s2` is a scrambled string of `s1`, otherwise, return `false`.
+
+ 
+
+**Example 1:**
+
+```
+Input: s1 = "great", s2 = "rgeat"
+Output: true
+Explanation: One possible scenario applied on s1 is:
+"great" --> "gr/eat" // divide at random index.
+"gr/eat" --> "gr/eat" // random decision is not to swap the two substrings and keep them in order.
+"gr/eat" --> "g/r / e/at" // apply the same algorithm recursively on both substrings. divide at ranom index each of them.
+"g/r / e/at" --> "r/g / e/at" // random decision was to swap the first substring and to keep the second substring in the same order.
+"r/g / e/at" --> "r/g / e/ a/t" // again apply the algorithm recursively, divide "at" to "a/t".
+"r/g / e/ a/t" --> "r/g / e/ a/t" // random decision is to keep both substrings in the same order.
+The algorithm stops now and the result string is "rgeat" which is s2.
+As there is one possible scenario that led s1 to be scrambled to s2, we return true.
+```
+
+**Example 2:**
+
+```
+Input: s1 = "abcde", s2 = "caebd"
+Output: false
+```
+
+**Example 3:**
+
+```
+Input: s1 = "a", s2 = "a"
+Output: true
+```
+
+ ![image-20210127092748116](/home/arkyyang/files/notes/notes/attachments/image-20210127092748116.png)
+
+```python
+class Solution:
+    def isScramble(self, s1: str, s2: str) -> bool:
+        if len(s1)!=len(s2): return False
+        if s1==s2: return True
+        
+        n = len(s1)
+        
+        dp = [[[False]*(n+1) for _ in range(n)] for _ in range(n)]
+        for i in range(n):
+            for j in range(n):
+                dp[i][j][1] = (s1[i]==s2[j])
+        
+        for length in range(2,n+1):
+            for i in range(n):
+                for j in range(n):
+                    for k in range(1, length):
+                        if i+k>=n or j+k>=n or j+length-k>=n: continue
+                        dp[i][j][length] = dp[i][j][length] or (dp[i][j][k] and dp[i+k][j+k][length-k]) or (dp[i][j+length-k][k] and dp[i+k][j][length-k])
+        
+        return dp[0][0][n]
+```
+
+
+
+### 5. Longest Palindromic Substring
+
+Medium
+
+
+
+Given a string `s`, return *the longest palindromic substring* in `s`.
+
+ 
+
+**Example 1:**
+
+```
+Input: s = "babad"
+Output: "bab"
+Note: "aba" is also a valid answer.
+```
+
+**Example 2:**
+
+```
+Input: s = "cbbd"
+Output: "bb"
+```
+
+**Example 3:**
+
+```
+Input: s = "a"
+Output: "a"
+```
+
+**Example 4:**
+
+```
+Input: s = "ac"
+Output: "a"
+```
+
+ 
+
+```python
+class Solution:
+    def longestPalindrome(self, s: str) -> str:
+        if not s: return ''
+        n = len(s)
+        maxStr = s[0]
+        for i in range(n):
+            exp = 1
+            while i-exp>=0 and i+exp<n and s[i-exp] == s[i+exp]:
+                exp += 1
+            if 1+2*(exp-1)>len(maxStr):
+                maxStr = s[i-exp+1:i+exp]
+            exp = 0
+            while i-exp>=0 and i+exp+1<n and s[i-exp] == s[i+exp+1]:
+                exp += 1
+            if 2*exp > len(maxStr):
+                maxStr = s[i-exp+1: i+exp+1]
+        
+        return maxStr
+```
+
+
+
+### 42. Trapping Rain Water
+
+Hard
+
+9674149Add to ListShare
+
+Given `n` non-negative integers representing an elevation map where the width of each bar is `1`, compute how much water it can trap after raining.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2018/10/22/rainwatertrap.png)
+
+```
+Input: height = [0,1,0,2,1,0,1,3,2,1,2,1]
+Output: 6
+Explanation: The above elevation map (black section) is represented by array [0,1,0,2,1,0,1,3,2,1,2,1]. In this case, 6 units of rain water (blue section) are being trapped.
+```
+
+**Example 2:**
+
+```
+Input: height = [4,2,0,3,2,5]
+Output: 9
+```
+
+
+
+```python
+class Solution:
+    def trap(self, height: List[int]) -> int:
+        if not height: return 0
+        
+        n = len(height)
+        
+        leftMax = [0]*n
+        
+        curMax = 0
+        for i in range(n):
+            curMax = max(curMax, height[i])
+            leftMax[i] = curMax
+            
+        rightMax = 0
+        res = 0
+        for i in range(n-1,-1,-1):
+            rightMax = max(rightMax, height[i])
+            res += min(leftMax[i], rightMax) - height[i]
+        
+        return res
+            
+```
+
+
+
+### 1335. Minimum Difficulty of a Job Schedule
+
+Hard
+
+You want to schedule a list of jobs in `d` days. Jobs are dependent (i.e To work on the `i-th` job, you have to finish all the jobs `j` where `0 <= j < i`).
+
+You have to finish **at least** one task every day. The difficulty of a job schedule is the sum of difficulties of each day of the `d` days. The difficulty of a day is the maximum difficulty of a job done in that day.
+
+Given an array of integers `jobDifficulty` and an integer `d`. The difficulty of the `i-th` job is `jobDifficulty[i]`.
+
+Return *the minimum difficulty* of a job schedule. If you cannot find a schedule for the jobs return **-1**.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2020/01/16/untitled.png)
+
+```
+Input: jobDifficulty = [6,5,4,3,2,1], d = 2
+Output: 7
+Explanation: First day you can finish the first 5 jobs, total difficulty = 6.
+Second day you can finish the last job, total difficulty = 1.
+The difficulty of the schedule = 6 + 1 = 7 
+```
+
+**Example 2:**
+
+```
+Input: jobDifficulty = [9,9,9], d = 4
+Output: -1
+Explanation: If you finish a job per day you will still have a free day. you cannot find a schedule for the given jobs.
+```
+
+**Example 3:**
+
+```
+Input: jobDifficulty = [1,1,1], d = 3
+Output: 3
+Explanation: The schedule is one job per day. total difficulty will be 3.
+```
+
+**Example 4:**
+
+```
+Input: jobDifficulty = [7,1,7,1,7,1], d = 3
+Output: 15
+```
+
+**Example 5:**
+
+```
+Input: jobDifficulty = [11,111,22,222,33,333,44,444], d = 6
+Output: 843
+```
+
+
+
+
+
+```python
+dp[day][j] = min(dp[day - 1][i -1] + max(difficulty[i:j])) for i in 0...j
+
+
+```
+
+```python
+    def minDifficulty(self, jobDifficulty: List[int], d: int) -> int:
+        n = len(jobDifficulty)
+        if n < d:
+            return -1
+        
+        dp = [[0] + [float('inf')] * n for _ in range(d + 1)]
+        
+        for i in range(1, d + 1):
+            for j in range(i, n + 1):
+                current = 0
+                for k in range(j, i - 1, -1):
+                    current = max(current, jobDifficulty[k - 1])
+                    dp[i][j] = min(dp[i][j], current + dp[i - 1][k - 1])
+        return dp[-1][-1]
+```
+
+
+
+
+
+### 221. Maximal Square
+
+Medium
+
+Given an `m x n` binary `matrix` filled with `0`'s and `1`'s, *find the largest square containing only* `1`'s *and return its area*.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2020/11/26/max1grid.jpg)
+
+```
+Input: matrix = [["1","0","1","0","0"],["1","0","1","1","1"],["1","1","1","1","1"],["1","0","0","1","0"]]
+Output: 4
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2020/11/26/max2grid.jpg)
+
+```
+Input: matrix = [["0","1"],["1","0"]]
+Output: 1
+```
+
+**Example 3:**
+
+```
+Input: matrix = [["0"]]
+Output: 0
+```
+
+ 
+
+```python
+class Solution:
+    def maximalSquare(self, matrix: List[List[str]]) -> int:
+        if not matrix: return 0
+        maxSqure = 0
+        n,m = len(matrix), len(matrix[0])
+                  
+        curMax = 0
+        
+        for i in range(0,n):
+            if matrix[i][0]=='1':
+                curMax = 1
+        for j in range(0,m):
+            if matrix[0][j]=='1':
+                curMax = 1
+                
+        for i in range(1,n):
+            for j in range(1,m):
+                if matrix[i][j]=='1':
+                    matrix[i][j] = min(int(matrix[i][j-1]), int(matrix[i-1][j-1]), int(matrix[i-1][j]))+1
+                    curMax = max(curMax, matrix[i][j])
+        
+
+        return curMax*curMax
+                    
+```
+
+
+
+### 312. Burst Balloons
+
+Hard
+
+
+
+You are given `n` balloons, indexed from `0` to `n - 1`. Each balloon is painted with a number on it represented by an array `nums`. You are asked to burst all the balloons.
+
+If you burst the `ith` balloon, you will get `nums[i - 1] * nums[i] * nums[i + 1]` coins. If `i - 1` or `i + 1` goes out of bounds of the array, then treat it as if there is a balloon with a `1` painted on it.
+
+Return *the maximum coins you can collect by bursting the balloons wisely*.
+
+ 
+
+**Example 1:**
+
+```
+Input: nums = [3,1,5,8]
+Output: 167
+Explanation:
+nums = [3,1,5,8] --> [3,5,8] --> [3,8] --> [8] --> []
+coins =  3*1*5    +   3*5*8   +  1*3*8  + 1*8*1 = 167
+```
+
+**Example 2:**
+
+```
+Input: nums = [1,5]
+Output: 10
+```
+
+ 
+
+**Constraints:**
+
+- `n == nums.length`
+- `1 <= n <= 500`
+- `0 <= nums[i] <= 100`
+
+
+
++ l, r, k (length to pick)
+
+  + ex: 3158-> 
+    + `3*1, 158`
+    + `3*1*5, 358`
+
+  `dp[l][r]=max(s[i-1]*s[i]*s[i+1]+dp[l][i-1]+dp[i+1][r] for i in len(s)) `
+
+
+
+```python
+class Solution:
+    def maxCoins(self, nums: List[int]) -> int:
+        nums = [1]+ nums + [1]
+        n = len(nums)
+        dp = [[0]*n for _ in range(n)]
+        
+        for left in range(n-2,-1,-1):
+            for right in range(left+2, n):
+                dp[left][right] = max(nums[left]*nums[i]*nums[right] + dp[left][i]+dp[i][right] for i in range(left+1, right))
+        
+        return dp[0][n-1]
+```
+
+
+
+### 647. Palindromic Substrings
+
+Medium
+
+Given a string, your task is to count how many palindromic substrings in this string.
+
+The substrings with different start indexes or end indexes are counted as different substrings even they consist of same characters.
+
+**Example 1:**
+
+```
+Input: "abc"
+Output: 3
+Explanation: Three palindromic strings: "a", "b", "c".
+```
+
+ 
+
+**Example 2:**
+
+```
+Input: "aaa"
+Output: 6
+Explanation: Six palindromic strings: "a", "a", "a", "aa", "aa", "aaa".
+```
+
+ 
+
++ From each center i, expand 
+  + each time expand: +1
+  + odd and even case
+
+```python
+class Solution:
+    def countSubstrings(self, s: str) -> int:
+        if not s: return 0
+        n = len(s)
+        res = 0
+        for i in range(n):
+            l=r=i
+            while l>=0 and r<n and s[l]==s[r]:
+                res += 1
+                l -= 1
+                r += 1
+            l = i
+            r = i+1
+            while l>=0 and r<n and s[l]==s[r]:
+                res += 1
+                l -= 1
+                r += 1
+        return res
+```
+
+
+
+### 10. Regular Expression Matching
+
+Hard
+
+Given an input string (`s`) and a pattern (`p`), implement regular expression matching with support for `'.'` and `'*'` where:
+
+- `'.'` Matches any single character.
+- `'*'` Matches zero or more of the preceding element.
+
+The matching should cover the **entire** input string (not partial).
+
+ 
+
+**Example 1:**
+
+```
+Input: s = "aa", p = "a"
+Output: false
+Explanation: "a" does not match the entire string "aa".
+```
+
+**Example 2:**
+
+```
+Input: s = "aa", p = "a*"
+Output: true
+Explanation: '*' means zero or more of the preceding element, 'a'. Therefore, by repeating 'a' once, it becomes "aa".
+```
+
+**Example 3:**
+
+```
+Input: s = "ab", p = ".*"
+Output: true
+Explanation: ".*" means "zero or more (*) of any character (.)".
+```
+
+**Example 4:**
+
+```
+Input: s = "aab", p = "c*a*b"
+Output: true
+Explanation: c can be repeated 0 times, a can be repeated 1 time. Therefore, it matches "aab".
+```
+
+**Example 5:**
+
+```
+Input: s = "mississippi", p = "mis*is*p*."
+Output: false
+```
+
+ 
+
++ Append $ to both expression to signify the end of the word, Split regular expression by `*`
++ start from back of s, match char group by group, `i` is the right end of each group, j'th group, length of split is m
++ `j>=m-2: match directly`
++ `j<m-2: match j or j+1`
+
+
+
+
+
+
+
+### 1235. Maximum Profit in Job Scheduling
+
+Hard
+
+We have `n` jobs, where every job is scheduled to be done from `startTime[i]` to `endTime[i]`, obtaining a profit of `profit[i]`.
+
+You're given the `startTime` , `endTime` and `profit` arrays, you need to output the maximum profit you can take such that there are no 2 jobs in the subset with overlapping time range.
+
+If you choose a job that ends at time `X` you will be able to start another job that starts at time `X`.
+
+ 
+
+**Example 1:**
+
+**![img](https://assets.leetcode.com/uploads/2019/10/10/sample1_1584.png)**
+
+```
+Input: startTime = [1,2,3,3], endTime = [3,4,5,6], profit = [50,10,40,70]
+Output: 120
+Explanation: The subset chosen is the first and fourth job. 
+Time range [1-3]+[3-6] , we get profit of 120 = 50 + 70.
+```
+
+**Example 2:**
+
+**![img](https://assets.leetcode.com/uploads/2019/10/10/sample22_1584.png)**
+
+```
+Input: startTime = [1,2,3,4,6], endTime = [3,5,10,6,9], profit = [20,20,100,70,60]
+Output: 150
+Explanation: The subset chosen is the first, fourth and fifth job. 
+Profit obtained 150 = 20 + 70 + 60.
+```
+
+**Example 3:**
+
+**![img](https://assets.leetcode.com/uploads/2019/10/10/sample3_1584.png)**
+
+```
+Input: startTime = [1,1,1], endTime = [2,3,4], profit = [5,6,4]
+Output: 6
+```
+
+
+
+```python
+        jobs = sorted(zip(startTime, endTime, profit), key= lambda v: v[1])
+        
+        dp = [[0,0]]
+        
+        def find(time):
+            i = bisect_left(dp, [time+1]) -1
+            return dp[i][1]
+        
+        for s,e,p in jobs:
+            dp.append([e, max(find(e), find(s)+p)])
+            
+        return dp[-1][1]
+```
+
+
+
+### 140. Word Break II
+
+Hard
+
+
+
+Given a **non-empty** string *s* and a dictionary *wordDict* containing a list of **non-empty** words, add spaces in *s* to construct a sentence where each word is a valid dictionary word. Return all such possible sentences.
+
+**Note:**
+
+- The same word in the dictionary may be reused multiple times in the segmentation.
+- You may assume the dictionary does not contain duplicate words.
+
+**Example 1:**
+
+```
+Input:
+s = "catsanddog"
+wordDict = ["cat", "cats", "and", "sand", "dog"]
+Output:
+[
+  "cats and dog",
+  "cat sand dog"
+]
+```
+
+**Example 2:**
+
+```
+Input:
+s = "pineapplepenapple"
+wordDict = ["apple", "pen", "applepen", "pine", "pineapple"]
+Output:
+[
+  "pine apple pen apple",
+  "pineapple pen apple",
+  "pine applepen apple"
+]
+Explanation: Note that you are allowed to reuse a dictionary word.
+```
+
+**Example 3:**
+
+```
+Input:
+s = "catsandog"
+wordDict = ["cats", "dog", "sand", "and", "cat"]
+Output:
+[]
+```

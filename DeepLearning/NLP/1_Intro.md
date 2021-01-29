@@ -181,3 +181,43 @@
 
 + 
 
+
+
+## Faireness in classification
+
++ T. Anne Cleary $(1966-1968):$ a test is biased if prediction on a subgroup makes consistent nonzero prediction errors compared to the aggregate
+  + ![image-20210126130221058](/home/arkyyang/files/notes/notes/attachments/image-20210126130221058.png)
++ Thorndike (1971), Petersen and Novik (1976): fairness in classification: ratio of predicted positives to ground truth positives must be approximately the same for each group
+  - Group $1: 50 \%$ positive movie reviews. Group $2: 60 \%$ positive movie reviews
+  - A classifier classifying $50 \%$ positive in both groups is unfair, regardless of accuracy
++ Allows for different criteria across groups: imposing different classification thresholds actually can give a fairer result
+
+
+
+
+
+## Applications
+
+### Textual Entailment
+
++ A soccer game with multiple males playing.
+  ENTAILS
+  Some men are playing a sport.
++ A black race car starts up in front of a crowd of people.
+  CONTRADICTS
+  A man is driving down a lonely road
++ A smiling costumed woman is holding an umbrella.
+  NEUTRAL
+  A happy woman in a fairy costume holds an umbrella.
+
+### Entity Linking
+
+![image-20210126135940209](/home/arkyyang/files/notes/notes/attachments/image-20210126135940209.png)
+
+
+
+### Authorship Attribution
+
+![image-20210126140017485](/home/arkyyang/files/notes/notes/attachments/image-20210126140017485.png)
+
+![image-20210126140030284](/home/arkyyang/files/notes/notes/attachments/image-20210126140030284.png)
