@@ -282,7 +282,123 @@ Return the following binary tree:
           return root
   ```
 
+
++ Pass range, save memory but slower
+
+  ```python
+  class Solution:
+      def buildTree(self, preorder: List[int], inorder: List[int]) -> TreeNode:
+          def build(prel,prer, inl, inr):
+              if prel>prer or inl>inr: return None
+              val = preorder[prel]
+              node = TreeNode(val)
+              for i in range(inl, inr+1):
+                  if inorder[i] == val:
+                      idx = i
+                      break
+              node.left = build(prel+1, prel + (idx-inl) , inl, idx-1)
+              node.right = build(prel + (idx-inl)+1, prer, idx+1, inr)
+              return node
+          
+          n = len(preorder)
+          return build(0,n-1,0,n-1)
+          
+  ```
+
+  ```java
+  class Solution {
+      public TreeNode buildTree(int[] preorder, int[] inorder) {
+          int prel = 0;
+          int prer = preorder.length -1;
+          int inl = 0;
+          int inr = inorder.length -1;
+          return build(preorder, prel, prer, inorder, inl, inr);
+          
+      }
+      
+      TreeNode build(int[] preorder, int prel, int prer, int[] inorder, int inl, int inr){
+          if (prel > prer || inl > inr)
+              return null;
+          int val = preorder[prel];
+          TreeNode node = new TreeNode(val);
+          int idx = 0;
+          for (int i = inl; i <= inr; i++){
+              if (inorder[i] == val){
+                  idx = i;
+                  break;
+              }
+          }
+          
+          node.left = build(preorder, prel+1, prel + (idx-inl), inorder, inl, idx-1);
+          node.right = build(preorder, prel + (idx-inl)+1, prer , inorder, idx+1, inr);
+          return node;
+      }
+      
+  }
+  ```
+
   
+
+### 106 Construct Binary Tree from Inorder and Postorder Traversal
+
+```
+inorder = [9,3,15,20,7]
+postorder = [9,15,7,20,3]
+```
+
+```python
+class Solution:
+    def buildTree(self, inorder: List[int], postorder: List[int]) -> TreeNode:
+        def build(pl,pr,inl, inr):
+            if (pl>pr or inl > inr): return None
+            val = postorder[pr]
+            node = TreeNode(val)
+            for i in range(inl, inr+1):
+                if val == inorder[i]:
+                    idx = i
+            node.left = build(pl, pl+ idx-inl-1, inl, idx-1)
+            node.right = build(pl+idx-inl,pr-1, idx+1, inr)
+            return node
+        
+        n = len(inorder)
+        return build(0, n-1, 0, n-1)
+```
+
+```java
+class Solution {
+    public TreeNode buildTree(int[] inorder, int[] postorder) {
+        int pl = 0;
+        int pr = inorder.length-1;
+        int inl = 0;
+        int inr = inorder.length-1;
+        return build(postorder, pl, pr, inorder, inl, inr);
+    }
+    
+    TreeNode build(int[] postorder, int pl, int pr, int[] inorder, int inl, int inr){
+        if (pl>pr || inl>inr){
+            return null;
+        }
+        int val = postorder[pr];
+        TreeNode node = new TreeNode(val);
+        int idx = 0;
+        for (int i = inl ;i <= inr; i++){
+            if (inorder[i] == val){
+                idx = i;
+                break;
+            }
+        }
+        node.left = build(postorder, pl, pl+idx-inl-1, inorder, inl, idx-1);
+        node.right = build(postorder, pl+idx-inl, pr-1, inorder, idx+1, inr);
+        return node;
+    }
+}
+```
+
+
+
+
+
+
 
 ### 112 Path Sum
 
@@ -887,68 +1003,62 @@ Output: [1,2]
 
  
 
-+ This is in an order of pre-order traversal with null pointer marked. Use an iterative method
++ Pre-order, for tree, recursion is ok, faster and smaller memory than iteration
 
-```python
-class Codec:
+  ```python
+  from collections import deque
+  class Codec:
+      def serialize(self, root):
+          if not root:
+              return '^'
+          return str(root.val) + ' ' + self.serialize(root.left) + ' ' + self.serialize(root.right)
+          
+  
+      def deserialize(self, data):
+          data = deque(data.split(' '))
+          def build(data):
+              cur = data.popleft()
+              if cur == '^':
+                  return None
+              node = TreeNode(int(cur))
+              node.left = build(data)
+              node.right = build(data)
+              return node
+          return build(data)
+  ```
 
-    def serialize(self, root):
-        """Encodes a tree to a single string.
+  
+
+```java
+public class Codec {
+
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
         
-        :type root: TreeNode
-        :rtype: str
-        """
-        if not root:
-            return ""
-        queue=deque([root])
-        nodes=[]
-        while queue:
-            node = queue.popleft()
-            if not node: 
-                nodes.append(None)
-                continue
-            nodes.append(node.val)
-            if node.left:
-                queue.append(node.left)
-            else:
-                queue.append(None)
-            if node.right:
-                queue.append(node.right)
-            else:
-                queue.append(None)
-        i = len(nodes)-1
-        while True:
-            if nodes[i]==None:
-                nodes.pop(i)
-                i-=1
-            else:
-                break
-        return str(nodes)
+        if (root == null){
+            return "^";
+        }
+        return String.valueOf(root.val) + "," + serialize(root.left) + "," + serialize(root.right);
+    }
+
+    TreeNode build(Queue<String> q){
+        String cur = q.poll();
+        if (cur.equals("^")){
+            return null;
+        }
+        TreeNode node = new TreeNode(Integer.parseInt(cur));
+        node.left = build(q);
+        node.right = build(q);
+        return node;
+    }
     
-    def deserialize(self, data):
-        """Decodes your encoded data to tree.
-        
-        :type data: str
-        :rtype: TreeNode
-        """
-        if not data:
-            return None
-        nodes = eval(data)
-        root = TreeNode(nodes[0])
-        queue = deque([root])
-        i=1
-        while queue and i<len(nodes):
-            node = queue.popleft()
-            if not nodes[i]==None:
-                node.left=TreeNode(nodes[i])
-                queue.append(node.left)
-            i+=1
-            if i>=len(nodes): break
-            if not nodes[i]==None:
-                node.right=TreeNode(nodes[i])
-                queue.append(node.right)
-            i+=1
-        return root
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+        String[] array = data.split(",");
+        Queue<String> q = new LinkedList<String>(Arrays.asList(array));
+        return build(q);
+    }
+}
 ```
 
 

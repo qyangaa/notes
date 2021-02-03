@@ -12,12 +12,14 @@ math.floor(p/k) #equivalent to:
 p//k
 ```
 
-### maxint minint
+### max min
 
 ```python
 import sys
 max = sys.maxsize
 min = -sys.maxsize - 1
+max = float('inf')
+min = float('-inf')
 ```
 
 ### String
@@ -31,6 +33,7 @@ s.lower() #to lower case
 s = list(S)
 Operations...
 S = ''.join(s)
+' '.join(map(str, res)) # list -> str
 ```
 
 
@@ -49,6 +52,9 @@ l.pop(idx)
 
 ```python
 set2 & set1 # intersection
+A.intersection(*other_sets) # intersection destroy
+set1 | set2 # union
+A.union(*other_sets) # union destroy
 ```
 
 
@@ -114,6 +120,29 @@ bisect.bisect(a, x, lo=0, hi=len(a))
 bisect.insort_left(a, x, lo=0, hi=len(a))
 bisect.insort_right(a, x, lo=0, hi=len(a))
 bisect.insort(a, x, lo=0, hi=len(a))
+
+
+import bisect
+n = [1,2,3,4,4,5,6]
+# first >=k
+print(bisect.bisect_left(n,4))  # 3
+print(bisect.bisect_left(n,3)) # 2
+print(bisect.bisect_left(n,3.5)) # 3
+# first > k 
+print(bisect.bisect_right(n,4)) # 5
+print(bisect.bisect_right(n,3)) # 3
+print(bisect.bisect_right(n,3.5)) # 3
+
+bisect_left:
+def search(n, k):
+    l,r = 0, len(n)
+    while l<r:
+        m = l+(r-l)//2
+        if n[m]>=k:#smallest idx satisfies this
+            r=m
+        else:
+            l=m+1
+    return l
 ```
 
 
@@ -861,11 +890,160 @@ return memo[n][m]
 
 ### 1D, depend on $O(1)$ sub problem
 
+Max sum subarray:
+
+```python
+dp[i] = max(dp[i-1]+arr[i], arr[i])
+```
+
+
+
+198. House Robber (max sum of no adjacent house)
+
+```python
+for i in range(N):
+    dp[i][0] = dp[i-1][1]+val[i] # rob
+    dp[i][1] = max(dp[i-1][0], dp[i-1][1]) # no rob
+return max(dp[N][0], dp[N][1])
+```
+
+123 Best Time to Buy and Sell Stock III: two (by+sell) only
+
+![image-20210202081942691](/home/arkyyang/files/notes/notes/attachments/image-20210202081942691.png)
+
+```python
+dp[0][0] = dp[0][1]= dp[0][2] = dp[0][3] = -prices[0]
+for i in range(N):
+    dp[i][0] = max(dp[i-1][0], -val[i]) #have 1
+    dp[i][1] = max(dp[i-1][1], dp[i-1][0]+val[i]) # no 1
+    dp[i][2] = max(dp[i-1][2], dp[i-1][1]-val[i]) #have 2
+    dp[i][3] = max(dp[i-1][3], dp[i-1][2]+val[i]) #no 2
+return max(max(dp[-1]),0)
+```
+
+309 Best Time to Buy and Sell Stock with Cooldown: must cooldown for 1 day after sell before buy
+
+```python
+dp[0][0] = -prices[0]
+dp[0][1] = float('-inf')
+for i in range(1, n):
+    dp[i][0] = max(dp[i-1][0], dp[i-1][2] - val[i]) # has
+    dp[i][1] = dp[i-1][0] + val[i]# sell
+    dp[i][2] = max(dp[i-1][2], dp[i-1][1])# wait with no stock
+return max(dp[-1][1], dp[-1][2])
+```
+
+376 Wiggle subsequence
+
+![image-20210202091343180](/home/arkyyang/files/notes/notes/attachments/image-20210202091343180.png)
+
+```python
+up[0] = down[0] = 1;
+for i in range(1,n):
+    if nums[i] < nums[i-1]:
+        down[i] = up[i-1]+1
+    else:
+        down[i] = down[i-1]
+    if nums[i] > nums[i-1]:
+        up[i]  = down[i-1] + 1
+    else:
+        up[i] = up[i-1]
+return max(up[-1], down[-1])        
+```
+
+1289  Minimum Falling Path Sum II:
+exactly one element from each row of `arr`, such that no two elements chosen in adjacent rows are in the same column.
+
+```python
+for i in range(1,n):
+    for j in range(m):
+        dp[i][j] = min([dp[i-1][k] for k in range(m) if k!=j ]) + arr[i][j]
+return min(dp[-1])
+```
+
+
+
+#### To Do or Not to Do
+
++ Two states: do, not
+
+487 Max Consecutive Ones II
+
+ binary array, find the maximum number of consecutive 1s in this array if you can flip at most one 0.
+
+```python
+noFlip[0] = nums[0]
+flip[0] = 1
+for i in range(1,n):
+    if nums[i] == 1:
+        noFlip[i] = noFlip[i-1]+1
+        flip[i] = flip[i-1] + 1
+    else:
+        noFlip[i] = 0
+        flip[i] = noFlip[i-1]+1
+return max(flip)
+```
+
+1186 Maximum Subarray Sum with One Deletion
+
+maximum sum for a **non-empty** subarray (contiguous elements) with at most one element deletion
+
+```python
+for i in range(1, n):
+    de[i] = max(no[i-1], de[i-1]+arr[i])
+    no[i] = max(no[i-1]+arr[i], arr[i])
+return max(max(de), max(no))
+```
+
 
 
 
 
 ### 1D, depend on $O(n)$ subproblem
+
++ Related to problem [0,i-1] (sum, max, min)
+
+300 Longest Increasing Subsequence
+
+```python
+for i in range(1,n):
+    dp[i] = 1;
+    for j in range(0,i):
+        if nums[j]<nums[i]:
+        	dp[i] = max(dp[i], dp[j]+1)
+return max(dp)
+```
+
+673 Number-of-Longest-Increasing-Subsequence
+
+```python
+dp = [1]*n
+count = [1]*n
+for i in range(1,n):
+    for j in range(0,i):
+        if nums[j]<nums[i]:
+            if dp[i] == dp[j]+1:
+                count[i] += count[j]
+            elif dp[j]+1 > dp[i]:
+                dp[i] = dp[j]+1
+                count[i] = count[j]
+return sum([count[i] for i in range(n) if dp[i]==max(dp)])
+```
+
+368 Largest Divisible Subset
+
+```python
+nums.sort()
+for i in range(1,n):
+    for j in range(0,i):
+        if nums[i]%nums[j] == 0:
+            dp[i] = max(dp[i], dp[j]+1)
+            if dp[i] == dp[j]+1:
+                sets[i] = sets[j] + [nums[i]]
+    if dp[i]> maxVal:
+        maxVal, maxIdx = dp[i], i
+return sets[maxIdx]
+```
 
 
 
@@ -899,6 +1077,54 @@ for i in range(n):
 #### 1D, multiple states
 
 ### 2D
+
++ 1143 Longest Common Subsequence
+
+```python
+dp[i][j]: LCS between first i items of l1 and first j items of l2
+if l1[i-1] == l2[j-1]:
+    dp[i][j] = dp[i-1][j-1] + 1
+else:
+    dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+```
+
++ 1092 Shortest Common Supersequence
+
+```python
+dp: from LCS
+if i == 0: 
+    s.appendLeft(l2[j-1])
+    j -= 1
+elif j == 0:
+    s.appendLeft(l1[i-1])
+    i -= 1
+if l1[i-1]==l2[j-1]:
+    s.appendLeft(l1[i-1])
+    i -= 1
+    j -= 1
+elif dp[i][j] == dp[i-1][j]:
+    s.appendLeft(l1[i-1])
+    i -= 1
+elif dp[i][j] == dp[i][j-1]:
+    s.appendLeft(l2[j-1])
+    j -= 1
+```
+
++ 516 Longest Palindromic subsequence
+
+```python
+dp[i][j]: longest palindromic subsequence from i to j
+for k in range(1,n):
+    for i in range(0, n-k):
+        j  = i + k - 1
+        
+if s[i] == s[j]:
+    s[i][j] = s[i+1][j-1] + 2
+else:
+    s[i][j] = max(s[i+1][j], s[i][j-1])
+```
+
+
 
 
 
@@ -1311,6 +1537,73 @@ def f(root):
     return g(root, l, r)
 ```
 
+#### Iterative Methods
+
+```python
+# Preorder: visit, push right, push left
+stack = [root]
+while stack:
+    cur = stack.pop()
+    visit(cur)
+    if cur.right: stack.append(cur.right)
+    if cur.left: stack.append(cur.left)
+
+# Preorder: save space by pushing only right
+stack = [root]
+cur = root
+while stack:
+    visit(cur)
+    if cur.right: stack.append(cur.right)
+    if cur.left: 
+        cur = cur.left
+    else:
+        cur = stack.pop()
+visit(cur)  
+
+# Inoder: push, go left, if no left, pop, visit, go right
+stack = []
+cur = root
+while stack or cur:
+    if cur:
+        stack.append(cur)
+        cur = cur.left
+    else:
+        cur = stack.pop()
+        visit(cur)
+        cur = cur.right
+
+# Postorder: 
+# go down until leaf, process leaf and pop stack
+# go up from left node, if has right push, else go up and pop
+res = []
+stack = [root]
+prev = None
+while stack:
+    cur = stack[-1]
+    # search for leaf
+    if not prev or prev.left == cur or prev.right == cur:
+        if cur.left:
+            stack.append(cur.left)
+        elif cur.right:
+            stack.append(cur.right)
+        else: # leaf
+            stack.pop()
+            res.append(cur.val)
+    elif cur.left == prev:
+        if cur.right:
+            stack.push(cur.right)
+        else:
+            stack.pop()
+            res.append(cur.val)
+    elif cur.right == prev:
+        stack.pop()
+        res.append(cur.val)
+    rev = cur
+return res
+```
+
+
+
 #### Find Path
 
 ##### Recursion
@@ -1473,6 +1766,31 @@ def f(p, q):
       
   ```
 
+### Morris Traversal (In Order)
+
+```python
+def inOrder(root):
+    cur = root
+    while cur:
+        if !cur.left:
+            print(cur.val)
+            cur = cur.right
+        else:
+            pre = cur.left
+            while cur.right!=cur and pre.right:
+                pre = pre.right
+            if !pre.right:
+                pre.right = cur
+                cur = cur.left
+            else:
+                pre.right = null
+                print(cur.val)
+                cur = cur.right
+                
+```
+
+
+
 ### BST
 
 + Find:
@@ -1485,6 +1803,7 @@ def find(root, target):
         if value<target: cur=cur.left
         else: cur=cur.right
     return False
+
 
 def add(root, value):
     if not root: root=TreeNode(value), return True
@@ -1521,6 +1840,45 @@ def findAndRemove(node):
     node.right = node.right.left
     return result
 ```
+
+
+
+### Trie
+
+```python
+class TrieNode:
+    def __init__():
+        children = [None]*26;
+        val = 0;
+        isWord = False;
+
+class Trie:
+    def __init__():
+        self.root = TrieNode()
+    def insert(word):
+        if not word: return
+        cur = self.root
+        for i in range(len(word)):
+            c = word[i]
+            idx = c - 'a'
+            if not cur.children[idx]:
+                newNode = TrieNode()
+                cur.children[idx] = newNode
+            cur = cur.children[idx]
+    	cur.isWord = True
+    def search(word):
+        if not word: return True
+        cur = self.root
+        for i in range(len(word)):
+            c = word[i]
+            idx = c - 'a'
+            if not cur.children[idx]: return False
+            cur = cur.children[idx]
+    	return cur.isWord        
+           
+```
+
+
 
 
 

@@ -406,88 +406,85 @@ Output: 3
   + definitions:
     + legalStep: step to 1, not out of boundary, not visited
     + terminate: if no legalSteps anymore
-  + BFS
-    + Start from `[0,0]`, go until terminate, count++
-    + Find an unvisited 1, go until terminate, count++ for each iteration
 
-```python
-    def numIslands(self, grid) -> int:
-        self.m = len(grid)
-        self.n = len(grid[0])
-        self.grid = grid
-        self.toVisit = set([(i, j) for i in range(self.m) for j in range(self.n) if self.grid[i][j] == "1"])
-        num_islands=0
-        while len(self.toVisit)>0:
-            start=self.toVisit.pop()
-            self.BFS(start)
-            num_islands+=1
-        return num_islands
-
-    def BFS(self, start):
-        curLevel=[start]
-        while len(curLevel)>0:
-            nextLevel=[]
-            for item in curLevel:
-                nextLevel+=self.findLegalSteps(item)
-            curLevel=nextLevel
-        return
-
-    def findLegalSteps(self, item):
-        legalSteps=[]
-        i,j=item[0],item[1]
-        for step in [(i+1,j),(i-1,j),(i,j+1),(i,j-1)]:
-            if self.isLegal(step[0],step[1]):
-                legalSteps.append(step)
-                self.toVisit.remove(step)
-        return legalSteps
-
-    def isLegal(self, i, j):
-        if not (i, j) in self.toVisit:
-            return False
-        if i < 0 or j < 0 or i >= self.m or j >= self.n:
-            return False
-        return True
-```
-
-+ DFS solution can be faster: (176ms vs 224ms, not too much difference)
-
-  + mark visited using the original grid (set to "0")
++ + mark visited using the original grid (set to "0")
 
   + ```python
-    def numIslands(self, grid):
-        if not grid:
-            return 0
+  class Solution:
+        def numIslands(self, grid: List[List[str]]) -> int:
+            if not grid: return 0
             
-        m = len(grid)
-        n = len(grid[0])
-        sum  = 0
-        
-        #linear scanning doesn't take too much time. Ok to do it rather than remembering places to visit
-        for i in range(m):
-            for j in range(n):
-                if grid[i][j] == "0":
-                    continue
-                else:
-                    #sum up only once per chance of meeting "1"
-                    sum += 1
-                    stack = list()
-                    stack.append([i,j])
-                    #visit each "1" in the adjacent area using a stack
-                    while len(stack) != 0:
-                        [p,q] = stack.pop()
-                        if p >= 1 and grid[p-1][q] == "1":
-                            stack.append([p-1,q])
-                        if p < m -1 and grid[p+1][q] == "1":
-                            stack.append([p+1,q])
-                        if q >= 1 and grid[p][q-1] == "1":
-                            stack.append([p,q-1])  
-                        if q < n - 1 and grid[p][q + 1] == "1":
-                            stack.append([p,q+1])
-                        #mark as visited
-                        grid[p][q] = "0"
-        
-        return sum
+            def dfs(i,j):
+                grid[i][j] = "0"
+                di = [0, 1, 0, -1]
+                dj = [1, 0, -1, 0]
+                for k in range(4):
+                    ni, nj = i + di[k], j + dj[k]
+                    if 0<=ni<n and 0<=nj<m and grid[ni][nj] == "1":
+                        dfs(ni,nj)
+                return
+            
+            
+            n, m = len(grid), len(grid[0])
+            
+            res = 0
+            
+            for i in range(n):
+                for j in range(m):
+                    if grid[i][j] == "1":
+                        res += 1
+                        dfs(i,j)
+            
+            return res
     ```
+
+
+
+```java
+class Solution {
+    
+    void dfs(char[][] grid, int i, int j){
+        int n = grid.length;
+        int m = grid[0].length;
+        grid[i][j] = '0';
+        int di[] = {0, 1, 0, -1};
+        int dj[] = {1, 0, -1, 0};
+        for (int k = 0; k < 4; k++){
+            int ni = i + di[k];
+            int nj = j + dj[k];
+            if (ni>=0 && ni<n && nj>=0 && nj<m && grid[ni][nj] == '1'){
+                dfs(grid, ni, nj);
+            }
+        }
+        return;
+    }
+    
+    public int numIslands(char[][] grid) {
+        if (grid.length == 0)
+            return 0;
+        
+        int n = grid.length;
+        int m = grid[0].length;
+        
+        int res = 0;
+        for (int i = 0 ; i < n; i++){
+            for (int j = 0; j < m; j ++){
+                if (grid[i][j] == '1'){
+                    res++;
+                    dfs(grid, i, j);
+                }
+            }
+        }
+        
+        return res;
+        
+    }
+}
+```
+
+
+
+
 
 
 

@@ -527,7 +527,32 @@ There are two possible trees.  The first has non-leaf node sum 36, and the secon
   + n node: spit into left right
     + `sum = recurse(left)+ recurse(right)+max(left)*max(right)`
 
-+ Time limit exceeded:
++ Stack:
+
+  + Wish to multiply large number as late as possible:
+    + Keep large number in stack, pop smaller number once seen
+    + When we have 3 numbers, we are certain to remove the smallest one
+    + When see a small number in middle, discard it and res+= the smaller product it forms with left/ right
+    + resulting stack is a decreasing sequence
+  + In the end pop all except first one
+  + Example: [6,2,4, 5]
+    + `[Max, 6]`
+    + `[Max, 6, 2]`
+    + `[Max, 6, 4] res+= 8 (2*4<2*8)`
+    + `[Max, 6, 5] res +=  20 (4*5<4*6)`
+    + `[Max, 6] res += 30 `
+  + Example: [7, 12, 8, 10]
+    + `[Max, 7]`
+    + `[Max, 12] res+= 7*12`
+    + `[Max, 12, 8]`
+    + `[Max, 12, 10] res+=12*8`
+    + `[Max, 12] res += 12*10`
+  + Example: [8,12,7,10]
+    + `[Max, 8]`
+    + `[Max, 12] res+=8*12`
+    + `[Max, 12, 7]`
+    + `[Max, 12, 10] res+= 7*10 (7*10<7*12)`
+    + `[Max, 12] res += 10`
 
   ```python
   import sys
@@ -545,6 +570,29 @@ There are two possible trees.  The first has non-leaf node sum 36, and the secon
           
           n = len(arr)
           return helper(0,n-1)
+  ```
+
+  ```java
+  class Solution {
+      public int mctFromLeafValues(int[] arr) {
+          int n = arr.length;
+          Stack<Integer> stack = new Stack<>();
+          int ans = 0;
+          stack.push(Integer.MAX_VALUE);
+          for (int cur: arr){
+              while (stack.peek()<=cur){
+                  int drop = stack.pop();
+                  ans += drop*Math.min(stack.peek(), cur);
+              }
+              stack.push(cur);
+          }
+          
+          while(stack.size()>2){
+              ans += stack.pop()*stack.peek();
+          }
+          return ans;
+      }
+  }
   ```
 
 + Greedy solution
@@ -790,7 +838,7 @@ Input: root = [1,null,2], low = 2, high = 4
 Output: [2]
 ```
 
- 
+ ![image-20210130165428133](/home/arkyyang/files/notes/notes/attachments/image-20210130165428133.png)
 
 ```python
     def trim(node):
@@ -803,9 +851,23 @@ Output: [2]
     return trim(root)
 ```
 
+```java
+class Solution {
+    
+    public TreeNode trimBST(TreeNode root, int low, int high) {
+        if (root == null) return root;
+        if (root.val > high) return trimBST(root.left, low, high);
+        if (root.val < low) return trimBST(root.right, low, high);
+        root.left = trimBST(root.left, low, high);
+        root.right = trimBST(root.right, low, high);
+        return root;
+    }
+}
+```
 
 
-\449. Serialize and Deserialize BST
+
+### 449 Serialize and Deserialize BST
 
 Medium
 
@@ -835,22 +897,46 @@ Output: []
 
  
 
++ Preorder:
 
+```python
+from collections import deque
+class Codec:
+    def serialize(self, root):
+        res = []
+        def preOrder(root):
+            if root:
+                res.append(root.val)
+                preOrder(root.left)
+                preOrder(root.right)
+        preOrder(root)
+        return ' '.join(map(str, res))
+
+
+    def deserialize(self, data):
+        data = deque(int(n) for n in data.split(' ') if n)
+        def build(cmin, cmax):
+            if data and cmin< data[0] < cmax:
+                cur = data.popleft()
+                node = TreeNode(cur)
+                node.left = build(cmin, cur)
+                node.right = build(cur, cmax)
+                return node
+        return build(float('-inf'), float('inf'))
+```
+
++ Postoder allows tail recursion, faster:
 
 ```python
 class Codec:
     def serialize(self, root):
-        """
-        Encodes a tree to a single string.
-        """
+
         def postorder(root):
             return postorder(root.left) + postorder(root.right) + [root.val] if root else []
         return ' '.join(map(str, postorder(root)))
 
     def deserialize(self, data):
-        """
-        Decodes your encoded data to tree.
-        """
+
         def helper(lower = float('-inf'), upper = float('inf')):
             if not data or data[-1] < lower or data[-1] > upper:
                 return None
@@ -863,6 +949,53 @@ class Codec:
         
         data = [int(x) for x in data.split(' ') if x]
         return helper()
+```
+
+```java
+public class Codec {
+    
+    StringBuilder postOrder(TreeNode root, StringBuilder sb){
+        if (root == null)
+            return sb;
+        postOrder(root.left, sb);
+        postOrder(root.right, sb);
+        sb.append(root.val);
+        sb.append(' ');
+        return sb;
+    }
+
+    // Encodes a tree to a single string.
+    public String serialize(TreeNode root) {
+        StringBuilder sb = postOrder(root, new StringBuilder());
+        if (sb.length() > 0)
+            sb.deleteCharAt(sb.length() -1);
+        return sb.toString();
+    }
+    
+    TreeNode helper(Integer lower, Integer upper, ArrayDeque<Integer> nums){
+        if (nums.isEmpty())
+            return null;
+        int val = nums.getLast();
+        if (val<lower || val > upper)
+            return null;
+        nums.removeLast();
+        TreeNode root  = new TreeNode(val);
+        root.right = helper(val, upper, nums);
+        root.left = helper(lower, val, nums);
+        return root;
+    }
+
+    // Decodes your encoded data to tree.
+    public TreeNode deserialize(String data) {
+        if (data.isEmpty())
+            return null;
+        ArrayDeque<Integer> nums = new ArrayDeque<Integer>();
+        for (String s: data.split("\\s+"))
+            nums.add(Integer.valueOf(s));
+        return helper(Integer.MIN_VALUE, Integer.MAX_VALUE, nums);
+        
+    }
+}
 ```
 
 
@@ -979,62 +1112,495 @@ Explanation: 2 cannot be in the right subtree of 3 because 2 < 3. Swapping 2 and
 
 + 
 
-+ ```python
-  if right<root and left>root:
-      swap(left, right)
-  elif left>root:
-      swap(left, root)
-  elif right<root:
-      swap(right, root)
-  
-  
-  ```
-
-
 
 + Recursion: technically $O(n)$ memory worst
 
 ```python
-import sys
+def inorder(root):
+    nonlocal first, second, prev
+    if not root: return
+    inorder(root.left)
+    if prev and prev.val > root.val:
+        if not first:
+            first = prev
+        second = root
+    prev = root
+    inorder(root.right)
 
-class Solution:
-    def recoverTree(self, root: TreeNode) -> None:
-        """
-        Do not return anything, modify root in-place instead.
-        """
-        LR = [None,None]
-        LRnodes = [None, None] 
-        
-        def minMax(root):
-            if not root: return sys.maxsize, -sys.maxsize-1
-            
-            minL, maxL = minMax(root.left)
-            minR, maxR = minMax(root.right)
-            
-            if maxL>minR:
-                LR[0], LR[1] = maxL, minR
-            elif maxL> root.val:
-                LR[0], LR[1] = maxL, root.val
-            elif minR < root.val:
-                LR[0], LR[1] = root.val, minR
-            
-            return min(minL, minR, root.val), max(maxL, maxR, root.val)
-        
-        def findNode(node, val):
-            if not node: return None
-            if node.val == val: return node
-            return findNode(node.left, val) or findNode(node.right, val)
-        
-
-        
-        _, _ = minMax(root)
-        LRnodes[0] = findNode(root, LR[0])
-        LRnodes[1] = findNode(root, LR[1])
-        
-        LRnodes[0].val, LRnodes[1].val = LRnodes[1].val, LRnodes[0].val
-        
-        return
+first = second = prev = None
+inorder(root)
+first.val, second.val = second.val, first.val
 ```
 
 
+
++ Morris Traversal
+
+```python
+class Solution:
+    def recoverTree(self, root):
+        """
+        :type root: TreeNode
+        :rtype: void Do not return anything, modify root in-place instead.
+        """
+
+        x = y = predecessor = pred = None
+        
+        while root:
+
+            if root.left:       
+                predecessor = root.left
+                while predecessor.right and predecessor.right != root:
+                    predecessor = predecessor.right
+
+                if predecessor.right is None:
+                    predecessor.right = root
+                    root = root.left
+
+                else:
+
+                    if pred and root.val < pred.val:
+                        y = root
+                        if x is None:
+                            x = pred 
+                    pred = root
+                    
+                    predecessor.right = None
+                    root = root.right
+
+            else:
+
+                if pred and root.val < pred.val:
+                    y = root
+                    if x is None:
+                        x = pred 
+                pred = root
+                
+                root = root.right
+        
+        x.val, y.val = y.val, x.val
+```
+
+
+
+### 1339. Maximum Product of Splitted Binary Tree
+
+Medium
+
+Given a binary tree `root`. Split the binary tree into two subtrees by removing 1 edge such that the product of the sums of the subtrees are maximized.
+
+Since the answer may be too large, return it modulo 10^9 + 7.
+
+ 
+
+**Example 1:**
+
+**![img](https://assets.leetcode.com/uploads/2020/01/21/sample_1_1699.png)**
+
+```
+Input: root = [1,2,3,4,5,6]
+Output: 110
+Explanation: Remove the red edge and get 2 binary trees with sum 11 and 10. Their product is 110 (11*10)
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2020/01/21/sample_2_1699.png)
+
+```
+Input: root = [1,null,2,3,4,null,null,5,6]
+Output: 90
+Explanation:  Remove the red edge and get 2 binary trees with sum 15 and 6.Their product is 90 (15*6)
+```
+
+**Example 3:**
+
+```
+Input: root = [2,3,9,10,7,8,6,5,4,11,1]
+Output: 1025
+```
+
+**Example 4:**
+
+```
+Input: root = [1,1]
+Output: 1
+```
+
+ 
+
+**Constraints:**
+
+- Each tree has at most `50000` nodes and at least `2` nodes.
+- Each node's value is between `[1, 10000]`.
+
+
+
++ We need at each node, we need to find to sums: 
+  + sum of its subtree including itself, sum of all other nodes
+
+```python
+class Solution:
+    def maxProduct(self, root: TreeNode) -> int:
+        def findSum(root):
+            return root.val + findSum(root.left) + findSum(root.right) if root else 0
+        
+        tot = findSum(root)
+        
+        def findCut(node, maxProd):
+            if not node: return 0
+            curSum = node.val + findCut(node.left, maxProd) + findCut(node.right, maxProd)
+            maxProd[0] = max(maxProd[0], curSum*(tot-curSum))
+            return curSum
+        
+        maxProd = [0]
+        findCut(root, maxProd)
+        return maxProd[0]%(10**9 + 7)
+```
+
+```java
+class Solution {
+    public int maxProduct(TreeNode root) {
+        int tot = findSum(root);
+        long[] maxProd = {0};
+        findCut(root, maxProd, tot);
+        return (int) (maxProd[0] % 1000000007);
+    }
+    
+    int findSum(TreeNode root){
+        return (root==null)? 0: root.val + findSum(root.left) + findSum(root.right);
+    }
+    
+    int findCut(TreeNode node, long[] maxProd, long tot){
+        if (node == null)
+            return 0;
+        int curSum = node.val + findCut(node.left, maxProd, tot) + findCut(node.right, maxProd, tot);
+        maxProd[0]  = Math.max(maxProd[0], (long)curSum*(tot - curSum));
+        return curSum;
+    }
+}
+```
+
+
+
+### 1676. Lowest Common Ancestor of a Binary Tree IV
+
+Medium
+
+Given the `root` of a binary tree and an array of `TreeNode` objects `nodes`, return *the lowest common ancestor (LCA) of **all the nodes** in* `nodes`. All the nodes will exist in the tree, and all values of the tree's nodes are **unique**.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2018/12/14/binarytree.png)
+
+```
+Input: root = [3,5,1,6,2,0,8,null,null,7,4], nodes = [4,7]
+Output: 2
+Explanation: The lowest common ancestor of nodes 4 and 7 is node 2.
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2018/12/14/binarytree.png)
+
+```
+Input: root = [3,5,1,6,2,0,8,null,null,7,4], nodes = [1]
+Output: 1
+Explanation: The lowest common ancestor of a single node is the node itself.
+```
+
+**Example 3:**
+
+![img](https://assets.leetcode.com/uploads/2018/12/14/binarytree.png)
+
+```
+Input: root = [3,5,1,6,2,0,8,null,null,7,4], nodes = [7,6,2,4]
+Output: 5
+Explanation: The lowest common ancestor of the nodes 7, 6, 2, and 4 is node 5.
+```
+
+**Example 4:**
+
+![img](https://assets.leetcode.com/uploads/2018/12/14/binarytree.png)
+
+```
+Input: root = [3,5,1,6,2,0,8,null,null,7,4], nodes = [0,1,2,3,4,5,6,7,8]
+Output: 3
+Explanation: The lowest common ancestor of all the nodes is the root node.
+```
+
+ 
+
++ If in both left and right and visited all:
+  + return node
++ if only in left / right:
+  + return node.left/ right
+
++ See if tree contains nodes:
+
+```python
+def contains(root, nodes):
+    if not root: return None
+    if root in nodes: return True
+    return contains(root.left) or contains(root.right)
+```
+
++ Modify to common ancestor
+
+```python
+def ancestor(root, nodes):
+    if not root: return None
+    if root in nodes: return node
+    left, right = ancestor(root.left, nodes), ancestor(root.right, nodes)
+    if not left:
+        return right
+    if not right:
+        return left
+    else:
+        return root
+```
+
+```java
+class Solution {
+    Set<Integer> set;
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode[] nodes) {
+        set = new HashSet<>();
+        for (TreeNode t: nodes){
+            set.add(t.val);
+        }
+        return find(root);
+    }
+    
+    TreeNode find(TreeNode node){
+        if (node==null) 
+            return null;
+        if (set.contains(node.val))
+            return node;
+        TreeNode left = find(node.left);
+        TreeNode right = find(node.right);
+        if (left==null){
+            return right;
+        }else if(right == null){
+            return left;
+        }else{
+            return node;
+        }
+    }
+}
+```
+
+
+
+### 129. Sum Root to Leaf Numbers
+
+Medium
+
+Given a binary tree containing digits from `0-9` only, each root-to-leaf path could represent a number.
+
+An example is the root-to-leaf path `1->2->3` which represents the number `123`.
+
+Find the total sum of all root-to-leaf numbers.
+
+**Note:** A leaf is a node with no children.
+
+**Example:**
+
+```
+Input: [1,2,3]
+    1
+   / \
+  2   3
+Output: 25
+Explanation:
+The root-to-leaf path 1->2 represents the number 12.
+The root-to-leaf path 1->3 represents the number 13.
+Therefore, sum = 12 + 13 = 25.
+```
+
+**Example 2:**
+
+```
+Input: [4,9,0,5,1]
+    4
+   / \
+  9   0
+ / \
+5   1
+Output: 1026
+Explanation:
+The root-to-leaf path 4->9->5 represents the number 495.
+The root-to-leaf path 4->9->1 represents the number 491.
+The root-to-leaf path 4->0 represents the number 40.
+Therefore, sum = 495 + 491 + 40 = 1026.
+```
+
+```python
+class Solution:
+    def sumNumbers(self, root: TreeNode) -> int:
+        def findSum(node, path):
+            if not node: return 0
+            cur  = path*10 + node.val
+            if not node.left and not node.right:
+                return cur
+            return findSum(node.left, cur) + findSum(node.right,cur)
+        
+        return findSum(root, 0)
+```
+
+```java
+class Solution {
+    public int sumNumbers(TreeNode root) {
+        return findSum(root, 0);
+    }
+    
+    int findSum(TreeNode node, int path){
+        if (node == null)
+            return 0;
+        int cur = path*10 + node.val;
+        if (node.left==null && node.right == null){
+            return cur;
+        }
+        return findSum(node.left, cur) + findSum(node.right, cur);
+    }
+}
+```
+
+
+
+### 114. Flatten Binary Tree to Linked List
+
+Medium
+
+Given the `root` of a binary tree, flatten the tree into a "linked list":
+
+- The "linked list" should use the same `TreeNode` class where the `right` child pointer points to the next node in the list and the `left` child pointer is always `null`.
+- The "linked list" should be in the same order as a [**pre-order** **traversal**](https://en.wikipedia.org/wiki/Tree_traversal#Pre-order,_NLR) of the binary tree.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2021/01/14/flaten.jpg)
+
+```
+Input: root = [1,2,5,3,4,null,6]
+Output: [1,null,2,null,3,null,4,null,5,null,6]
+```
+
+**Example 2:**
+
+```
+Input: root = []
+Output: []
+```
+
+**Example 3:**
+
+```
+Input: root = [0]
+Output: [0]
+```
+
+ 
+
+```python
+class Solution:
+    def flatten(self, root: TreeNode) -> None:
+        if not root: return root
+        pre = None
+        cur = root
+        stack = [root]
+        while stack:
+            if pre:
+                pre.right, pre.left = cur, None
+            if cur.right: stack.append(cur.right)
+            if cur.left:
+                pre, cur = cur, cur.left
+            else:
+                pre, cur = cur, stack.pop()
+            
+        return
+```
+
+```java
+class Solution {
+    public void flatten(TreeNode root) {
+        if (root==null)
+            return;
+        TreeNode pre = null;
+        TreeNode cur = root;
+        Stack<TreeNode> stack = new Stack<TreeNode>();
+        stack.push(root);
+        while(!stack.isEmpty()){
+            if(pre!=null){
+                pre.right = cur;
+                pre.left = null;
+            }
+            if(cur.right!=null)
+                stack.push(cur.right);
+            if(cur.left!=null){
+                pre = cur;
+                cur = cur.left;
+            }else{
+                pre = cur;
+                cur = stack.pop();
+            }
+        }
+    return;
+    }
+}
+```
+
+
+
+### 889. Construct Binary Tree from Preorder and Postorder Traversal
+
+Medium
+
+Return any binary tree that matches the given preorder and postorder traversals.
+
+Values in the traversals `pre` and `post` are distinct positive integers.
+
+ 
+
+**Example 1:**
+
+```
+Input: pre = [1,2,4,5,3,6,7], post = [4,5,2,6,7,3,1]
+Output: [1,2,3,4,5,6,7]
+```
+
+ 
+
+**Note:**
+
+- `1 <= pre.length == post.length <= 30`
+- `pre[]` and `post[]` are both permutations of `1, 2, ..., pre.length`.
+- It is guaranteed an answer exists. If there exists multiple answers, you can return any of them.
+
++ **Be careful when finding relative position, use offset like `idx-postl` instead of absolute `idx`, except for the single `idx+1`**
+
+```python
+class Solution:
+    def constructFromPrePost(self, pre: List[int], post: List[int]) -> TreeNode:
+
+        def build(prel, prer, postl, postr):
+            print(prel, prer, postl, postr)
+            if prel>prer or postl>postr: return None
+            if prel==prer: return TreeNode(pre[prel])
+            val = pre[prel]
+            node = TreeNode(val)
+            for i in range(postl, postr+1):
+                if post[i] == pre[prel+1]:
+                    idx = i
+            prel += 1
+            node.left = build(prel, prel+idx-postl, postl, idx)
+            node.right = build(prel+idx-postl+1, prer,idx+1, postr-1)
+            return node
+        
+        n = len(pre)
+        return build(0, n-1, 0, n-1)
+```
 

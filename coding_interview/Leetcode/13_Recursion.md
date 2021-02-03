@@ -1124,29 +1124,67 @@ There are 5 ways to assign symbols to make the sum of nums be target 3.
      class Solution:
          def findTargetSumWays(self, nums: List[int], S: int) -> int:
              if not nums: return 0
-             
-             totSum = sum(nums)
-             
-             if S>totSum: return 0
-             
-             dp = [0]*(totSum+1)
-             dp[nums[0]]=1
-             if nums[0]==0:
-                 dp[nums[0]]+=1
-             
-             n = len(nums)
-             for i in range(1,n):
-                 last = dp.copy()
-                 for j in range(totSum+1):
-                     left = last[abs(j-nums[i])]
-                     if j+nums[i]<=totSum:
-                         right = last[j+nums[i]]
-                         dp[j] = left+right
-                     else:
-                         dp[j] = left
-             return dp[abs(S)]
-                 
+             tot = sum(nums)
+             if tot<S:
+                 return 0
+             dp = [0]*(2*tot+1)
+             dp[tot] = 1
+             for num in nums:
+                 prev = dp.copy()
+                 for i in range(0, len(dp)):
+                     left = prev[i-num] if i-num>=0 else 0
+                     right = prev[i+num] if i+num<len(dp) else 0
+                     dp[i] = left + right
+                     
+             return dp[tot+S]
      ```
+
+   + 
+
+   + Save one side:
+
+   + ```python
+     class Solution:
+         def findTargetSumWays(self, nums: List[int], S: int) -> int:
+             if not nums: return 0
+             tot = sum(nums)
+             if tot<S:
+                 return 0
+             dp = [0]*(tot+1)
+             dp[0] = 1
+             for num in nums:
+                 prev = dp.copy()
+                 for i in range(0, len(dp)):
+                     left = prev[i-num] if i-num>=0 else prev[num-i]
+                     right = prev[i+num] if i+num<len(dp) else 0
+                     dp[i] = left + right 
+             return dp[abs(S)]
+     ```
+
+```java
+class Solution {
+    public int findTargetSumWays(int[] nums, int S) {
+        if (nums.length == 0)
+            return 0;
+        int sum = Arrays.stream(nums).sum();
+        if (sum < S)
+            return 0;
+        int len = sum + 1;
+        int[] dp = new int[len];
+        dp[0] = 1;
+        for (int num: nums){
+            int[] prev = dp.clone();
+            for (int i=0; i<len; i++){
+                int left = (i-num >= 0) ? prev[i - num] : prev[num - i];
+                int right = (i+num < len) ? prev[i + num] : 0;
+                dp[i] = left + right;
+            }
+        }
+        
+        return dp[Math.abs(S)];
+        
+    }
+```
 
 
 

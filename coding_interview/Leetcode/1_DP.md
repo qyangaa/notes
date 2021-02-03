@@ -1257,7 +1257,7 @@ You may **not engage in multiple transactions** at the same time (ie, you must s
     n = len(prices)
     if n<=1: return 0
     cooldownDone = [0]
-    hasStock = = [0]
+    hasStock = = [-prices[0]]
     justSold = = [-sys.maxint-1]
     
     for day in range(1,n):
@@ -1268,8 +1268,30 @@ You may **not engage in multiple transactions** at the same time (ie, you must s
     
     ```
 
+    ```java
+  class Solution {
+        public int maxProfit(int[] prices) {
+            int n = prices.length;
+            if (n==0)
+                return 0;
+            int[][] dp = new int[n][3];
+            dp[0][0] = -prices[0];
+            dp[0][1] = Integer.MIN_VALUE;
+            for(int i=1; i<n; i++){
+                dp[i][0] = Math.max(dp[i-1][0], dp[i-1][2] - prices[i]);
+                dp[i][1] = dp[i-1][0] + prices[i];
+                dp[i][2] = Math.max(dp[i-1][2], dp[i-1][1]);           
+            }
+            
+            return Math.max(Math.max(dp[n-1][1], dp[n-1][2]),0);
+      }
+    }
+  ```
+  
+    
+  
   + DP save space: we only use `[day-1]` values in each iteration
-
+  
     ```python
     n = len(prices)
     if n<=1: return 0
@@ -1284,9 +1306,9 @@ You may **not engage in multiple transactions** at the same time (ie, you must s
         lastCooldownDone, lastHasStock, lastJustSold = cooldownDone, hasStock, justSold
     return max(lastCooldownDone, lastJustSold)
     ```
-
+  
   + If want to record the optimal path
-
+  
     ```python
     purchaseDays =[] # purchaseDays[i] = last Purchase day that would maximize profit fo day i
     saleDays =[] #saleDays[i] = last sale day that would maximize profit fo day i
@@ -1700,20 +1722,81 @@ subproblem that removes the first letter off the first word, and then the subpro
 class Solution:
     def longestCommonSubsequence(self, text1: str, text2: str) -> int:
         
-        dp = [[0]*(len(text2)+1) for _ in range(len(text1)+1)]
-        for i in reversed(range(len(text1))):
-            for j in reversed(range(len(text2))):
-                if text1[i]==text2[j]:
-                    dp[i][j]=1+dp[i+1][j+1]
+        n1, n2 = len(text1), len(text2)
+        dp = [[0]*(n2+1) for _ in range(n1+1)]
+        for i in range(1, n1+1):
+            for j in range(1, n2+1):
+                if text1[i-1]==text2[j-1]:
+                    dp[i][j] = dp[i-1][j-1] + 1
                 else:
-                    dp[i][j]=max(dp[i+1][j], dp[i][j+1])
-
-            
+                    dp[i][j] = max(dp[i][j-1], dp[i-1][j])
         
-        return dp[0][0]
+        return dp[-1][-1]
 ```
 
+```java
+class Solution {
+    public int longestCommonSubsequence(String text1, String text2) {
+        int n1 = text1.length();
+        int n2 = text2.length();
+        int[][] dp = new int[n1+1][n2+1];
+        
+        for (int i = 1; i < n1 + 1; i++){
+            for (int j = 1; j < n2 + 1; j++){
+                if (text1.charAt(i-1) == text2.charAt(j-1)){
+                    dp[i][j] = dp[i-1][j-1] + 1;
+                } else{
+                    dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+                }
+            }
+        }
+        
+        return dp[n1][n2];
+        
+    }
+}
+```
 
+```java
+class Solution {
+    public String shortestCommonSupersequence(String str1, String str2) {
+        int n1 = str1.length();
+        int n2 = str2.length();
+        int[][] dp = new int[n1+1][n2+1];
+        for (int i = 1; i <= n1; i++){
+            for (int j = 1; j <= n2; j++){
+                if (str1.charAt(i-1) == str2.charAt(j-1)){
+                    dp[i][j] = dp[i-1][j-1] + 1;
+                }else{
+                    dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+                }
+            }
+        }
+        
+        int i = n1;
+        int j = n2;
+        StringBuilder sb = new StringBuilder();
+        while (i>0 || j>0){
+            if (i == 0){
+                sb.append(str2.charAt(--j));
+            }else if (j == 0){
+                sb.append(str1.charAt(--i));
+            }else if (str1.charAt(i-1) == str2.charAt(j-1)){
+                sb.append(str1.charAt(--i));
+                j--;
+            }else if (dp[i][j] == dp[i-1][j]){
+                sb.append(str1.charAt(--i));
+            }else if (dp[i][j] == dp[i][j-1]){
+                sb.append(str2.charAt(--j));
+            }
+            
+        }
+        StringBuilder reversed = sb.reverse();
+        return reversed.toString();
+            
+    }
+}
+```
 
 
 
@@ -1737,6 +1820,13 @@ str1 = "abac" is a subsequence of "cabac" because we can delete the first "c".
 str2 = "cab" is a subsequence of "cabac" because we can delete the last "ac".
 The answer provided is the shortest such string that satisfies these properties.
 ```
+
++ With LCS dp:
+  ![image-20210130150157208](/home/arkyyang/files/notes/notes/attachments/image-20210130150157208.png)
+
+
+
+
 
 
 
@@ -1763,6 +1853,43 @@ The answer provided is the shortest such string that satisfies these properties.
                 dp_str[j] = prev[j]+cur1  
 
     return dp_str[-1]
+```
+
+```python
+import sys
+class Solution:
+    def shortestCommonSupersequence(self, str1: str, str2: str) -> str:
+        n1, n2 = len(str1), len(str2)
+        dp = [[0]*(n2+1) for _ in range(n1+1)]
+        for i in range(1, n1+1):
+            for j in range(1, n2+1):
+                if str1[i-1] == str2[j-1]:
+                    dp[i][j] = dp[i-1][j-1] + 1
+                else:
+                    dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+        
+        i, j = n1, n2
+        res = []
+        while i or j:
+            if i == 0:
+                res.append(str2[j-1])
+                j -= 1
+            elif j == 0:
+                res.append(str1[i-1])
+                i -= 1
+            elif str1[i-1] == str2[j-1]:
+                res.append(str1[i-1])
+                i-=1
+                j-=1
+            elif dp[i][j] == dp[i-1][j]:
+                res.append(str1[i-1])
+                i -= 1
+            elif dp[i][j] == dp[i][j-1]:
+                res.append(str2[j-1])
+                j -= 1
+                
+        res.reverse()
+        return ''.join(res)
 ```
 
 
@@ -2123,9 +2250,32 @@ A **subsequence** is a sequence that can be derived from an array by deleting so
 
   
 
-  + DP: binary search (patient sort algorithm). With patient sort, the number of piles equal to the longest increasing sequence, because:
+  ```java
+  class Solution {
+      public int lengthOfLIS(int[] nums) {
+          int n = nums.length;
+          if(n==0)
+              return 0;
+          int[] dp = new int[n];
+          dp[0] = 1;
+          for(int i =1; i<n;i++){
+              dp[i] = 1;
+              for(int j = 0; j<i;j++){
+                  if(nums[j]<nums[i]){
+                      dp[i] = Math.max(dp[i], dp[j]+1);
+                  }
+                  
+              }
+          }
+          return Arrays.stream(dp).max().getAsInt();
+      }
+  }
+  ```
 
-    + each pile is a decreasing sequence
+  
+
+  + DP: binary search (patient sort algorithm). With patient sort, the number of piles equal to the longest increasing sequence, because:
+  + each pile is a decreasing sequence
     + patient sort always append to smaller pile first
     + $O(n log n)$
 
@@ -2190,11 +2340,72 @@ Output:
 
 One possible longest palindromic subsequence is "bb".
 
-+ 
++ for subsequence
+
++ ```python
+  class Solution:
+      def longestPalindromeSubseq(self, s: str) -> int:
+          if not s: return 0
+          n = len(s)
+          dp = [[0]*n for _ in range(n)]
+          for k in range(1,n+1):
+              for i in range(0, n-k+1):
+                  j = i + k - 1
+                  if i == j:
+                      dp[i][j] = 1
+                  elif s[i] == s[j]: 
+                      dp[i][j] = dp[i+1][j-1] + 2
+                  else:
+                      dp[i][j] = max(dp[i+1][j], dp[i][j-1])
+          
+          return dp[0][n-1]
+  
+  class Solution:
+      def longestPalindromeSubseq(self, s: str) -> int:
+          if not s: return 0
+          n = len(s)
+          dp = [0]*n
+          prev = prev2 = dp
+          for k in range(1,n+1):
+              prev, prev2 = dp.copy(), prev.copy()
+              for i in range(0, n-k+1):
+                  j = i + k - 1
+                  if i == j:
+                      dp[i] = 1
+                  elif s[i] == s[j]: 
+                      dp[i] = prev2[i+1] + 2 #prev2: k-2
+                  else:
+                      dp[i] = max(prev[i+1], prev[i]) # prev: k-1
+          
+          return dp[0]
+  ```
+
++ ```java
+  class Solution {
+      public int longestPalindromeSubseq(String s) {
+          if (s.length() == 0)
+              return 0;
+          int n = s.length();
+          int[][] dp = new int[n][n];
+          for (int k  = 1; k<=n; k++){
+              for (int i = 0; i <= n-k; i++){
+                  int j = i + k - 1;
+                  if (i == j){
+                      dp[i][j] = 1;
+                  }else if (s.charAt(i) == s.charAt(j)){
+                      dp[i][j] = dp[i+1][j-1] + 2;
+                  }else{
+                      dp[i][j] = Math.max(dp[i+1][j], dp[i][j-1]);
+                  }
+              }
+          }
+          return dp[0][n-1];
+          
+      }
+  }
+  ```
 
 + 
-+ 
-+ for subsequence
 
 `dp[start][end]`
 
@@ -2908,53 +3119,368 @@ Output: 6
 
 
 
-### 140. Word Break II
+### LC 123.Best Time to Buy and Sell Stock III
 
-Hard
+Say you have an array for which the *i*th element is the price of a given stock on day *i*.
 
+Design an algorithm to find the maximum profit. You may complete at most *two* transactions.
 
+**Note:** You may not engage in multiple transactions at the same time (i.e., you must sell the stock before you buy again).
 
-Given a **non-empty** string *s* and a dictionary *wordDict* containing a list of **non-empty** words, add spaces in *s* to construct a sentence where each word is a valid dictionary word. Return all such possible sentences.
-
-**Note:**
-
-- The same word in the dictionary may be reused multiple times in the segmentation.
-- You may assume the dictionary does not contain duplicate words.
+ 
 
 **Example 1:**
 
 ```
-Input:
-s = "catsanddog"
-wordDict = ["cat", "cats", "and", "sand", "dog"]
-Output:
-[
-  "cats and dog",
-  "cat sand dog"
-]
+Input: prices = [3,3,5,0,0,3,1,4]
+Output: 6
+Explanation: Buy on day 4 (price = 0) and sell on day 6 (price = 3), profit = 3-0 = 3.
+Then buy on day 7 (price = 1) and sell on day 8 (price = 4), profit = 4-1 = 3.
 ```
 
 **Example 2:**
 
 ```
-Input:
-s = "pineapplepenapple"
-wordDict = ["apple", "pen", "applepen", "pine", "pineapple"]
-Output:
-[
-  "pine apple pen apple",
-  "pineapple pen apple",
-  "pine applepen apple"
-]
-Explanation: Note that you are allowed to reuse a dictionary word.
+Input: prices = [1,2,3,4,5]
+Output: 4
+Explanation: Buy on day 1 (price = 1) and sell on day 5 (price = 5), profit = 5-1 = 4.
+Note that you cannot buy on day 1, buy on day 2 and sell them later, as you are engaging multiple transactions at the same time. You must sell before buying again.
 ```
 
 **Example 3:**
 
 ```
-Input:
-s = "catsandog"
-wordDict = ["cats", "dog", "sand", "and", "cat"]
-Output:
-[]
+Input: prices = [7,6,4,3,1]
+Output: 0
+Explanation: In this case, no transaction is done, i.e. max profit = 0.
 ```
+
+**Example 4:**
+
+```
+Input: prices = [1]
+Output: 0
+```
+
+```python
+class Solution:
+    def maxProfit(self, prices: List[int]) -> int:
+        if not prices: return 0
+        n = len(prices)
+        dp = [[0]*4 for _ in range(n)]
+        dp[0][0] = dp[0][1]= dp[0][2] = dp[0][3] = -prices[0]
+        
+        for i in range(1,n):
+            dp[i][0] = max(dp[i-1][0], -prices[i]) #have1
+            dp[i][1] = max(dp[i-1][1], dp[i-1][0]+prices[i]) # no1
+            dp[i][2] = max(dp[i-1][2], dp[i-1][1]-prices[i]) #have2
+            dp[i][3] = max(dp[i-1][3], dp[i-1][2]+prices[i]) #no 2         
+        return max(max(dp[-1]),0)
+```
+
+```java
+class Solution {
+    public int maxProfit(int[] prices) {
+        int n = prices.length;
+        if (n == 0)
+            return 0;
+        int[][] dp = new int[n][4];
+        dp[0][0] = -prices[0];
+        dp[0][1] = -prices[0];
+        dp[0][2] = -prices[0];
+        dp[0][3] = -prices[0];
+        
+        for (int i = 1; i<n; i++){
+            dp[i][0] = Math.max(dp[i-1][0], -prices[i]);
+            dp[i][1] = Math.max(dp[i-1][1], dp[i-1][0]+prices[i]); 
+            dp[i][2] = Math.max(dp[i-1][2], dp[i-1][1]-prices[i]); 
+            dp[i][3] = Math.max(dp[i-1][3], dp[i-1][2]+prices[i]); 
+        }
+        return Math.max(Math.max(dp[n-1][1], dp[n-1][3]),0);
+        
+    }
+}
+```
+
+
+
+### 376. Wiggle Subsequence
+
+Medium
+
+A sequence of numbers is called a **wiggle sequence** if the differences between successive numbers strictly alternate between positive and negative. The first difference (if one exists) may be either positive or negative. A sequence with fewer than two elements is trivially a wiggle sequence.
+
+For example, `[1,7,4,9,2,5]` is a wiggle sequence because the differences `(6,-3,5,-7,3)` are alternately positive and negative. In contrast, `[1,4,7,2,5]` and `[1,7,4,5,5]` are not wiggle sequences, the first because its first two differences are positive and the second because its last difference is zero.
+
+Given a sequence of integers, return the length of the longest subsequence that is a wiggle sequence. A subsequence is obtained by deleting some number of elements (eventually, also zero) from the original sequence, leaving the remaining elements in their original order.
+
+**Example 1:**
+
+```
+Input: [1,7,4,9,2,5]
+Output: 6
+Explanation: The entire sequence is a wiggle sequence.
+```
+
+**Example 2:**
+
+```
+Input: [1,17,5,10,13,15,10,5,16,8]
+Output: 7
+Explanation: There are several subsequences that achieve this length. One is [1,17,10,13,10,16,8].
+```
+
+**Example 3:**
+
+```
+Input: [1,2,3,4,5,6,7,8,9]
+Output: 2
+```
+
+```java
+class Solution {
+    public int wiggleMaxLength(int[] nums) {
+        int n = nums.length;
+        if (n<=1)
+            return n;
+        int[] up = new int[n];
+        int[] down = new int[n];
+        up[0] = 1;
+        down[0] = 1;
+        for (int i = 1; i<n; i++){
+            if(nums[i]<nums[i-1]){
+                down[i] = up[i-1] + 1;
+            }else{
+                down[i] = down[i-1];
+            }
+            if(nums[i]>nums[i-1]){
+                up[i] = down[i-1] + 1;
+            }else{
+                up[i] = up[i-1];
+            }
+        }
+        return Math.max(down[n-1], up[n-1]);
+    }
+}
+```
+
+
+
+### 1289. Minimum Falling Path Sum II
+
+Hard
+
+Given a square grid of integers `arr`, a *falling path with non-zero shifts* is a choice of exactly one element from each row of `arr`, such that no two elements chosen in adjacent rows are in the same column.
+
+Return the minimum sum of a falling path with non-zero shifts.
+
+ 
+
+**Example 1:**
+
+```
+Input: arr = [[1,2,3],[4,5,6],[7,8,9]]
+Output: 13
+Explanation: 
+The possible falling paths are:
+[1,5,9], [1,5,7], [1,6,7], [1,6,8],
+[2,4,8], [2,4,9], [2,6,7], [2,6,8],
+[3,4,8], [3,4,9], [3,5,7], [3,5,9]
+The falling path with the smallest sum is [1,5,7], so the answer is 13.
+```
+
+```java
+class Solution {
+    public int minFallingPathSum(int[][] arr) {
+        int n = arr.length;
+        if(n==0)
+            return 0;
+        int m = arr[0].length;
+        int[] dp = new int[n];
+        for (int i=0; i<m; i++){
+            dp[i] = arr[0][i];
+        }
+        for(int i=1; i<n; i++ ){
+            int[] prev = dp.clone();
+            for(int j=0; j<m; j++){
+                int min = Integer.MAX_VALUE;
+                for (int k=0; k<m; k++){
+                    if(j!=k){
+                         min = Math.min(min, prev[k]+arr[i][j]); 
+                    }
+
+                }
+                dp[j] = min;
+            }
+        }
+        return Arrays.stream(dp).min().getAsInt();
+    }
+}
+```
+
++ Can be improved by memorizing max and second max value of each row
+
+
+
+### 487. Max Consecutive Ones II
+
+Medium
+
+Given a binary array, find the maximum number of consecutive 1s in this array if you can flip at most one 0.
+
+**Example 1:**
+
+```
+Input: [1,0,1,1,0]
+Output: 4
+Explanation: Flip the first zero will get the the maximum number of consecutive 1s.
+    After flipping, the maximum number of consecutive 1s is 4.
+```
+
+```java
+class Solution {
+    public int findMaxConsecutiveOnes(int[] nums) {
+        int n = nums.length;
+        if (n==0)
+            return 0;
+        int[] noFlip = new int[n];
+        int[] flip = new int[n];
+        noFlip[0] = nums[0];
+        flip[0] = 1;
+        for (int i = 1; i<n; i++){
+            if(nums[i]==1){
+                noFlip[i] = noFlip[i-1]+1;
+                flip[i] = flip[i-1]+1;
+            }else{
+                noFlip[i] = 0;
+                flip[i] = noFlip[i-1]+1;
+            }
+        }
+        return Arrays.stream(flip).max().getAsInt();
+    }
+}
+```
+
+
+
+### 1186. Maximum Subarray Sum with One Deletion
+
+Medium
+
+Given an array of integers, return the maximum sum for a **non-empty** subarray (contiguous elements) with at most one element deletion. In other words, you want to choose a subarray and optionally delete one element from it so that there is still at least one element left and the sum of the remaining elements is maximum possible.
+
+Note that the subarray needs to be **non-empty** after deleting one element.
+
+ 
+
+**Example 1:**
+
+```
+Input: arr = [1,-2,0,3]
+Output: 4
+Explanation: Because we can choose [1, -2, 0, 3] and drop -2, thus the subarray [1, 0, 3] becomes the maximum value.
+```
+
+**Example 2:**
+
+```
+Input: arr = [1,-2,-2,3]
+Output: 3
+Explanation: We just choose [3] and it's the maximum sum.
+```
+
+**Example 3:**
+
+```
+Input: arr = [-1,-1,-1,-1]
+Output: -1
+Explanation: The final subarray needs to be non-empty. You can't choose [-1] and delete -1 from it, then get an empty subarray to make the sum equals to 0.
+```
+
+```java
+class Solution {
+    public int maximumSum(int[] arr) {
+        int n = arr.length;
+        if(n==1)
+            return arr[0];
+        int[] de = new int[n];
+        int[] no = new int[n];
+        no[0] = arr[0];
+        de[0] = Math.max(0, arr[0]);
+        int max = Integer.MIN_VALUE;
+        for(int i = 1; i<n; i++){
+            de[i] = Math.max(no[i-1], de[i-1]+ arr[i]);
+            max = Math.max(max, de[i]);
+            no[i] = Math.max(no[i-1]+arr[i], arr[i]);
+            max = Math.max(max, no[i]);
+        }
+        return max;
+    }
+}
+```
+
+### 673 Number-of-Longest-Increasing-Subsequence
+
+
+
+
+
+```python
+class Solution:
+    def findNumberOfLIS(self, nums: List[int]) -> int:
+        if not nums: return 0
+        n = len(nums)
+        maxLen = 1
+        dp = [1]*n
+        count = [1]*n
+        for i in range(1,n):
+            for j in range(0,i):
+                if nums[j]<nums[i]:
+                    if dp[i] == dp[j]+1:
+                        count[i] += count[j]
+                    elif dp[j]+1 > dp[i]:
+                        dp[i] = dp[j]+1
+                        count[i] = count[j]
+        return sum([count[i] for i in range(n) if dp[i]==max(dp)])
+```
+
+### 368. Largest Divisible Subset
+
+Medium
+
+Given a set of **distinct** positive integers `nums`, return the largest subset `answer` such that every pair `(answer[i], answer[j])` of elements in this subset satisfies:
+
+- `answer[i] % answer[j] == 0`, or
+- `answer[j] % answer[i] == 0`
+
+If there are multiple solutions, return any of them.
+
+ 
+
+**Example 1:**
+
+```
+Input: nums = [1,2,3]
+Output: [1,2]
+Explanation: [1,3] is also accepted.
+```
+
+**Example 2:**
+
+```
+Input: nums = [1,2,4,8]
+Output: [1,2,4,8]
+```
+
+```python
+for i in range(1,n):
+    for j in range(0,i):
+        if nums[i]%nums[j] == 0:
+            dp[i] = max(dp[i], dp[j]+1)
+            if dp[i] == dp[j]+1:
+                sets[i] = sets[j] + [nums[i]]
+    if dp[i]> maxVal:
+        maxVal, maxIdx = dp[i], i
+return sets[maxIdx]
+```
+
