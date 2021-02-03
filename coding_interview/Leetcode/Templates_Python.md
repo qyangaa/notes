@@ -1045,6 +1045,22 @@ for i in range(1,n):
 return sets[maxIdx]
 ```
 
+1105 Filling bookcase shelves
+
+Group S into subarrays, minimize the sum(max(subarray)), with sum(widths) of each subarray <= W
+
+dp[i]: min sum(max(subarray)) of S[:i] 
+
+``` python
+for i in range(1, n):
+    for j in range(i-1, -1):
+        if totWidth[j+1,i]<=W:
+            dp[i] = min(dp[i], dp[j]+ maxHeight[j+1,i])
+        else:
+            break
+return dp[-1]
+```
+
 
 
 #### 1D, 2 sets of sub-problems
@@ -1091,6 +1107,17 @@ else:
 + 1092 Shortest Common Supersequence
 
 ```python
+# Find length
+for i in range(1,m):
+    for j in range(1,n):
+        if s[i]==t[j]:
+            dp[i][j] = dp[i-1][j-1]+1
+        else:
+            dp[i][j] = min(dp[i-1][j]+1, dp[i][j-1]+1)
+```
+
+```python
+# Find sequence
 dp: from LCS
 if i == 0: 
     s.appendLeft(l2[j-1])
@@ -1109,6 +1136,91 @@ elif dp[i][j] == dp[i][j-1]:
     s.appendLeft(l2[j-1])
     j -= 1
 ```
+
++ 72 Min Edit Distance: num insert, delete, replace to make two words the same
+
+```python
+# need padding before
+dp[0] = [i for i in range(m+1)]
+for i in range(n+1):
+    dp[i][0] = i
+
+for i in range(1,n+1):
+    for j in range(1,m+1):
+        if word1[i-1]==word2[j-1]:
+            dp[i][j] = dp[i-1][j-1]
+        else:
+            dp[i][j] = min(dp[i-1][j], dp[i-1][j-1],dp[i][j-1])+1
+```
+
++ 97 Interleaving sting![img](https://assets.leetcode.com/uploads/2020/09/02/interleave.jpg)
+
+```python
+# padding required
+for i in range(1, n+1):
+    if s1[i-1] == s3[i-1]:
+        dp[i][0] = True
+    else:
+        break
+
+for i in range(1, m+1):
+    if s2[i-1] == s3[i-1]:
+        dp[0][i] = True
+    else:
+        break
+
+
+
+for i in range(1,n+1):
+    for j in range(1,m+1):
+
+        if (dp[i-1][j] and s1[i-1] == s3[i+j-1]) or (dp[i][j-1] and s2[j-1] == s3[i+j-1]):
+            dp[i][j] = True
+
+return dp[-1][-1]              
+            
+```
+
++ 115 Distinct subsequence
+
+```python
+for i in range(1,n):
+    dp[i][0] = dp[i-1][0]
+    if s[i] == t[0]:
+        dp[i][0] += 1
+
+for i in range(1,n):
+    for j in range(1,m):
+        if s[i] == t[j]:
+            dp[i][j] = dp[i-1][j-1] + dp[i-1][j]
+        else:
+            dp[i][j] = dp[i-1][j]
+```
+
++ 727 Minimum Window Subsequence
+
+minimum (contiguous) **substring** `W` of `S`, so that `T` is a **subsequence** of `W`.
+
+```python
+dp[i][j]: min length substring ending with S[i] with subsequence T[:j]
+if S[0]==T[0]:
+    dp[0][0] = 1
+for i in range(1,n):
+    if S[i] == T[0]:
+        dp[i][0] = 1
+    else:
+        dp[i][0] = dp[i-1][0]+1
+    
+for i in range(1,n):
+    for j in range(1,m):
+        if S[i] == T[j]:
+            dp[i][j] = dp[i-1][j-1] + 1
+        else:
+            dp[i][j] = dp[i-1][j] + 1
+return min(dp[:][m-1])
+```
+
+
 
 + 516 Longest Palindromic subsequence
 

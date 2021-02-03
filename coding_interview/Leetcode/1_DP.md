@@ -3484,3 +3484,332 @@ for i in range(1,n):
 return sets[maxIdx]
 ```
 
+    
+
+
+
+
+### 1105. Filling Bookcase Shelves
+
+Medium
+
+We have a sequence of `books`: the `i`-th book has thickness `books[i][0]` and height `books[i][1]`.
+
+We want to place these books **in order** onto bookcase shelves that have total width `shelf_width`.
+
+We choose some of the books to place on this shelf (such that the sum of their thickness is `<= shelf_width`), then build another level of shelf of the bookcase so that the total height of the bookcase has increased by the maximum height of the books we just put down. We repeat this process until there are no more books to place.
+
+Note again that at each step of the above process, the order of the books we place is the same order as the given sequence of books. For example, if we have an ordered list of 5 books, we might place the first and second book onto the first shelf, the third book on the second shelf, and the fourth and fifth book on the last shelf.
+
+Return the minimum possible height that the total bookshelf can be after placing shelves in this manner.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2019/06/24/shelves.png)
+
+```
+Input: books = [[1,1],[2,3],[2,3],[1,1],[1,1],[1,1],[1,2]], shelf_width = 4
+Output: 6
+Explanation:
+The sum of the heights of the 3 shelves are 1 + 3 + 2 = 6.
+Notice that book number 2 does not have to be on the first shelf.
+```
+
+ 
+
+```python
+class Solution:
+    def minHeightShelves(self, books: List[List[int]], shelf_width: int) -> int:
+        if not books: return 0
+        n = len(books)
+        totWidth = [[0]*n for _ in range(n)]
+        maxHeight = [[0]*n for _ in range(n)]
+        
+        curWidth = 0
+        curHeight = 0
+        for i in range(n):
+            curWidth += books[i][0]
+            curHeight = max(curHeight, books[i][1])
+            totWidth[0][i] = curWidth
+            maxHeight[0][i] = curHeight
+
+        if curWidth<= shelf_width:
+            return curHeight                        
+
+        
+        dp = [sys.maxsize]*n
+        
+        i = 0
+        while totWidth[0][i]<=shelf_width:
+            dp[i] = maxHeight[0][i] 
+            i+=1
+        
+        
+        for i in range(1,n):
+            for j in range(i-1, -1, -1):
+                if totWidth[j+1][i]==0:
+                    totWidth[j+1][i] = sum([book[0] for book in books[j+1:i+1]])
+                    maxHeight[j+1][i] = max([book[1] for book in books[j+1:i+1]])
+                if totWidth[j+1][i]<= shelf_width:
+                    dp[i] = min(dp[i], dp[j] + maxHeight[j+1][i])
+                else:
+                    break
+        return dp[-1]
+```
+
+
+
+### 72. Edit Distance
+
+Hard
+
+Given two strings `word1` and `word2`, return *the minimum number of operations required to convert `word1` to `word2`*.
+
+You have the following three operations permitted on a word:
+
+- Insert a character
+- Delete a character
+- Replace a character
+
+ 
+
+**Example 1:**
+
+```
+Input: word1 = "horse", word2 = "ros"
+Output: 3
+Explanation: 
+horse -> rorse (replace 'h' with 'r')
+rorse -> rose (remove 'r')
+rose -> ros (remove 'e')
+```
+
+**Example 2:**
+
+```
+Input: word1 = "intention", word2 = "execution"
+Output: 5
+Explanation: 
+intention -> inention (remove 't')
+inention -> enention (replace 'i' with 'e')
+enention -> exention (replace 'n' with 'x')
+exention -> exection (replace 'n' with 'c')
+exection -> execution (insert 'u')
+```
+
+ 
+
+```python
+dp[0] = [i for i in range(m+1)]
+for i in range(n+1):
+    dp[i][0] = i
+
+for i in range(1,n+1):
+    for j in range(1,m+1):
+        if word1[i-1]==word2[j-1]:
+            dp[i][j] = dp[i-1][j-1]
+        else:
+            dp[i][j] = min(dp[i-1][j], dp[i-1][j-1],dp[i][j-1])+1
+```
+
+
+
+### 97. Interleaving String
+
+Hard
+
+Given strings `s1`, `s2`, and `s3`, find whether `s3` is formed by an **interleaving** of `s1` and `s2`.
+
+An **interleaving** of two strings `s` and `t` is a configuration where they are divided into **non-empty** substrings such that:
+
+- `s = s1 + s2 + ... + sn`
+- `t = t1 + t2 + ... + tm`
+- `|n - m| <= 1`
+- The **interleaving** is `s1 + t1 + s2 + t2 + s3 + t3 + ...` or `t1 + s1 + t2 + s2 + t3 + s3 + ...`
+
+**Note:** `a + b` is the concatenation of strings `a` and `b`.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2020/09/02/interleave.jpg)
+
+```
+Input: s1 = "aabcc", s2 = "dbbca", s3 = "aadbbcbcac"
+Output: true
+```
+
+**Example 2:**
+
+```
+Input: s1 = "aabcc", s2 = "dbbca", s3 = "aadbbbaccc"
+Output: false
+```
+
+**Example 3:**
+
+```
+Input: s1 = "", s2 = "", s3 = ""
+Output: true
+```
+
+ 
+
+```python
+class Solution:
+    def isInterleave(self, s1: str, s2: str, s3: str) -> bool:
+        n, m, len3 = len(s1), len(s2), len(s3)
+        if len3 != n+m: return False
+        if not n: return s2==s3
+        if not m: return s1==s3
+        dp = [[0]*(m+1) for _ in range(n+1)]
+        
+        dp[0][0] = 1
+        
+        for i in range(1, n+1):
+            if s1[i-1] == s3[i-1]:
+                dp[i][0] = True
+            else:
+                break
+        
+        for i in range(1, m+1):
+            if s2[i-1] == s3[i-1]:
+                dp[0][i] = True
+            else:
+                break
+        
+        
+        
+        for i in range(1,n+1):
+            for j in range(1,m+1):
+                
+                if (dp[i-1][j] and s1[i-1] == s3[i+j-1]) or (dp[i][j-1] and s2[j-1] == s3[i+j-1]):
+                    dp[i][j] = True
+
+        return dp[-1][-1]              
+```
+
+
+
+### 115. Distinct Subsequences
+
+Hard
+
+Given two strings `s` and `t`, return *the number of distinct subsequences of `s` which equals `t`*.
+
+A string's **subsequence** is a new string formed from the original string by deleting some (can be none) of the characters without disturbing the relative positions of the remaining characters. (i.e., `"ACE"` is a subsequence of `"ABCDE"` while `"AEC"` is not).
+
+It's guaranteed the answer fits on a 32-bit signed integer.
+
+ 
+
+**Example 1:**
+
+```
+Input: s = "rabbbit", t = "rabbit"
+Output: 3
+Explanation:
+As shown below, there are 3 ways you can generate "rabbit" from S.
+rabbbit
+rabbbit
+rabbbit
+```
+
+**Example 2:**
+
+```
+Input: s = "babgbag", t = "bag"
+Output: 5
+Explanation:
+As shown below, there are 5 ways you can generate "bag" from S.
+babgbag
+babgbag
+babgbag
+babgbag
+babgbag
+```
+
+ 
+
+```python
+class Solution:
+    def numDistinct(self, s: str, t: str) -> int:
+        if not s: return 1 if not t else 0
+        n, m = len(s),len(t)
+        dp = [[0]*(m) for _ in range(n)]
+        
+        dp[0][0] = 1 if s[0]==t[0] else 0
+        for i in range(1,n):
+            dp[i][0] = dp[i-1][0]
+            if s[i] == t[0]:
+                dp[i][0] += 1
+        
+        for i in range(1,n):
+            for j in range(1,m):
+                if s[i] == t[j]:
+                    dp[i][j] = dp[i-1][j-1] + dp[i-1][j]
+                else:
+                    dp[i][j] = dp[i-1][j]        
+
+        
+        return dp[-1][-1]
+```
+
+
+
+### 727. Minimum Window Subsequence
+
+Hard
+
+Given strings `S` and `T`, find the minimum (contiguous) **substring** `W` of `S`, so that `T` is a **subsequence** of `W`.
+
+If there is no such window in `S` that covers all characters in `T`, return the empty string `""`. If there are multiple such minimum-length windows, return the one with the left-most starting index.
+
+**Example 1:**
+
+```
+Input: 
+S = "abcdebdde", T = "bde"
+Output: "bcde"
+Explanation: 
+"bcde" is the answer because it occurs before "bdde" which has the same length.
+"deb" is not a smaller window because the elements of T in the window must occur in order.
+```
+
+ 
+
+```python
+class Solution:
+    def minWindow(self, S: str, T: str) -> str:
+        n,m = len(S), len(T)
+        dp = [[n]*m for _ in range(n)]
+        if S[0]==T[0]:
+            dp[0][0] = 1
+        for i in range(1,n):
+            if S[i] == T[0]:
+                dp[i][0] = 1
+            else:
+                dp[i][0] = dp[i-1][0]+1
+        
+        for i in range(1,n):
+            for j in range(1,m):
+                if S[i] == T[j]:
+                    dp[i][j] = dp[i-1][j-1] + 1
+                else:
+                    dp[i][j] = dp[i-1][j] + 1
+        
+
+        
+        curMin = 2*n
+        minIdx = n
+        for i in range(n-1, -1, -1):
+            if dp[i][m-1]<=curMin:
+                curMin = dp[i][m-1]
+                minIdx = i
+
+        return S[minIdx-curMin+1:minIdx+1]
+```
+
