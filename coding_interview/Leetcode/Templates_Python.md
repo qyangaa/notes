@@ -1222,18 +1222,168 @@ return min(dp[:][m-1])
 
 
 
+#### 4. separate into K consecutive windows
+
+<img src="/home/arkyyang/files/notes/notes/attachments/image-20210205081553687.png" alt="image-20210205081553687" style="zoom:70%;" />
+
+1278 Palindrome Partitioning III 
+
+min number of change character to divide into k palindrome substrings
+
+```python
+for i in range(1, n):
+    for k in range(1, K):
+        for j in range(i, k-1, -1):
+            dp[i][k] = min(dp[i][k], dp[j-1][k-1] + change(j,i))
+return dp[-1][K]
+```
+
+813 Largest Sum of Averages
+
+Max sum of averages of at most K groups
+
+```python
+dp[i][k] = max(dp[i][k], dp[j-1][k-1] + avg(j,i))
+```
+
+410 Split Array Largest Sum
+
+Min largest sum among m subarrays
+
+```python
+dp[i][k] = min(dp[i][k], max(dp[j-1][k-1], sum(j,i)))
+```
+
+1335 Minimum Difficulty of a job schedule
+
+Min sum (max (val of each subarray))
+
+```python
+curMax = 0
+for j in range(i, k-1, -1):
+    curMax = max(curMax, A[j])
+    dp[i][k] = min(dp[i][k], dp[j-1][k-1]+ curMax)
+```
+
+
+
+#### 5. one sequence, depends on smaller size
+
+<img src="/home/arkyyang/files/notes/notes/attachments/image-20210205094433187.png" alt="image-20210205094433187" style="zoom:67%;" />
+
+l: length, i: start, calculate end j from i+l-1, scan over middle point k
+
 + 516 Longest Palindromic subsequence
 
 ```python
 dp[i][j]: longest palindromic subsequence from i to j
-for k in range(1,n):
-    for i in range(0, n-k):
-        j  = i + k - 1
-        
-if s[i] == s[j]:
-    s[i][j] = s[i+1][j-1] + 2
-else:
-    s[i][j] = max(s[i+1][j], s[i][j-1])
+for l in range(1,n):
+    for i in range(0, n-l):
+        j  = i + l - 1
+    if l == 1:
+        dp[i][j]
+    if s[i] == s[j]:
+        s[i][j] = s[i+1][j-1] + 2
+    else:
+        s[i][j] = max(s[i+1][j], s[i][j-1])
+```
+
++ 312 Burst Ballons: max result
+
+```python
+for i in range(n-2, -1 ,-1):
+    for j in range(i+2, n):
+        dp[i][j] = max(nums[i]*nums[k]*nums[j] + dp[i][k] + dp[k][j] for k in range(i+1, j))
+```
+
++ 375 Guess number higher or lower II
+
+min tot cost to guarantee win guess in range number 1 to n
+
+```python
+minlen = 2
+for i in range(n-(minlen-1), -1, -1):
+    for j in range(i+(minlen-1), n):
+        dp[i][j] = min(k + max(dp[i][k-1], dp[k+1][j]) for k in range(i,j+1))
+
+
+
+
+dp = [[0]*(n+2) for _ in range(n+2)]
+
+for l in range(2,n+1):
+    for i in range(1,n-l+2):
+        j = i+l-1
+        dp[i][j] = float('inf')
+        for k in range(i, j+1):
+            dp[i][j] = min(dp[i][j], k+max(dp[i][k-1], dp[k+1][j]))
+
+return dp[1][n]
+```
+
++ 1246 Palindrome Removal
+
+min number of palindrome removals to remove all numbers
+
+```python
+for i in range(n, -1, -1):
+    for j in range(i, n):
+        if i == j :
+            dp[i][j] = 1
+        	continue
+        dp[i][j] = min(dp[i][k-1]+max(1, dp[k+1][j-1]) for k in range(i,j+1) and s[k]==s[j])
+
+for l in range(1, n+1):
+    for i in range(1, n-l+2):
+        j = i+l-1
+        for k in range(i, j+1):
+            if s[k]==s[j]:
+            	dp[i][j] = min(dp[i][j], dp[i][k-1]+max(1, dp[k+1][j-1]))
+```
+
+#### 6. Knapsack
+
+Can choose whether take i'th item or not.
+
+Standard 0-1 knapsack
+
+```python
+dp[0][0] = 0
+dp[0][c] = Min
+for i in range(1,N):
+    for c in range(1,C):
+        dp[i][c] = max(dp[i-1][c], dp[i-1][c-wi]+vi)
+```
+
+494 Target Sum
+
+```python
+for i in range(1,n):
+    for c in range(-maxSum, maxSum+1):
+        dp[i][s] = dp[i-1][s-nums[i]] + dp[i-1][s+nums[i]];
+```
+
+1049 Last Stone Weight II
+
+```python
+for i in range(1,n):
+    for s in range(-maxSum, maxSum+1):
+        dp[i][s] = dp[i-1][s-nums[i]] or dp[i-1][s+nums[i]]
+return first positive s s.t. dp[N][s] is true
+```
+
+474 Ones and zeros
+
+input: array of binary strings.
+
+return: size of largest subset with at most m 0's and n 1's
+
+```python
+for i in range(1,N+1):
+    for cm in range(1,m+1):
+        for cn in range(1,n+1):
+            if cm-num0[i-1]>=0and cn-num1[i-1]>=0:
+                dp[i][cm][cn] = max(dp[i-1][cm-num0[i-1]][cn-num1[i-1]]+1, dp[i-1][cm][cn])
 ```
 
 

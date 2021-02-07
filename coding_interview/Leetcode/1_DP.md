@@ -1286,6 +1286,7 @@ You may **not engage in multiple transactions** at the same time (ie, you must s
             return Math.max(Math.max(dp[n-1][1], dp[n-1][2]),0);
       }
     }
+    ```
   ```
   
     
@@ -1305,7 +1306,7 @@ You may **not engage in multiple transactions** at the same time (ie, you must s
         justSold = lastHasStock+prices[day]
         lastCooldownDone, lastHasStock, lastJustSold = cooldownDone, hasStock, justSold
     return max(lastCooldownDone, lastJustSold)
-    ```
+  ```
   
   + If want to record the optimal path
   
@@ -2786,20 +2787,28 @@ dp[day][j] = min(dp[day - 1][i -1] + max(difficulty[i:j])) for i in 0...j
 ```
 
 ```python
+class Solution:
     def minDifficulty(self, jobDifficulty: List[int], d: int) -> int:
-        n = len(jobDifficulty)
-        if n < d:
-            return -1
+        A = jobDifficulty
         
-        dp = [[0] + [float('inf')] * n for _ in range(d + 1)]
+        n = len(A)
         
-        for i in range(1, d + 1):
-            for j in range(i, n + 1):
-                current = 0
-                for k in range(j, i - 1, -1):
-                    current = max(current, jobDifficulty[k - 1])
-                    dp[i][j] = min(dp[i][j], current + dp[i - 1][k - 1])
-        return dp[-1][-1]
+        if n<d: return -1
+        dp = [[float('inf')]*d for _ in range(n)]
+        
+        curMax = 0
+        for i in range(n):
+            curMax = max(curMax, A[i])
+            dp[i][0] = curMax
+        
+        for i in range(n):
+            for k in range(d):
+                curMax = 0
+                for j in range(i, k-1, -1):
+                    curMax = max(curMax, A[j])
+                    dp[i][k] = min(dp[i][k], dp[j-1][k-1]+ curMax)
+        
+        return dp[i][k]
 ```
 
 
@@ -3484,7 +3493,7 @@ for i in range(1,n):
 return sets[maxIdx]
 ```
 
-    
+​    
 
 
 
@@ -3811,5 +3820,442 @@ class Solution:
                 minIdx = i
 
         return S[minIdx-curMin+1:minIdx+1]
+```
+
+
+
+### 1278. Palindrome Partitioning III
+
+Hard
+
+You are given a string `s` containing lowercase letters and an integer `k`. You need to :
+
+- First, change some characters of `s` to other lowercase English letters.
+- Then divide `s` into `k` non-empty disjoint substrings such that each substring is palindrome.
+
+Return the minimal number of characters that you need to change to divide the string.
+
+ 
+
+**Example 1:**
+
+```
+Input: s = "abc", k = 2
+Output: 1
+Explanation: You can split the string into "ab" and "c", and change 1 character in "ab" to make it palindrome.
+```
+
+**Example 2:**
+
+```
+Input: s = "aabbc", k = 3
+Output: 0
+Explanation: You can split the string into "aa", "bb" and "c", all of them are palindrome.
+```
+
+**Example 3:**
+
+```
+Input: s = "leetcode", k = 8
+Output: 0
+```
+
+
+
+```python
+class Solution:
+    def palindromePartition(self, s: str, k: int) -> int:
+        
+        
+        def change(l, r):
+            if changedp[l][r]>=0:
+                return changedp[l][r]
+            if l>=r: return 0
+            if s[l] == s[r]:
+                return change(l+1, r-1)
+            else:
+                return change(l+1, r-1) + 1
+        
+        n = len(s)
+        dp = [[float('inf')]*(k) for _ in range(n)]
+        changedp = [[-1]*n for _ in range(n)]
+        
+        for i in range(n):
+            dp[i][0] = change(0,i)
+        
+        for i in range(1,n):
+            for curk in range(1,k):
+                for j in range(i, curk-1, -1):
+                    dp[i][curk] = min(dp[i][curk], dp[j-1][curk-1]+ change(j,i))
+        
+        
+        return dp[-1][-1]
+```
+
+
+
+### 813. Largest Sum of Averages
+
+Medium
+
+We partition a row of numbers `A` into at most `K` adjacent (non-empty) groups, then our score is the sum of the average of each group. What is the largest score we can achieve?
+
+Note that our partition must use every number in A, and that scores are not necessarily integers.
+
+```
+Example:
+Input: 
+A = [9,1,2,3,9]
+K = 3
+Output: 20
+Explanation: 
+The best choice is to partition A into [9], [1, 2, 3], [9]. The answer is 9 + (1 + 2 + 3) / 3 + 9 = 20.
+We could have also partitioned A into [9, 1], [2], [3, 9], for example.
+That partition would lead to a score of 5 + 2 + 6 = 13, which is worse.
+```
+
+```python
+class Solution:
+    def largestSumOfAverages(self, A: List[int], K: int) -> float:
+        
+        def avg(j,i):
+            if j==0:
+                return sumdp[i]/(i+1)
+            return (sumdp[i] - sumdp[j-1])/(i-j+1)
+        n = len(A)
+        
+        dp = [[0]*K for _ in range(n)]
+        sumdp = [0]*n
+        sumdp[0] = A[0]
+        
+        for i in range(1, n):
+            sumdp[i] = sumdp[i-1] + A[i]
+        
+        for i in range(n):
+            dp[i][0] = avg(0,i)
+        
+        for i in range(n):
+            for k in range(1,K):
+                for j in range(i, k-1, -1):
+                    dp[i][k] = max(dp[i][k], dp[j-1][k-1]+avg(j,i))
+                    
+
+        
+        return dp[-1][-1]
+```
+
+
+
+### 410. Split Array Largest Sum
+
+Hard
+
+Given an array `nums` which consists of non-negative integers and an integer `m`, you can split the array into `m` non-empty continuous subarrays.
+
+Write an algorithm to minimize the largest sum among these `m` subarrays.
+
+ 
+
+**Example 1:**
+
+```
+Input: nums = [7,2,5,10,8], m = 2
+Output: 18
+Explanation:
+There are four ways to split nums into two subarrays.
+The best way is to split it into [7,2,5] and [10,8],
+where the largest sum among the two subarrays is only 18.
+```
+
+**Example 2:**
+
+```
+Input: nums = [1,2,3,4,5], m = 2
+Output: 9
+```
+
+**Example 3:**
+
+```
+Input: nums = [1,4,4], m = 3
+Output: 4
+```
+
+ 
+
+```python
+class Solution:
+    def splitArray(self, nums: List[int], m: int) -> int:
+        
+        def getSum(j,i):
+            if j==0:
+                return sumdp[i]
+            return (sumdp[i]-sumdp[j-1])
+        
+        nums = [num for num in nums if num!=0]
+        
+        n = len(nums)
+        m = min(m, n)
+                
+        dp = [[float('inf')]*m for _ in range(n)]
+        sumdp = [0]*n
+        sumdp[0] = nums[0]
+        for i in range(1,n):
+            sumdp[i] = sumdp[i-1] + nums[i]
+        
+        for i in range(n):
+            dp[i][0] = sumdp[i]
+            
+        for i in range(1,n):
+            for k in range(1,m):
+                for j in range(i, k-1, -1):
+                    
+                    dp[i][k] = min(dp[i][k], max(dp[j-1][k-1], getSum(j,i)))
+
+        
+        
+        return dp[-1][-1]
+```
+
+
+
+
+
+### 375. Guess Number Higher or Lower II
+
+Medium
+
+
+
+We are playing the Guessing Game. The game will work as follows:
+
+1. I pick a number between `1` and `n`.
+2. You guess a number.
+3. If you guess the right number, **you win the game**.
+4. If you guess the wrong number, then I will tell you whether the number I picked is **higher or lower**, and you will continue guessing.
+5. Every time you guess a wrong number `x`, you will pay `x` dollars. If you run out of money, **you lose the game**.
+
+Given a particular `n`, return *the minimum amount of money you need to **guarantee a win regardless of what number I pick***.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2020/09/10/graph.png)
+
+```
+Input: n = 10
+Output: 16
+Explanation: The winning strategy is as follows:
+- The range is [1,10]. Guess 7.
+    - If this is my number, your total is $0. Otherwise, you pay $7.
+    - If my number is higher, the range is [8,10]. Guess 9.
+        - If this is my number, your total is $7. Otherwise, you pay $9.
+        - If my number is higher, it must be 10. Guess 10. Your total is $7 + $9 = $16.
+        - If my number is lower, it must be 8. Guess 8. Your total is $7 + $9 = $16.
+    - If my number is lower, the range is [1,6]. Guess 3.
+        - If this is my number, your total is $7. Otherwise, you pay $3.
+        - If my number is higher, the range is [4,6]. Guess 5.
+            - If this is my number, your total is $7 + $3 = $10. Otherwise, you pay $5.
+            - If my number is higher, it must be 6. Guess 6. Your total is $7 + $3 + $5 = $15.
+            - If my number is lower, it must be 4. Guess 4. Your total is $7 + $3 + $5 = $15.
+        - If my number is lower, the range is [1,2]. Guess 1.
+            - If this is my number, your total is $7 + $3 = $10. Otherwise, you pay $1.
+            - If my number is higher, it must be 2. Guess 2. Your total is $7 + $3 + $1 = $11.
+The worst case in all these scenarios is that you pay $16. Hence, you only need $16 to guarantee a win.
+```
+
+**Example 2:**
+
+```
+Input: n = 1
+Output: 0
+Explanation: There is only one possible number, so you can guess 1 and not have to pay anything.
+```
+
+**Example 3:**
+
+```
+Input: n = 2
+Output: 1
+Explanation: There are two possible numbers, 1 and 2.
+- Guess 1.
+    - If this is my number, your total is $0. Otherwise, you pay $1.
+    - If my number is higher, it must be 2. Guess 2. Your total is $1.
+The worst case is that you pay $1.
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= n <= 200`
+
+```python
+class Solution:
+    def getMoneyAmount(self, n: int) -> int:
+        
+        dp = [[0]*(n+2) for _ in range(n+2)]
+        
+        for l in range(2,n+1):
+            for i in range(1,n-l+2):
+                j = i+l-1
+                dp[i][j] = float('inf')
+                for k in range(i, j+1):
+                    dp[i][j] = min(dp[i][j], k+max(dp[i][k-1], dp[k+1][j]))
+        
+        return dp[1][n]
+```
+
+
+
+
+
+### 1246. Palindrome Removal
+
+Hard
+
+Given an integer array `arr`, in one move you can select a **palindromic** subarray `arr[i], arr[i+1], ..., arr[j]` where `i <= j`, and remove that subarray from the given array. Note that after removing a subarray, the elements on the left and on the right of that subarray move to fill the gap left by the removal.
+
+Return the minimum number of moves needed to remove all numbers from the array.
+
+ 
+
+**Example 1:**
+
+```
+Input: arr = [1,2]
+Output: 2
+```
+
+**Example 2:**
+
+```
+Input: arr = [1,3,4,1,5]
+Output: 3
+Explanation: Remove [4] then remove [1,3,1] then remove [5].
+```
+
+
+
+### 1049. Last Stone Weight II
+
+Medium
+
+We have a collection of rocks, each rock has a positive integer weight.
+
+Each turn, we choose **any two rocks** and smash them together. Suppose the stones have weights `x` and `y` with `x <= y`. The result of this smash is:
+
+- If `x == y`, both stones are totally destroyed;
+- If `x != y`, the stone of weight `x` is totally destroyed, and the stone of weight `y` has new weight `y-x`.
+
+At the end, there is at most 1 stone left. Return the **smallest possible** weight of this stone (the weight is 0 if there are no stones left.)
+
+ 
+
+**Example 1:**
+
+```
+Input: [2,7,4,1,8,1]
+Output: 1
+Explanation: 
+We can combine 2 and 4 to get 2 so the array converts to [2,7,1,8,1] then,
+we can combine 7 and 8 to get 1 so the array converts to [2,1,1,1] then,
+we can combine 2 and 1 to get 1 so the array converts to [1,1,1] then,
+we can combine 1 and 1 to get 0 so the array converts to [1] then that's the optimal value.
+```
+
+
+
+```python
+class Solution:
+    def lastStoneWeightII(self, stones: List[int]) -> int:
+        n = len(stones)
+        maxSum = sum(stones)
+        dp = [[False]*(2*maxSum+1) for _ in range(n+1)]
+        dpwidth = (2*maxSum+1)
+        dp[0][maxSum] = True
+        
+        for i in range(1,n+1):
+            for s in range(-maxSum, maxSum+1):
+                c = s+maxSum
+                if 0<=c-stones[i-1]<(dpwidth):
+                    dp[i][c] = dp[i][c] or dp[i-1][c-stones[i-1]]
+                if 0<=c+stones[i-1]<(dpwidth):
+                    dp[i][c] = dp[i][c] or dp[i-1][c+stones[i-1]]
+        
+        for s in range(-maxSum, maxSum+1):
+            c = s+maxSum
+            if s>=0 and dp[-1][c]:
+                return s
+```
+
+
+
+
+
+### 474. Ones and Zeroes
+
+Medium
+
+You are given an array of binary strings `strs` and two integers `m` and `n`.
+
+Return *the size of the largest subset of `strs` such that there are **at most*** `m` `0`*'s and* `n` `1`*'s in the subset*.
+
+A set `x` is a **subset** of a set `y` if all elements of `x` are also elements of `y`.
+
+ 
+
+**Example 1:**
+
+```
+Input: strs = ["10","0001","111001","1","0"], m = 5, n = 3
+Output: 4
+Explanation: The largest subset with at most 5 0's and 3 1's is {"10", "0001", "1", "0"}, so the answer is 4.
+Other valid but smaller subsets include {"0001", "1"} and {"10", "1", "0"}.
+{"111001"} is an invalid subset because it contains 4 1's, greater than the maximum of 3.
+```
+
+**Example 2:**
+
+```
+Input: strs = ["10","0","1"], m = 1, n = 1
+Output: 2
+Explanation: The largest subset is {"0", "1"}, so the answer is 2.
+```
+
+```python
+class Solution:
+    def findMaxForm(self, strs: List[str], m: int, n: int) -> int:
+        N = len(strs)
+        dp = [[[0]*(n+1) for _ in range(m+1)] for _ in range(N+1)]
+        count = []
+        for s in strs:
+            sum0 = 0
+            sum1 = 0
+            for i in s:
+                if i=="0":
+                    sum0+=1
+                else:
+                    sum1+=1
+            count.append([sum0, sum1])
+        
+            
+        maxRes = 0
+        for i in range(1, N+1):
+            for cm in range(m+1):
+                for cn in range(n+1):
+                    count0 = count[i-1][0]
+                    count1 = count[i-1][1]
+                    if cm-count0>=0 and cn-count1>=0:
+                        dp[i][cm][cn] = max(dp[i-1][cm-count0][cn-count1]+1, dp[i-1][cm][cn])
+                    else:
+                        dp[i][cm][cn] = dp[i-1][cm][cn]
+                        
+                    maxRes = max(maxRes, dp[i][cm][cn])
+        
+        # print(dp)
+        
+        return maxRes
 ```
 

@@ -141,7 +141,8 @@
   - Are you fitting the data fast enough?
 - Is the model generalizing?
 - If your train performance is okay and dev performance is low: are you underfitting the data? Add more features or increase neural network size
-- 
+- Print the dimensions of all tensors in your computation graph, particularly when batching. Make sure you understand what all these tensors mean and what dimensions they should be!
+- Try making hyperparameters prime numbers wherever possible you can understand where dimensions come from
 
 ## Linear Binary Classification
 

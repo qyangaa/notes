@@ -131,6 +131,26 @@ $$
 + Use subwords
 + Embeddings are computed using RNNs and Transformers through language modeling. We can't just look up an embedding for each word, but actually need to run a mode
 
+### Applying embeddings
+
++ Use as first layer of network
+  + Approach 1: learn these embeddings as parameters from your data
+    Often works pretty well
+  + Approach 2 : initialize word embeddings using GloVe, keep fixed
+    Faster because no need to update these parameters
+  + Approach 3: initialize word embeddings GloVe, fine-tune
+    Works best for some tasks
+  + Can also evaluate embeddings intrinsically on tasks like word similarity
++ Deep averaging Networks
+
+![image-20210203133430627](/home/arkyyang/files/notes/notes/attachments/image-20210203133430627.png)
+
+![image-20210203133444973](/home/arkyyang/files/notes/notes/attachments/image-20210203133444973.png)
+
+limitations
+
+![image-20210203133504914](/home/arkyyang/files/notes/notes/attachments/image-20210203133504914.png)
+
 ### Debiasing
 
 + Approach1: 
@@ -139,4 +159,6 @@ $$
   + Subtract those projections from the original word
   + ![image-20210202152713279](/home/arkyyang/files/notes/notes/attachments/image-20210202152713279.png)
 + Not effective: bias pervades the word embedding space
+
+
 
