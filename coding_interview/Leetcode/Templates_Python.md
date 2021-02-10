@@ -92,6 +92,16 @@ count.sort(key=lambda x: (-x[1], x[0]))
 heapq.nlargest(k,count, lambda x: (-x[1], x[0]))
 ```
 
+
+
+### Sort
+
+```python
+counter.sort(key = lambda x: (x[1], x[0]), reverse=False)
+```
+
+
+
 ### Python Heapq
 
 + Only supports minHeap
@@ -2191,6 +2201,24 @@ def findCycle(cur, path):
         ret = findCycle(child, path)
         if ret: return ret
         return ret
+```
+
++ In undirected graph
+
+```python
+        def hasCycle(v, parent):
+            visited.add(v)
+            for child in graph[v]:
+                if child not in visited:
+                    if hasCycle(child, v):
+                        return True
+                elif parent!= child:
+                    return True
+            return False
+         for v in range(n):
+            visited = set()
+            if hasCycle(v, -1):
+                return True
 ```
 
 

@@ -201,3 +201,103 @@ class Solution:
 ### 502
 
 https://leetcode.com/problems/ipo/
+
+
+
+
+
+### Check if an array is a heap
+
++ Example:
+  + `[90,15,10,7,12,2,7,3]`
+  + return True
++ parent -> children: n-> 2n+1, 2n+2
++ child -> parent: n->(n-1)/2
+
+```python
+    for i in range(len(nums)-1, 0, -1):
+        if not nums[i]<= nums[(i-1)//2]:
+            return False
+    return True
+```
+
+
+
+
+
+### Merge K sorted Arrays
+
+```python
+import heapq
+from collections import deque
+def mergeKArrays(arrays):
+    heap = []
+    q = deque([])
+    for i in range(len(arrays)):
+        if arrays[i]:
+            heapq.heappush(heap, [-arrays[i].pop(),i])
+    
+    while heap:
+        item = heapq.heappop(heap)
+        cur, i = -item[0], item[1]
+        q.appendleft(cur)
+        if arrays[i]:
+            heapq.heappush(heap, [-arrays[i].pop(),i])
+        
+    
+    return list(q)
+
+```
+
+
+
+### 973. K Closest Points to Origin
+
+Medium
+
+We have a list of `points` on the plane. Find the `K` closest points to the origin `(0, 0)`.
+
+(Here, the distance between two points on a plane is the Euclidean distance.)
+
+You may return the answer in any order. The answer is guaranteed to be unique (except for the order that it is in.)
+
+ 
+
+**Example 1:**
+
+```
+Input: points = [[1,3],[-2,2]], K = 1
+Output: [[-2,2]]
+Explanation: 
+The distance between (1, 3) and the origin is sqrt(10).
+The distance between (-2, 2) and the origin is sqrt(8).
+Since sqrt(8) < sqrt(10), (-2, 2) is closer to the origin.
+We only want the closest K = 1 points from the origin, so the answer is just [[-2,2]].
+```
+
+**Example 2:**
+
+```
+Input: points = [[3,3],[5,-1],[-2,4]], K = 2
+Output: [[3,3],[-2,4]]
+(The answer [[-2,4],[3,3]] would also be accepted.)
+```
+
+ 
+
+
+
+```python
+from collections import defaultdict
+class Solution:
+    def kClosest(self, points: List[List[int]], K: int) -> List[List[int]]:
+    h = []
+    for point in points:
+        h.append([point[0]**2+point[1]**2, point])
+    heapq.heapify(h)
+    res=[]
+    for _ in range(K):
+        res.append(heapq.heappop(h)[1])
+    return res
+```
+

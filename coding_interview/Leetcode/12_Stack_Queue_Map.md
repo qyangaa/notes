@@ -602,3 +602,174 @@ Output: false
 ![image-20210117201322564](/home/arkyyang/files/notes/notes/attachments/image-20210117201322564.png)
 
 ![image-20210117201331230](/home/arkyyang/files/notes/notes/attachments/image-20210117201331230.png)
+
+
+
+
+
+### 503. Next Greater Element II
+
+Medium
+
+Given a circular array (the next element of the last element is the first element of the array), print the Next Greater Number for every element. The Next Greater Number of a number x is the first greater number to its traversing-order next in the array, which means you could search circularly to find its next greater number. If it doesn't exist, output -1 for this number.
+
+**Example 1:**
+
+```
+Input: [1,2,1]
+Output: [2,-1,2]
+Explanation: The first 1's next greater number is 2; The number 2 can't find next greater number; The second 1's next greater number needs to search circularly, which is also 2.
+```
+
+
+
+
+​        
+
+```python
+class Solution:
+    def nextGreaterElements(self, nums: List[int]) -> List[int]:
+        if not nums: return []
+        nums = nums+nums
+        n = len(nums)
+        stack=[]
+        res = [-1]*n
+	for i in range(n):
+        if not stack: 
+            stack.append([i, nums[i]])
+        elif nums[i]<stack[-1][1]:
+            stack.append([i,nums[i]])
+        else:
+            while stack and nums[i]>stack[-1][1]:
+                cur = stack.pop()
+                res[cur[0]] = nums[i]
+            stack.append([i, nums[i]])
+    
+    return res[:n//2]
+```
+
+
+
+### Bad hair day
+
+Some of Farmer John's N cows (1 ≤ N ≤ 800) are having a bad hair day! Since each cow is self-conscious about her messy hairstyle, FJ wants to count the number of other cows that can see the top of other cows' heads. Each cow i has a specified height hi (1 ≤ hi ≤ 1,000) and is standing in a line of cows all facing east (to the right in our diagrams). Therefore, cow i can see the tops of the heads of cows in front of her (namely cows i+1, i+2, and so on), for as long as these cows are strictly shorter than cow i.Let ci denote the number of cows whose hairstyle is visible from cow i; please compute the sum of c1 through cN
+
+
+
++ Find res, where `res[i] = range[i,k] where nums[i]..nums[k] all < nums[i]`
+
+```python
+    stack = []
+    res = 0
+    for cow in cows:
+        while stack and cow>=stack[-1]:
+            stack.pop()
+        res += len(stack)
+        stack.append(cow)                
+    return res
+```
+
+
+
+### Print all subarrays with 0 sum
+
+- Difficulty Level : [Medium](https://www.geeksforgeeks.org/medium)
+-  Last Updated : 09 May, 2020
+
+Given an array, print all subarrays in the array which has sum 0.
+
+**Examples:**
+
+```
+Input:  arr = [6, 3, -1, -3, 4, -2, 2,
+             4, 6, -12, -7]
+Output:  
+Subarray found from Index 2 to 4
+Subarray found from Index 2 to 6          
+Subarray found from Index 5 to 6
+Subarray found from Index 6 to 9
+Subarray found from Index 0 to 10
+```
+
+```python
+from collections import defaultdict
+def findSubArrays(nums):
+    prefixSum = defaultdict(list)
+    prefixSum[0].append(-1)
+    curSum = 0
+    for i, num in enumerate(nums):
+        curSum += num
+        prefixSum[curSum].append(i)
+    res = []
+    for idxs in prefixSum.values():
+        while len(idxs)>1:
+            r = idxs.pop()
+            for l in idxs:
+                res.append([l+1, r])
+    return sorted(res)
+```
+
+
+
+### 76. Minimum Window Substring
+
+Hard
+
+Given two strings `s` and `t`, return *the minimum window in `s` which will contain all the characters in `t`*. If there is no such window in `s` that covers all characters in `t`, return *the empty string `""`*.
+
+**Note** that If there is such a window, it is guaranteed that there will always be only one unique minimum window in `s`.
+
+ 
+
+**Example 1:**
+
+```
+Input: s = "ADOBECODEBANC", t = "ABC"
+Output: "BANC"
+```
+
+**Example 2:**
+
+```
+Input: s = "a", t = "a"
+Output: "a"
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= s.length, t.length <= 105`
+- `s` and `t` consist of English letters.
+
+
+
+![image-20210207115437151](/home/arkyyang/files/notes/notes/attachments/image-20210207115437151.png)
+
+```python
+from collections import defaultdict
+class Solution:
+    def minWindow(self, s: str, t: str) -> str:
+        mapS = defaultdict(int)
+        mapT = defaultdict(int)
+        for c in t:
+            mapT[c]+=1
+        
+        count = 0
+        start = 0
+        res = ""
+        for i,c in enumerate(s):
+            if mapT[c]>0:
+                mapS[c]+=1
+                if mapT[c]>=mapS[c]:
+                    count+=1
+            if count == len(t):
+                while mapT[s[start]]<mapS[s[start]] or mapT[s[start]]==0:
+                    if mapT[s[start]]<mapS[s[start]]:
+                        mapS[s[start]] -= 1
+                    start += 1
+                if not res or i-start+1<len(res):
+                    res = s[start:i+1]
+        return res
+```
+
