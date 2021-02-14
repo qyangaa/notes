@@ -1694,10 +1694,38 @@ def findAndRemove(node):
 ### Convert List of edges to Adjacency List
 
 ```python
-graph = defaultdict(list)
-for edge in edges:
-    graph[edge[0]].append(edge[1])
-    graph[edge[1]].append(edge[0]) # undirected
+boolean[] visited = new boolean[n];
+List[] graph = new List[n];
+for (int i = 0; i<graph.length; i++){
+    graph[i] = new ArrayList<Integer>();
+}
+
+for(int[] edge: edges){
+    int u = edge[0];
+    int v = edge[1];
+    graph[u].add(v);
+    graph[v].add(u);
+}
+```
+
+### DFS
+
++ Template
+
+```java
+Stack<Integer> stack = new Stack<>();
+
+for(int i = 0; i<n; i++){
+    if(!visited[i]){ //over different connected components
+        stack.push(i);
+
+        while(!stack.isEmpty()){
+            int cur = stack.pop();
+            visited[cur] = true;
+            List<Integer> neighbors = graph[cur];
+            for(int nei: neighbors){
+                if(!visited[nei]){
+                    stack.push(nei);}}}}}
 ```
 
 

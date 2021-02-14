@@ -491,6 +491,7 @@ Output: ["catdog"]
 
 
 + input: List(String):
+  
   + some are single words, some are concatenated words, need to find the concatenated words
 + Output: all concatenated words
 + Assumptions:
@@ -1568,5 +1569,77 @@ class Solution:
                         
         res = distance[destination[0]][destination[1]]
         return path[destination[0]][destination[1]] if res != sys.maxsize else 'impossible'
+```
+
+
+
+### 526. Beautiful Arrangement
+
+Medium
+
+Suppose you have `n` integers labeled `1` through `n`. A permutation of those `n` integers `perm` (**1-indexed**) is considered a **beautiful arrangement** if for every `i` (`1 <= i <= n`), **either** of the following is true:
+
+- `perm[i]` is divisible by `i`.
+- `i` is divisible by `perm[i]`.
+
+Given an integer `n`, return *the **number** of the **beautiful arrangements** that you can construct*.
+
+ 
+
+**Example 1:**
+
+```
+Input: n = 2
+Output: 2
+Explanation: 
+The first beautiful arrangement is [1,2]:
+    - perm[1] = 1 is divisible by i = 1
+    - perm[2] = 2 is divisible by i = 2
+The second beautiful arrangement is [2,1]:
+    - perm[1] = 2 is divisible by i = 1
+    - i = 2 is divisible by perm[2] = 1
+```
+
+**Example 2:**
+
+```
+Input: n = 1
+Output: 1
+```
+
+
+
+```python
+class Solution:
+    def countArrangement(self, n: int) -> int:
+
+        def fillSpace(start, numbers):
+            
+            count = 0
+            for number in list(numbers):
+                if start%number==0 or number%start==0:
+                    if start == n:
+                        count += 1
+                    else:
+                        numbers.remove(number)
+                        count += fillSpace(start+1, numbers)
+                        numbers.add(number)
+            return count       
+        
+        count = fillSpace(1, set(i for i in range(1,n+1)))
+        
+        return count
+```
+
+```python
+# Top down
+def countArrangement(self, N):
+    def count(i, X):
+        if i == 1:
+            return 1
+        return sum(count(i - 1, X - {x})
+                   for x in X
+                   if x % i == 0 or i % x == 0)
+    return count(N, set(range(1, N + 1)))
 ```
 

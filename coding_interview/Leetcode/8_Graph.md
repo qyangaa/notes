@@ -628,19 +628,21 @@ Every integer represented in the 2D-array will be between 1 and N, where N is th
 + Solution: DFS:
 
 ```python
-graph = defaultdict(set)
-def dfs(s,t):
-    if s in visited: return False
-    visited.add(s)
-    if s==t: return True
-    return any(dfs(nei, t) for nei in graph[s])
-    
-for u,v in edges:
-    visited=set()
-    if u in graph and v in graph and dfs(u,v): return u,v
-    graph[u].add(v)
-    graph[v].add(u)
-    # construct on the go, will return the first edge that completes the cycle
+class Solution(object):
+    def findRedundantConnection(self, edges):
+        graph = collections.defaultdict(set)
+
+        def hasCycle(s,t):
+            if s in visited: return False
+            visited.add(s)
+            if s==t: return True
+            return any(hasCycle(child,t) for child in graph[s])
+        
+        for u,v in edges:
+            visited = set()
+            if u in graph and v in graph and hasCycle(u,v): return [u,v]
+            graph[u].add(v)
+            graph[v].add(u)
 ```
 
 
@@ -648,6 +650,42 @@ for u,v in edges:
 + Solution: Union find. Cycle occurs when dsu can no longer union
 
 ```python
+class DSU(object):
+    def __init__(self):
+        self.par = range(1001)
+        self.rnk = [0] * 1001
+
+    def find(self, x):
+        if self.par[x] != x:
+            self.par[x] = self.find(self.par[x])
+        return self.par[x]
+
+    def union(self, x, y):
+        xr, yr = self.find(x), self.find(y)
+        if xr == yr:
+            return False
+        elif self.rnk[xr] < self.rnk[yr]:
+            self.par[xr] = yr
+        elif self.rnk[xr] > self.rnk[yr]:
+            self.par[yr] = xr
+        else:
+            self.par[yr] = xr
+            self.rnk[xr] += 1
+        return True
+    
+class DSU(object):
+    def __init__(self):
+        self.par = [i for i in range(1001)]
+    def find(self,x):
+        if self.par[x] != x:
+            self.par[x] = self.find(self.par[x])
+        return self.par[x]
+    def union(self, x,y):
+        xp, yp = self.find(x), self.find(y)
+        if xp==yp: return False
+        self.par[xp] = yp
+        return True
+
 dsu=DSU()
 for edge in edges:
     if not dsu.union(*edge):
@@ -715,5 +753,679 @@ class Solution:
                 return False
         return True
         
+```
+
+
+
+
+
+### 269. Alien Dictionary
+
+Hard
+
+There is a new alien language that uses the English alphabet. However, the order among letters are unknown to you.
+
+You are given a list of strings `words` from the dictionary, where `words` are **sorted lexicographically** by the rules of this new language.
+
+*Derive the order of letters in this language, and return it*. If the given input is invalid, return `""`. If there are multiple valid solutions, return **any of them**.
+
+ 
+
+**Example 1:**
+
+```
+Input: words = ["wrt","wrf","er","ett","rftt"]
+t->f
+w->e
+r->t
+e->r
+Output: "wertf"
+```
+
+**Example 2:**
+
+```
+Input: words = ["z","x"]
+Output: "zx"
+```
+
+**Example 3:**
+
+```
+Input: words = ["z","x","z"]
+Output: ""
+Explanation: The order is invalid, so return "".
+```
+
++ Topological sort
+
+```python
+from collections import defaultdict
+class Solution:
+    def alienOrder(self, words: List[str]) -> str:
+        edges = defaultdict(list)
+        indegree = defaultdict(int)
+        chars = set()
+        
+        for w in words:
+            for c in w:
+                chars.add(c)
+        
+        n = len(chars)
+        
+        for i in range(len(words)-1):
+            first, second = words[i], words[i+1]
+            j=0
+            while j<len(first) and j<len(second):
+                if first[j]==second[j]:
+                    j+=1
+                else:
+                    edges[first[j]].append(second[j])
+                    indegree[second[j]]+=1
+                    break
+            if j==len(second) and len(first)>len(second): return ""
+                
+        res = []  
+        
+        
+        def removeEdge(v):
+            if indegree[v]<=0 and v in chars:
+                res.append(v)
+                chars.remove(v)
+                for child in edges[v]:
+                    indegree[child]-=1
+                    removeEdge(child)
+            return
+                
+                    
+        
+        for v in list(chars):
+            if not indegree[v]:
+                removeEdge(v)       
+        
+        if len(res)!=n: return ""
+        
+        return "".join(res)
+```
+
+
+
+### 332. Reconstruct Itinerary
+
+Medium
+
+Given a list of airline tickets represented by pairs of departure and arrival airports `[from, to]`, reconstruct the itinerary in order. All of the tickets belong to a man who departs from `JFK`. Thus, the itinerary must begin with `JFK`.
+
+**Note:**
+
+1. If there are multiple valid itineraries, you should return the itinerary that has the **smallest lexical order** when read as a single string. For example, the itinerary `["JFK", "LGA"]` has a smaller lexical order than `["JFK", "LGB"]`.
+2. All airports are represented by three capital letters (IATA code).
+3. You may assume all tickets form at least one valid itinerary.
+4. One must use all the tickets once and only once.
+
+**Example 1:**
+
+```
+Input: [["MUC", "LHR"], ["JFK", "MUC"], ["SFO", "SJC"], ["LHR", "SFO"]]
+Output: ["JFK", "MUC", "LHR", "SFO", "SJC"]
+```
+
+**Example 2:**
+
+```
+Input: [["JFK","SFO"],["JFK","ATL"],["SFO","ATL"],["ATL","JFK"],["ATL","SFO"]]
+Output: ["JFK","ATL","JFK","SFO","ATL","SFO"]
+Explanation: Another possible reconstruction is ["JFK","SFO","ATL","JFK","ATL","SFO"].
+             But it is larger in lexical order.
+```
+
+
+
+
+
+
+
+
+
+### 210. Course Schedule II
+
+Medium
+
+There are a total of `n` courses you have to take labelled from `0` to `n - 1`.
+
+Some courses may have `prerequisites`, for example, if `prerequisites[i] = [ai, bi]` this means you must take the course `bi` before the course `ai`. `b->a`
+
+Given the total number of courses `numCourses` and a list of the `prerequisite` pairs, return the ordering of courses you should take to finish all courses.
+
+If there are many valid answers, return **any** of them. If it is impossible to finish all courses, return **an empty array**.
+
+ 
+
+**Example 1:**
+
+```
+Input: numCourses = 2, prerequisites = [[1,0]]
+Output: [0,1]
+Explanation: There are a total of 2 courses to take. To take course 1 you should have finished course 0. So the correct course order is [0,1].
+```
+
+**Example 2:**
+
+```
+Input: numCourses = 4, prerequisites = [[1,0],[2,0],[3,1],[3,2]]
+Output: [0,2,1,3]
+Explanation: There are a total of 4 courses to take. To take course 3 you should have finished both courses 1 and 2. Both courses 1 and 2 should be taken after you finished course 0.
+So one correct course order is [0,1,2,3]. Another correct ordering is [0,2,1,3].
+```
+
+**Example 3:**
+
+```
+Input: numCourses = 1, prerequisites = []
+Output: [0]
+```
+
+
+
+```python
+ edges = defaultdict(list)
+        indegree = defaultdict(int)
+        tovisit = set([i for i in range(numCourses)])
+        for a,b in prerequisites:
+            edges[b].append(a)
+            indegree[a]+=1
+        
+        def remove(cur):
+            if indegree[cur]==0 and cur in tovisit:
+                res.append(cur)
+                tovisit.remove(cur)
+                for child in edges[cur]:
+                    indegree[child]-=1
+                    remove(child)
+            return
+        
+        res = []
+        for v in list(tovisit):
+            if not indegree[v]:
+                remove(v)
+        
+        if len(res) != numCourses: return ""
+        
+        return res
+```
+
+
+
+
+
+### 797. All Paths From Source to Target
+
+Medium
+
+Given a directed acyclic graph (**DAG**) of `n` nodes labeled from 0 to n - 1, find all possible paths from node `0` to node `n - 1`, and return them in any order.
+
+The graph is given as follows: `graph[i]` is a list of all nodes you can visit from node `i` (i.e., there is a directed edge from node `i` to node `graph[i][j]`).
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2020/09/28/all_1.jpg)
+
+```
+Input: graph = [[1,2],[3],[3],[]]
+Output: [[0,1,3],[0,2,3]]
+Explanation: There are two paths: 0 -> 1 -> 3 and 0 -> 2 -> 3.
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2020/09/28/all_2.jpg)
+
+```
+Input: graph = [[4,3,1],[3,2,4],[3],[4],[]]
+Output: [[0,4],[0,3,4],[0,1,3,4],[0,1,2,3,4],[0,1,4]]
+```
+
+**Example 3:**
+
+```
+Input: graph = [[1],[]]
+Output: [[0,1]]
+```
+
+**Example 4:**
+
+```
+Input: graph = [[1,2,3],[2],[3],[]]
+Output: [[0,1,2,3],[0,2,3],[0,3]]
+```
+
+**Example 5:**
+
+```
+Input: graph = [[1,3],[2],[3],[]]
+Output: [[0,1,2,3],[0,3]]
+```
+
+ 
+
++ dfs
+
+```python
+        def dfs(cur, path):
+            if cur==len(graph)-1:
+                res.append(list(path)+[cur])
+                return
+            for child in graph[cur]:
+                path.append(cur)
+                dfs(child, path)
+                path.pop()
+            return
+        
+        res = []
+        dfs(0, [])
+        return res
+```
+
+
+
+
+
+### 685. Redundant Connection II
+
+Hard
+
+In this problem, a rooted tree is a **directed** graph such that, there is exactly one node (the root) for which all other nodes are descendants of this node, plus every node has exactly one parent, except for the root node which has no parents.
+
+The given input is a directed graph that started as a rooted tree with `n` nodes (with distinct values from `1` to `n`), with one additional directed edge added. The added edge has two different vertices chosen from `1` to `n`, and was not an edge that already existed.
+
+The resulting graph is given as a 2D-array of `edges`. Each element of `edges` is a pair `[ui, vi]` that represents a **directed** edge connecting nodes `ui` and `vi`, where `ui` is a parent of child `vi`.
+
+Return *an edge that can be removed so that the resulting graph is a rooted tree of* `n` *nodes*. If there are multiple answers, return the answer that occurs last in the given 2D-array.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2020/12/20/graph1.jpg)
+
+```
+Input: edges = [[1,2],[1,3],[2,3]]
+Output: [2,3]
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2020/12/20/graph2.jpg)
+
+```
+Input: edges = [[1,2],[2,3],[3,4],[4,1],[1,5]]
+Output: [4,1]
+```
+
+ 
+
+**Constraints:**
+
+- `n == edges.length`
+- `3 <= n <= 1000`
+- `edges[i].length == 2`
+- `1 <= ui, vi <= n`
+
+
+
+### 323. Number of Connected Components in an Undirected Graph
+
+Medium
+
+Given `n` nodes labeled from `0` to `n - 1` and a list of undirected edges (each edge is a pair of nodes), write a function to find the number of connected components in an undirected graph.
+
+**Example 1:**
+
+```
+Input: n = 5 and edges = [[0, 1], [1, 2], [3, 4]]
+
+     0          3
+     |          |
+     1 --- 2    4 
+
+Output: 2
+```
+
+**Example 2:**
+
+```
+Input: n = 5 and edges = [[0, 1], [1, 2], [2, 3], [3, 4]]
+
+     0           4
+     |           |
+     1 --- 2 --- 3
+
+Output:  1
+```
+
+**Note:**
+You can assume that no duplicate edges will appear in `edges`. Since all edges are undirected, `[0, 1]` is the same as `[1, 0]` and thus will not appear together in `edges`.
+
+
+
+```python
+class DSU:
+    def __init__(self,n):
+        self.par = [i for i in range(n)]
+    def find(self, x):
+        if self.par[x]!=x:
+            self.par[x] = self.find(self.par[x])
+        return self.par[x]
+    def union(self,x,y):
+        xp, yp = self.find(x), self.find(y)
+        if xp==yp: return False
+        self.par[xp] = yp
+        return True
+    def compress(self):
+        for x in range(len(self.par)):
+            self.find(x)
+        
+
+class Solution:
+    def countComponents(self, n: int, edges: List[List[int]]) -> int:
+        dsu = DSU(n)
+        for edge in edges:
+            dsu.union(*edge)
+        dsu.compress()
+        
+        return len(set(dsu.par))
+```
+
+
+
+### 1334. Find the City With the Smallest Number of Neighbors at a Threshold Distance
+
+Medium
+
+There are `n` cities numbered from `0` to `n-1`. Given the array `edges` where `edges[i] = [fromi, toi, weighti]` represents a bidirectional and weighted edge between cities `fromi` and `toi`, and given the integer `distanceThreshold`.
+
+Return the city with the smallest number of cities that are reachable through some path and whose distance is **at most** `distanceThreshold`, If there are multiple such cities, return the city with the greatest number.
+
+Notice that the distance of a path connecting cities ***i*** and ***j*** is equal to the sum of the edges' weights along that path.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2020/01/16/find_the_city_01.png)
+
+```
+Input: n = 4, edges = [[0,1,3],[1,2,1],[1,3,4],[2,3,1]], distanceThreshold = 4
+Output: 3
+Explanation: The figure above describes the graph. 
+The neighboring cities at a distanceThreshold = 4 for each city are:
+City 0 -> [City 1, City 2] 
+City 1 -> [City 0, City 2, City 3] 
+City 2 -> [City 0, City 1, City 3] 
+City 3 -> [City 1, City 2] 
+Cities 0 and 3 have 2 neighboring cities at a distanceThreshold = 4, but we have to return city 3 since it has the greatest number.
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2020/01/16/find_the_city_02.png)
+
+```
+Input: n = 5, edges = [[0,1,2],[0,4,8],[1,2,3],[1,4,2],[2,3,1],[3,4,1]], distanceThreshold = 2
+Output: 0
+Explanation: The figure above describes the graph. 
+The neighboring cities at a distanceThreshold = 2 for each city are:
+City 0 -> [City 1] 
+City 1 -> [City 0, City 4] 
+City 2 -> [City 3, City 4] 
+City 3 -> [City 2, City 4]
+City 4 -> [City 1, City 2, City 3] 
+The city 0 has 1 neighboring city at a distanceThreshold = 2.
+```
+
+ 
+
+Dijstra
+
+```python
+from collections import deque, defaultdict
+import heapq
+class Solution:
+    def findTheCity(self, n: int, edges: List[List[int]], distanceThreshold: int) -> int:
+        def dijkstra(start):
+            dist = [float('inf')]*n
+            dist[start] = 0
+            heap = [(0,start)]
+            while heap:
+                curDist, cur = heapq.heappop(heap)
+                if curDist > dist[cur]:
+                    continue
+                for nei, weight in graph[cur]:
+                    newDist = curDist + weight
+                    if newDist < dist[nei]:
+                        dist[nei] = newDist
+                        heapq.heappush(heap, (newDist, nei))
+            return sum(1 for d in dist if d<=distanceThreshold)
+        
+        graph = defaultdict(list)
+        for edge in edges:
+            graph[edge[0]].append((edge[1], edge[2]))
+            graph[edge[1]].append((edge[0], edge[2]))
+        
+        # print(graph)
+        
+        res = 0
+        curMin = n
+        for i in range(n):
+            curCount = dijkstra(i)
+            if curCount<=curMin:
+                curMin, res = curCount, i
+        
+        return res
+```
+
+
+
+### 1042. Flower Planting With No Adjacent
+
+Medium
+
+You have `n` gardens, labeled from `1` to `n`, and an array `paths` where `paths[i] = [xi, yi]` describes a bidirectional path between garden `xi` to garden `yi`. In each garden, you want to plant one of 4 types of flowers.
+
+All gardens have **at most 3** paths coming into or leaving it.
+
+Your task is to choose a flower type for each garden such that, for any two gardens connected by a path, they have different types of flowers.
+
+Return ***any** such a choice as an array* `answer`*, where* `answer[i]` *is the type of flower planted in the* `(i+1)th` *garden. The flower types are denoted* `1`*,* `2`*,* `3`*, or* `4`*. It is guaranteed an answer exists.*
+
+ 
+
+**Example 1:**
+
+```
+Input: n = 3, paths = [[1,2],[2,3],[3,1]]
+Output: [1,2,3]
+Explanation:
+Gardens 1 and 2 have different types.
+Gardens 2 and 3 have different types.
+Gardens 3 and 1 have different types.
+Hence, [1,2,3] is a valid answer. Other valid answers include [1,2,4], [1,4,2], and [3,2,1].
+```
+
+**Example 2:**
+
+```
+Input: n = 4, paths = [[1,2],[3,4]]
+Output: [1,2,1,2]
+```
+
+**Example 3:**
+
+```
+Input: n = 4, paths = [[1,2],[2,3],[3,4],[4,1],[1,3],[2,4]]
+Output: [1,2,3,4]
+```
+
+
+
+
+
+### 547. Number of Provinces
+
+Medium
+
+There are `n` cities. Some of them are connected, while some are not. If city `a` is connected directly with city `b`, and city `b` is connected directly with city `c`, then city `a` is connected indirectly with city `c`.
+
+A **province** is a group of directly or indirectly connected cities and no other cities outside of the group.
+
+You are given an `n x n` matrix `isConnected` where `isConnected[i][j] = 1` if the `ith` city and the `jth` city are directly connected, and `isConnected[i][j] = 0` otherwise.
+
+Return *the total number of **provinces***.
+
+ 
+
+**Example 1:**
+
+![img](https://assets.leetcode.com/uploads/2020/12/24/graph1.jpg)
+
+```
+Input: isConnected = [[1,1,0],[1,1,0],[0,0,1]]
+Output: 2
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2020/12/24/graph2.jpg)
+
+```
+Input: isConnected = [[1,0,0],[0,1,0],[0,0,1]]
+Output: 3
+```
+
+
+
+```python
+count = 0
+n = len(isConnected)
+visited  = [False]*n
+for i in range(n):
+    if not visited[i]:
+        stack = [i]
+        count += 1
+        while stack:
+            cur = stack.pop()
+            visited[cur] = True
+            for j, edge in enumerate(isConnected[cur]):
+                if edge and not visited[j]:
+                    stack.append(j)
+return count
+```
+
+
+
+### 1376. Time Needed to Inform All Employees
+
+Medium
+
+A company has `n` employees with a unique ID for each employee from `0` to `n - 1`. The head of the company is the one with `headID`.
+
+Each employee has one direct manager given in the `manager` array where `manager[i]` is the direct manager of the `i-th` employee, `manager[headID] = -1`. Also, it is guaranteed that the subordination relationships have a tree structure.
+
+The head of the company wants to inform all the company employees of an urgent piece of news. He will inform his direct subordinates, and they will inform their subordinates, and so on until all employees know about the urgent news.
+
+The `i-th` employee needs `informTime[i]` minutes to inform all of his direct subordinates (i.e., After informTime[i] minutes, all his direct subordinates can start spreading the news).
+
+Return *the number of minutes* needed to inform all the employees about the urgent news.
+
+ 
+
+**Example 1:**
+
+```
+Input: n = 1, headID = 0, manager = [-1], informTime = [0]
+Output: 0
+Explanation: The head of the company is the only employee in the company.
+```
+
+**Example 2:**
+
+![img](https://assets.leetcode.com/uploads/2020/02/27/graph.png)
+
+```
+Input: n = 6, headID = 2, manager = [2,2,-1,2,2,2], informTime = [0,0,1,0,0,0]
+Output: 1
+Explanation: The head of the company with id = 2 is the direct manager of all the employees in the company and needs 1 minute to inform them all.
+The tree structure of the employees in the company is shown.
+```
+
+**Example 3:**
+
+![img](https://assets.leetcode.com/uploads/2020/02/28/1730_example_3_5.PNG)
+
+```
+Input: n = 7, headID = 6, manager = [1,2,3,4,5,6,-1], informTime = [0,6,5,4,3,2,1]
+Output: 21
+Explanation: The head has id = 6. He will inform employee with id = 5 in 1 minute.
+The employee with id = 5 will inform the employee with id = 4 in 2 minutes.
+The employee with id = 4 will inform the employee with id = 3 in 3 minutes.
+The employee with id = 3 will inform the employee with id = 2 in 4 minutes.
+The employee with id = 2 will inform the employee with id = 1 in 5 minutes.
+The employee with id = 1 will inform the employee with id = 0 in 6 minutes.
+Needed time = 1 + 2 + 3 + 4 + 5 + 6 = 21.
+```
+
+**Example 4:**
+
+```
+Input: n = 15, headID = 0, manager = [-1,0,0,1,1,2,2,3,3,4,4,5,5,6,6], informTime = [1,1,1,1,1,1,1,0,0,0,0,0,0,0,0]
+Output: 3
+Explanation: The first minute the head will inform employees 1 and 2.
+The second minute they will inform employees 3, 4, 5 and 6.
+The third minute they will inform the rest of employees.
+```
+
+**Example 5:**
+
+```
+Input: n = 4, headID = 2, manager = [3,3,-1,2], informTime = [0,0,162,914]
+Output: 1076
+```
+
+ 
+
+**Constraints:**
+
+- `1 <= n <= 105`
+- `0 <= headID < n`
+- `manager.length == n`
+- `0 <= manager[i] < n`
+- `manager[headID] == -1`
+- `informTime.length == n`
+- `0 <= informTime[i] <= 1000`
+- `informTime[i] == 0` if employee `i` has no subordinates.
+- It is **guaranteed** that all the employees can be informed.
+
+
+
++ Max Root-to-leaf sum, each node has single parent: tree
+
+```python
+graph = [[] for _ in range(n)]
+for i in range(n):
+    u,v = manager[i], i
+    if u!= -1:
+        graph[u].append(v)
+
+def dfs(start):
+    maxDist = -1
+    for nei in graph[start]:
+        maxDist = max(maxDist, dfs(nei))
+
+    if maxDist == -1: return 0
+    return maxDist + informTime[start]
+
+return dfs(headID)
 ```
 

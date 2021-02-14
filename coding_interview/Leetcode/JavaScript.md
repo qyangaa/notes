@@ -2,19 +2,19 @@
 
 ### JavaScript Built-in APIs
 
-| Array (arr.) | .push(e)                   | .pop()            | .unshift(e)   | .shift()       | .slice(start, end)          | .concat()     | .splice(start, numRmv, e1, e2..) |
-| ------------ | -------------------------- | ----------------- | ------------- | -------------- | --------------------------- | ------------- | -------------------------------- |
-|              | .sort(sortby)              | .filter(filterby) | .reverse()    | .join(',')     | .reduce(reducer)            | for(i of arr) | .includes(item)                  |
-| Array.       | .isArray(obj)              | .from(obj)        |               |                |                             |               |                                  |
-| String       | .concat(s2)                | .slice(l, r)      | .replace(o,n) | .split(',', n) | .toLowerCase() .toUpperCase | for(c of s)   |                                  |
-|              | .indexOf(c)                | .lastIndexOf(c)   | .match(v)     | .parseInt(s)   |                             |               |                                  |
-| Obj          |                            | key in obj        | obj[key]      |                |                             |               |                                  |
-| Map          | new Map(arr)               | .get(key)         | .set(key, v)  | .delete(key)   |                             |               |                                  |
-| Set&Map      | .keys()                    | .values()         | .entries()    | .forEach()     | .size                       | .size.clear() |                                  |
-| Set          | new Set(arr)               | .add(v)           | .delete(v)    | .has(v)        |                             |               |                                  |
-| JSON         | .parse(json)               | .stringify(obj)   |               |                |                             |               |                                  |
-| Proxy        | new Proxy(target, handler) |                   |               |                |                             |               |                                  |
-| Reflect      |                            |                   |               |                |                             |               |                                  |
+| Array (arr.) | .push(e)                   | .pop()            | .unshift(e)   | .shift()       | .slice(start, end)          | .concat()     | ==.splice(start, numRmv, e1, e2..)== |
+| ------------ | -------------------------- | ----------------- | ------------- | -------------- | --------------------------- | ------------- | ------------------------------------ |
+|              | .sort(sortby)              | .filter(filterby) | .reverse()    | .join(',')     | .reduce(reducer)            | for(i of arr) | .includes(item)                      |
+| Array.       | .isArray(obj)              | .from(obj)        |               |                |                             |               |                                      |
+| String       | .concat(s2)                | .slice(l, r)      | .replace(o,n) | .split(',', n) | .toLowerCase() .toUpperCase | for(c of s)   |                                      |
+|              | .indexOf(c)                | .lastIndexOf(c)   | .match(v)     | .parseInt(s)   |                             |               |                                      |
+| Obj          |                            | key in obj        | obj[key]      |                |                             |               |                                      |
+| Map          | new Map(arr)               | .get(key)         | .set(key, v)  | .delete(key)   |                             |               |                                      |
+| Set&Map      | .keys()                    | .values()         | .entries()    | .forEach()     | .size                       | .size.clear() |                                      |
+| Set          | new Set(arr)               | .add(v)           | .delete(v)    | .has(v)        |                             |               |                                      |
+| JSON         | .parse(json)               | .stringify(obj)   |               |                |                             |               |                                      |
+| Proxy        | new Proxy(target, handler) |                   |               |                |                             |               |                                      |
+| Reflect      |                            |                   |               |                |                             |               |                                      |
 
 
 
@@ -39,7 +39,7 @@ let array = Array(rows).fill().map(() => Array(columns));
 let array = Array(rows).fill().map(() => Array(columns).fill(0));
 ```
 
-+ General curry
++ ==General curry==
 
 ```javascript
 function curry(f){
@@ -154,7 +154,7 @@ obj = new Obj("aa")
 ```
 
 + `Obj.prototype.constructor`: points back to original function i.e. `function Obj(par){obj.par = par}`
-+ `Object.getPrototypeOf(obj).constructor`
++ ==`Object.getPrototypeOf(obj).constructor`==
 + `obj instanseof Obj`: return true or false
 
 #### Inheritance
@@ -313,7 +313,7 @@ setTimeout(function run(){
 
 + Debouncing and throttling:
 
-  + Debouncing: only execute fn after user silent for duration
+  + ==Debouncing: only execute fn after user silent for duration==
 
     + ```javascript
       function debounce (fn, delay){
@@ -324,7 +324,7 @@ setTimeout(function run(){
               timer = setTimeout(()=>{fn.apply(this, arguments)}, delay)}}
       ```
 
-  + Throttling: only execute fn once in a interval
+  + ==Throttling: only execute fn once in a interval==
 
     + ```javascript
       function throttle (fn, interval){
@@ -379,7 +379,7 @@ Promise.race([promise1, promise2, promise3]).then((v)=>fn(v));
       }catch(e){console.log(e)}}
   ```
 
-  + Different modes of execution
+  + ==Different modes of execution==
 
     + Sequential
 
@@ -391,7 +391,7 @@ Promise.race([promise1, promise2, promise3]).then((v)=>fn(v));
 
       
 
-    + Concurrent:
+    + Concurrent: assign first
 
       ```javascript
       const hello = resolveHello(2s);
@@ -401,7 +401,7 @@ Promise.race([promise1, promise2, promise3]).then((v)=>fn(v));
       //Hello World, after 2s
       ```
 
-    + Parallel
+    + Parallel: Promise.all
 
       ```javascript
       function parallel(){Promise.all([

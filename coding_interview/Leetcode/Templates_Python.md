@@ -1505,9 +1505,9 @@ l = 0, r = len(A)
 
 
 
-### DFS & BFS
+## DFS & BFS
 
-#### Grid
+### Grid
 
 ```python
 if not A return False
@@ -1661,7 +1661,7 @@ def earlyStop(i,j):
 
   
 
-#### Combination/ Permutation
+### Combination/ Permutation
 
 ```python
 def DFS(n,item,result):
@@ -1817,7 +1817,7 @@ stack = [root]
 while stack:
     cur = stack.pop()
     visit(cur)
-    if cur.right: stack.append(cur.right)
+    if cur.right: stack.append(cur.right) # right first then left
     if cur.left: stack.append(cur.left)
 
 # Preorder: save space by pushing only right
@@ -1844,7 +1844,21 @@ while stack or cur:
         visit(cur)
         cur = cur.right
 
-# Postorder: 
+# Postorder:
+# Indirect method: Reverse append and left/right of pre-order method use deque
+stack = [root]
+cur = root
+q = deque([])
+if not root: return []
+while stack:
+    q.appendleft(cur.val)
+    if cur.left: stack.append(cur.left)
+    if cur.right:
+        cur = cur.right
+    else:
+        cur = stack.pop()
+return list(q)
+# Direct method:
 # go down until leaf, process leaf and pop stack
 # go up from left node, if has right push, else go up and pop
 res = []
@@ -1872,6 +1886,17 @@ while stack:
         res.append(cur.val)
     rev = cur
 return res
+```
+
+#### Root-to-leaf sum
+
+```python
+def maxRoot2LeafSum(start):
+    maxDist = -1
+    for nei in graph[start]:
+        maxDist = max(maxDist, maxRoot2LeafSum(nei) + value(start, nei))
+    if maxDist == -1: return 0
+    return maxDist
 ```
 
 
@@ -2157,6 +2182,8 @@ class Trie:
 
 ## Graph
 
+https://leetcode.com/discuss/general-discussion/655708/graph-for-beginners-problems-pattern-sample-solutions/
+
 ### Convert List of edges to Adjacency List
 
 ```python
@@ -2168,7 +2195,55 @@ for edge in edges:
 
 
 
-### Find Cycle
+### DFS
+
++ Pattern
+
+```python
+# Recursive
+def dfs(cur):
+    if cur in visited: return
+    visited.add(cur)
+    for nei in graph[cur]:
+        dfs(nei)
+dfs(start)
+
+# Iterative
+stack.apend(start)
+while stack:
+    cur = stack.pop()
+    visited.add(cur)
+    for nei in graph[cur]:
+        if nei not in visited:
+            stack.append(nei)
+```
+
+#### Connected components  (323, 547)
+
++ Maintain a count label for each dfs
+
+<img src="/home/arkyyang/files/notes/notes/attachments/image-20210213092757379.png" alt="image-20210213092757379" style="zoom:50%;" />
+
+```python
+group = [-1]*n
+count = 0
+
+for i in range(n):
+    if i not in visited:
+        count += 1
+        dfs(i)
+        
+def dfs(cur):
+    if cur in visited: return
+    visited.add(cur)
+    group[cur] = count
+    for nei in graph[cur]:
+        dfs(nei)
+```
+
+
+
+#### Find Cycle
 
 + With backtracking
 
@@ -2223,41 +2298,117 @@ def findCycle(cur, path):
 
 
 
-### Topological Sort
+### Dijkstra (shorted weight path)
 
 ```python
-class GNode:
-    def __init__(self):
-        self.inDegrees=0
-        self.outNodes=[]
-
-graph=defaultdict(GNode)
-totalDeps = 0
-for first, second in prerequisites:
-    graph[first].outNodes.append(second)
-    graph.second.inDegrees+=1
-    totalDeps+=1
-
-# find no inDegree nodes to start with
-start = deque()
-for index, node in graph.items():
-    if node.inDegrees ==0:
-        start.append(index)
-        
-res=[]
-while start:
-    cur = start.pop()
-    res.append(cur)
-    for child in graph[cur].outNodes:
-        graph[child].inDegrees-=1
-        removedEdges+=1
-        if graph[child].inDegrees=0:
-            start.append(child)
-
-return res
+def dijkstra(start):
+    dist = [float('inf')]*n
+    dist[start] = 0
+    heap = [(0, start)]
+    while heap:
+        curDist, cur = heapq.heappop(heap)
+        if curDist > dist[cur]:
+            continue
+        for neighbor, weight in graph[cur]:
+            newDist = curDist + weight
+            if newDist < dist[neightbor]:
+                dist[neighbor] = newDist
+                heapq.heappush(heap, (newDist, neighbor))
+    return dist
 ```
 
-### Graph
+
+
+### Graph m- Coloring
+
+```python
+# DFS
+def isSafe(v, colors, curColor):
+    for nei in graph[v]:
+        if colors[nei] == curColor: return False
+    return True
+
+def dfs(m, colors, v):
+    if v==n: return True
+    for curColor in range(1, m+1):
+        if isSafe(v, colors, curColor):
+            colors[v] = curColor
+            if dfs(m, colors, )
+# BFS
+
+# Greedy
+res = [0]*(n+1)
+for cur in range(1, n+1):
+    available = {1,2,3..m}
+    for nei in graph[cur]:
+        if res[nei] in available:
+            available.remove(res[nei])
+   	res[cur] = available.pop()
+return res[1:]
+
+```
+
+
+
+
+
+### Topological Sort
+
++ BFS
+
+```python
+def topSOrt(self,graph):
+    indegrees = self.get_indegree(graph)
+    order = []
+    start_nodes = [n for n in graph if indegrees[n] == 0]
+    queue = deque(start_nodes)
+    while queue:
+        node = queue.popleft()
+        order.append(node)
+        for neighbor in node.neighbors:
+            indegrees[neighbor] -= 1
+            if indegrees[neighbor] == 0:
+                queue.append(neighbor)
+     return order
+
+def get_indegree(self, graph):
+    indegrees = {x: 0 for x in graph}
+    for node in graph:
+        for neighbor in node.neighbors:
+            indregees[neighbor] += 1
+    return indegrees
+```
+
++ DFS
+
+```python
+def topSort(self, graph):
+    indegree = {}
+    for x in graph:
+        indegree[x]=0
+    for i in graph:
+        for j in i.neighbors:
+            indegree += 1
+    ans = []
+    for i in graph:
+        if indegree[i] == 0:
+            self.dfs(i, indegree, ans)
+    return ans
+
+def dfs(self, i, indegree, ans):
+    ans.append(i)
+    indegree[i] -= 1
+    for j in i.neighbors:
+        indegree[j] -=1
+        if indegree[j] ==0:
+            self.dfs(j, indegree, ans)
+```
+
+
+
+
+
+### Graph Traversal
 
 ```python
 visited=set()
@@ -2367,11 +2518,11 @@ def union(x,y):
     
 def DSU: #for set size of max 1001
     def __init__(self):
-        self.par=range(1001)
+        self.par=[i for i in range(1001)]
         self.rank=[0]*1001
         
     def find(self,x):
-        if self.par!=x:
+        if self.par[x]!=x:
             # path compression
             self.par[x]=self.find(self.par[x])
         return self.par[x]
@@ -2391,8 +2542,64 @@ def DSU: #for set size of max 1001
         return True
     
     def unionWithoutRank(self,x,y):
-        self.par[self.find(x)]=self.find(y)
+        xr,yr=self.find(x), self.find(y)
+        if xr==yr: return False
+        self.par[xr]=yr
+        return True
 ```
+
+
+
+### Eulerian Path
+
+Path that traverses all edges
+
+```python
+n = num vertices
+m = num edges
+g = adjList
+in = [0]*n
+out = [0]*n
+path = deque([])
+
+countInOutDegrees();
+start, end = findStartEnd()
+if start==-1: return
+dfs(start)
+if len(path) == m+1: return path
+return
+
+
+def countInOutDegrees():
+    for v in g:
+        for u in v.neighbors:
+            out[v]+=1
+            in[u]+=1
+
+def findStartEnd():
+    start, end = 0, 0
+    hasStart, hasEnd = False
+    for i in range(n):
+        if (out[i]-in[i])>1 or (in[i]-out[i])>1:
+            return -1,-1
+        elif out[i]-in[i]==1:
+            if hasStart: return -1,-1
+            start = i
+        elif in[i]-out[i]==1:
+            if hasEnd: return -1,-1
+            end = i
+     return start, end
+
+def dfs(cur):
+    while (out[cur]!=0):
+        out[cur] -= 1
+        dfs(g[cur][-1])
+    path.appendleft(cur)
+```
+
+
+
+
 
 
 
@@ -2612,3 +2819,126 @@ class GraphNode{
 }
 ```
 
+
+
+## OOD
+
+### Concepts
+
+- Class and Object
+
+  - Class: a blueprint for a data type, scheme
+  -  Object: a specific realization of any class
+
+- Data Encapsulation: Data Abstraction and Access Labels
+
+  - Providing only essential information to the outside world and hiding their
+    background details
+
+  - Separate interface and implementation
+
+  - Access Labels:  public,  private,  protected , default
+    $$
+    \begin{array}{|l|l|l|l|}
+    \hline \text { Access } & \text { public } & \text { protected } & \text { private } \\
+    \hline \text { Same class } & \text { yes } & \text { yes } & \text { yes } \\
+    \hline \text { Derived classes } & \text { yes } & \text { yes } & \text { no } \\
+    \hline \text { Outside classes } & \text { yes } & \text { no } & \text { no } \\
+    \hline
+    \end{array}
+    $$
+
+- Inheritance: base class-> derived class
+
+- Interface/ abstract class: cannot be instantiated
+
+  - ```java
+    public interface InterfaceName{
+        // with final, static fiields, abstract methods
+    } 
+    public abstract class AbstractName{
+        // data fields, constructor, methods with implementtaion
+    }
+    public class Name extends AbstractName{}
+    ```
+
+- Override, overload, polymorphism
+
+  ```java
+  public abstract class Human{
+     ...
+     public abstract void goPee();
+  }
+  ```
+
+  - Override: method in the subclass with the same signature as the one in the superclass is called
+
+    ```java
+    public class Male extends Human{
+    ...
+        @Override
+        public void goPee(){
+            System.out.println("Stand Up");
+        }
+    }
+    ```
+
+  - Polymorphism: create object of more general class and assign to a child instance
+
+  ```java
+  public static void main(String[] args){
+      ArrayList<Human> group = new ArrayList<Human>();
+      group.add(new Male());
+      group.add(new Female());
+      // ... add more...
+  
+      // tell the class to take a pee break
+      for (Human person : group) person.goPee();
+  }
+  ```
+  - **Overloading** is the action of defining multiple methods with the same name, but with different parameters. It is unrelated to either overriding or polymorphism.
+
+### Template
+
+1. Clarify
+2. Core actors and functions (from use cases)
+   1. Core actors
+   2. Functions
+3. Classes: 
+   1. graph
+   2. Explaination
+4. Example Cases
+   1. Flow chart
+5. Code
+
+### Example  
+
+#### Design a parking lot
+
+1. Clarify
+   1. multiple floors, multiple entry/ exit points
+   2. customers collect ticket from entry point, park, and exit at exit point
+   3. customers pay via cash or credit cards
+   4. system has max capacity
+   5. allows multiple types of parking spots (compact, large, electric, motorcycle, handicapped)
+   6. allows multiple types of vehicles
+   7. per-hour fee model
+2. Core actors and functions (from use cases)
+   1. Core actors:
+      1. Admin
+      2. Customer: pay, get ticket, park
+      3. parking attendant
+      4. system
+   2. functions
+      1. Add/ remove/ edit parking floor
+      2. Add/ remove/ edit parking spot
+      3. Add/ remove/ edit parking attendant
+      4. Take ticket
+      5. Scan ticket
+      6. Credit card payment
+      7. Cash payment
+      8. Change parking rate
+3. Classes
+   1. Graph: 
+4. Cases
+5. Code
