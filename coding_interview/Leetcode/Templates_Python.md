@@ -2248,17 +2248,25 @@ def dfs(cur):
 + With backtracking
 
 ```python
-def hasCycle(cur, graph, path, visited):
-    if path[cur]: return True
-    if visited[cur]: return False
-    path[cur]=True
-    ret = False
-    for child in graph[cur]:
-        ret = hasCycle(child, graph, path)
-        if ret: break #not return directly because we need to backtrack
-    path[cur] = False #backtrack
-    visited[cur] = True
-    return ret
+# 0: unvisited, 1: inPath, 2: visited
+
+def hasCycle(i):
+    if visited[i] != 0: return visited[i]==1
+    visited[i] = 1
+    for j in graph[i]:
+        if hasCycle(j): return True
+    visited[i] = 2
+    return False
+
+
+def notInCycle(i): #802
+    if visited[i] != 0: return visited[i]==2
+    visited[i] = 1
+    for j in graph[i]:
+        if not notInCycle(j): return False
+    visited[i] = 2
+    return True  
+
 
 def inCycle(s,t, visited=set()):
     if s in visited: return False
@@ -2266,16 +2274,23 @@ def inCycle(s,t, visited=set()):
     if s==t: return True
     return any(inCycle(nei, t) for nei in graph[s])
 
-def findCycle(cur, path):
-    if cur in path: return path
-    if cur in visited: return []
-    visited.add(cur)
-    path.append(cur)
-    ret = []
-    for child in graph[cur]:
-        ret = findCycle(child, path)
-        if ret: return ret
-        return ret
+def findCycle(i, path):
+    if visited[i] != 0:
+        return path if visited[i]==1 else []
+    visited[i] = 1
+    path.append(i)
+    res = []
+    for j in graph[i]:
+        res = findCycle(j, path)
+        if res: return res
+    path.pop()
+    visited[i] = 2
+    return res
+
+n = len(graph)
+visited = [0]*n
+for i in range(n):
+    print(___Cycle(i, []))
 ```
 
 + In undirected graph
@@ -2294,6 +2309,28 @@ def findCycle(cur, path):
             visited = set()
             if hasCycle(v, -1):
                 return True
+```
+
+### BFS (shortest path in grid)
+
++ Max/ min dist in grid: 1162, 542, 994, 1092
+
+```python
+n, m = len(grid), len(grid[0])
+queue = deque((i,j,0) for i in range(n) for j in range(m) if grid[i][j] == 1)
+res = -1
+
+di = [1,-1,0,0]
+dj = [0,0,1,-1]
+
+while queue:
+    i,j,d = queue.popleft()
+    res = max(res, d)
+    for k in range(4):
+        ni,nj = i+di[k], j+dj[k]
+        if 0<=ni<n and 0<=nj<m and grid[ni][nj] ==0:
+            grid[ni][nj] = 1
+            queue.append((ni,nj,d+1))
 ```
 
 
@@ -2506,24 +2543,16 @@ for node in range(len(graph)):
 
 ### Union Find
 
-```python
-def find(x):
-    while parent[x]!=x:
-        x=parent[x]
-    return x
++ 547, 684, 947, 1319, 990, 721 ,1135
 
-def union(x,y):
-    parent[find(x)] = find(y)
-    
-    
-def DSU: #for set size of max 1001
+```python
+class DSU: #for set size of max 1001
     def __init__(self):
         self.par=[i for i in range(1001)]
         self.rank=[0]*1001
         
     def find(self,x):
-        if self.par[x]!=x:
-            # path compression
+        if self.par[x]!=x:# path compression
             self.par[x]=self.find(self.par[x])
         return self.par[x]
     
@@ -2547,6 +2576,21 @@ def DSU: #for set size of max 1001
         self.par[xr]=yr
         return True
 ```
+
++ Number of connected components: 
+
+```python
+dsu = DSU(n)
+numRedundant = 0
+for u,v in edgeList:
+    if not dsu.union(u,v): numRedundant += 1
+
+numConnected = len({dsu.find(i) for i in range(n)})
+```
+
+
+
+
 
 
 
@@ -2942,3 +2986,218 @@ class GraphNode{
    1. Graph: 
 4. Cases
 5. Code
+
+
+
+
+
+## System Design
+
+### Template
+
++ Senarios:
+
+  + Ask: 
+    + Functionalities/ Features
+    + DAU: Daily/ monthly.. active users
+  + Enumerate features
+  + Select core features
+  + Analyze
+    + DAU => QPS: query per second `QPS = DAU * query per user per day / 86400 (seconds a day)`
+      + Peak: usually * 3
+      + Fast growing: expectation in 3 months, peak users *2
+    + Read QPS (~QPS?) / Write QPS (smaller?)
+
++ Service:
+
+  + Replay: go over core features, add service to each feature
+  + Merge: merge similar services
+  + Divide large system into micro services
+
++ Storage
+
+  + Candidates:
+
+    + Relational data base: SQL, `user Table ..`
+    + NoSQL Database: 
+    + File system: `Media Files`
+
+  + Step 1: select, data structure and database type for each service
+
+  + Step 2: Schema: 
+
+    + Table schema: field name: field type
+
+    + Pull vs. push
+
++ Optimize + maintainance
+
+  + Scale the design
+  + Highly Available (no single point of failure):
+    + Minimum latency (no bottleneck): 
+  + Scalable (caching/ sharding): 
+      + Sharding criteria
+
+  + Optimize
+
+    + More features: 
+    + Special cases: 
+
+  + Maintainance
+
+  + Additional considerations
+
+    + Security
+    + Telemetry
+    
+  + 
+
+    
+
+### Cheatsheet
+
+- 1 Bit
+- 1 Byte = 8 bits
+- 1 Kilobyte (KB) = 1024 Bytes ≈ 1000 Bytes = 1e3
+- 1 Megabyte (MB) = 1024 KB ≈ 1000 KB = 1e6
+- 1 Gigabyte (GB) = 1024 MB ≈ 1000 MB = 1e9
+- 1 Terabyte (TB) = 1024 GB ≈ 1000 GB = 1e12
+- 1 Petabyte (PB) = 1024 TB ≈ 1000 TB = 1e15
+- 1 Exabyte (EB) = 1024 PB ≈ 1000 PB = 1e18
+
+
+
+### Details
+
++ Senarios:
+
+  + Ask: 
+
+    + Functionalities/ Features
+    + DAU: Daily/ monthly.. active users
+
+  + Enumerate features
+
+    ```
+    ○ Register / Login
+    ○ User Profile Display / Edit
+    ○ Upload Image / Video *
+    ○ Search *
+    ○ Post / Share a tweet
+    ○ Timeline / News Feed
+    ○ Follow / Unfollow a user
+    ○ Ads *
+    ```
+
+  + Select core features
+
+    ```
+    ○ Post a Tweet
+    ○ Timeline / News Feed
+    ○ Follow / Unfollow a user
+    ○ Register / Login
+    ```
+
+  + Analyze
+
+    + DAU => QPS: query per second `QPS = DAU * query per user per day * 86400 (seconds a day)`
+      + Peak: usually * 3
+      + Fast growing: expectation in 3 months, peak users *2
+    + Read QPS (~QPS?) / Write QPS (smaller?)
+
++ Service:
+
+  + Replay: go over core features, add service to each feature
+
+  + Merge: merge similar services
+
+    ```
+    UserService: Register/ Login
+    Tweet Service: Post tweet, news feed
+    Media Service: upload image/ video
+    Frendship service: follow/ unfollow
+    ```
+
+    
+
+  + Divide large system into micro services
+
+  + Split/ Application/ Module
+
++ Storage
+
+  + Candidates:
+
+    + Relational data base: SQL, `user Table ..`
+
+    + NoSQL Database: 
+
+      ```
+      Tweets;
+      Social Graph;
+      ```
+
+    + File system: `Media Files`
+
+  + Step 1: select, data base type for each service
+
+  + Step 2: Schema: 
+
+    + SQL: field name: field type
+
+    $$
+    \begin{array}{|l|l|}
+    \hline \text { User } & \\
+    \hline \text { id } & \text { integer } \\
+    \hline \text { username } & \text { varchar } \\
+    \hline \text { email } & \text { varchar } \\
+    \hline \text { password } & \text { varchar } \\
+    \hline
+    \end{array}
+    \begin{array}{|l|l|}
+    \hline \text { Fridenship } & \\
+    \hline \text { id } & \text { integer } \\
+    \hline \text { from_user_id } & \text { Foreign Key } \\
+    \hline \text { to_user_id } & \text { Foreign Key } \\
+    \hline
+    \end{array}
+    \begin{array}{|l|l|}
+    \hline \text { Tweet } & \\
+    \hline \text { id } & \text { integer } \\
+    \hline \text { user id } & \text { Foreign Key } \\
+    \hline \text { content } & \text { text } \\
+    \hline \text { created_at } & \text { timestamp } \\
+    \hline
+    \end{array}
+    $$
+
+    ​		 +  TODO: types in SQL
+
+    + Pull vs. push (eg. news feed)
+      + Pull: data only flows when requested 
+        + eg. when user requests news feed, server obtain 100 tweets from each friends [N DB reads] and merge to find first 100 tweets [1 DB write]
+        + High read low write
+        + Pros: doesn't care if clients are online
+        + When to use: abundant resource, requires real time, celebrity issue, many writes
+      + Push: server push changes to user 
+        + eg. server push tweet to all one's friends newsfeed field [N DB writes] when he posts a tweet. Directly read from newsfeed field when reading [1 DB read]
+        + Low read high write
+        + Pros: write can be async
+        + When to use: opposite to pull
+      + Examples:
+        + Pull: facebook, twitteer
+        + Push + pull: Instagram
+
++ Optimize + maintainance
+
+  + Optimize
+    + Issues: Cache for faster read, trade off: how many to cache
+      + Pull: add to cache before DB read, cache timeline/ newsFeed
+      + Push: Disk is cheap, can store lot of data in disk. 
+    + More features: edit, delete, media, ads
+    + Special cases: 
+      + Inactive users: rank followers by weight (no need to push to or pull from inactive users)
+      + celebrities: push may overload server, can use Push+pull
+  + Maintainance
+    + Robust
+    + Scalability

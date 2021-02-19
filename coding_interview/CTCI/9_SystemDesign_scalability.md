@@ -43,10 +43,10 @@
 + **Load Balancer:** distribute incoming traffic across servers/ databases. 
 
   + Hardware load balancer: expensive, effective
-  + Software load balancer: cheap, less effective
-  + Multiple load balancer to avoid single point of failure: active-active mode/ active-passive mode 
+  + ==Software load balancer: cheap, less effective==
+  + Multiple load balancer to avoid single point of failure: **active-active mode/ active-passive mode** 
   + Load balancing algorithms: Round Robin, Least Loaded, Session Based, Hashing (consistent hashing)
-    + Consistent hashing: 
+    + ==**Consistent hashing:**== 
       + avoid the need to redistribute all keys when changing number of servers. Normally need to recalculate all keys, but here by assign to next available node, only Nkeys/Nservers on average
         ![image-20201220100234053](../attachments/image-20201220100234053.png)
       + avoid imbalanced distribution of keys across servers by adding ghost nodes on hashing ring
@@ -54,11 +54,11 @@
 
 ### Storage
 
-+ **Object Store**: manage data as objects instead of file hierarchy
++ ==**Object Store**: manage data as objects instead of file hierarchy==
 
 + **RAID**: Redundant array of independent disks , add redundant drives to protect data in failures. 
 
-  + Key: save space, reliability during failure, prevent over frequent access to same region
+  + Key: ==save space, reliability during failure, prevent over frequent access to same region==
 
   + RAID levels: 
 
@@ -75,7 +75,7 @@
 
 #### Database
 
-+ 3 requirements of a distributed system: (**CAP theorem**: only can achieve 2 of 3)
++ 3 requirements of a distributed system: (==**CAP theorem**: only can achieve 2 of 3==)
   + Consistency: same data between nodes
   + Availability: no single point of failure
   + Partition tolerant: function in spite of network partition (loss connection between servers)
@@ -91,7 +91,7 @@
   + Single-leader architecture
   + Multi-leader architecture
   + No-leader architecture
-+ Database partitioning (**sharding**): split data across machines
++ ==Database partitioning (**sharding**): split data across machines==
   + Factors to consider: data size, performance, latency, cost
   + Types
     + Vertical: by feature, issue: large feature cannot fit in one machine, needs to be partitioned further
@@ -101,16 +101,16 @@
 
 #### Caching
 
-+ Data ( query & results, or object) stored in fast memory (RAM) for fast access
++ Data ( ==query & results, or object) stored in fast memory (RAM)== for fast access
 + Try to keep 20% data in cache
 + Cache Invalidation:
   <img src="../attachments/image-20201220095848528.png" alt="image-20201220095848528" style="zoom: 67%;" />
 + Cache Eviction:
-  + Least Recently Used (LRU)
+  + ==Least Recently Used (LRU)==
   + Most Recently Used (MRU)
   + First In First Out (FIFO)
   + Last In First Out (LIFO)
-  + Least Frequently Used (LFU)
+  + ==Least Frequently Used (LFU)==
   + Random Replacement (RR)
 + Use multiple (distributed) cache to avoid single point of failure
 
@@ -118,42 +118,42 @@
 
 #### NoSQL
 
-+ Key-value store: Redis, Amazon’s Dynamo and Voldemort.
-+ Column oriented database: all rows of one column is stored together, fast retrieval of one value from the column. Cassandra and HBase.
-+ Document-based: can be expressed in json format. MongoDB and CouchDB.
-+ Graph-based: The nodes can be entities and the edges can be relationships. Neo4j.
++ ==Key-value store: Redis, Amazon’s Dynamo and Voldemort.==
++ ==Column oriented database: all rows of one column is stored together, fast retrieval of one value from the column. Cassandra and HBase.==
++ ==Document-based: can be expressed in json format. MongoDB and CouchDB.==
++ ==Graph-based: The nodes can be entities and the edges can be relationships. Neo4j.==
 
 ### Servers
 
-+ Web Servers: for web requests.
++ ==Web Servers==: for web requests.
   + HTML documents, images, CSS stylesheets, and JavaScript files.
-+ Application servers:  business logic of the system, both hardware and software environments.
++ ==Application servers==:  business logic of the system, both hardware and software environments.
 
 ### Architectural patterns
 
 + Monolithic: single component
 + Layered
 + SOA (Service oriented architecture)
-+ Microservice architecture
++ ==Microservice architecture==
   + Features of microservice:
     + Highly maintainable and testable
     + Loosely coupled
     + Independently deployable
     + Organized around business capabilities i.e. Single responsibility principle
     + Owned by a small team
-  + Components:
-    + API gateway
-    + Service discovery
-    + Service management
+  + ==Components:==
+    + ==API gateway==
+    + ==Service discovery==
+    + ==Service management==
 
 
 
 ### Communication
 
 + Networking Metrics:
-  + Bandwidth: max data transferred/ time (bits/second) 
-  + Throughput: actual amount of data transferred/ time
-  + Latency: delay between sending and receiving
+  + ==Bandwidth: max data transferred/ time (bits/second)== 
+  + ==Throughput: actual amount of data transferred/ time==
+  + ==Latency: delay between sending and receiving==
 
 + Asynchronous processing:
 
@@ -168,23 +168,22 @@
 
 + Communication protocols: 
 
-  + HTTP, HTTP Long polling, Websockets
-    
-
-  ![image-20201220105415893](../attachments/image-20201220105415893.png)
+  + ==HTTP, HTTP Long polling, Websockets==
+  
+![img](https://blog.kakaocdn.net/dn/b6f8BK/btqCxPowWEP/58PRi2CG1jSAnlyPqi126K/img.jpg)
   [Image reference](https://blog.kakaocdn.net/dn/b6f8BK/btqCxPowWEP/58PRi2CG1jSAnlyPqi126K/img.jpg)
-
-+ content delivery network (CDN) :  geographically distributed group of servers which work together to provide fast delivery of Internet content. 
+  
++ ==content delivery network (CDN) :  geographically distributed group of servers which work together to provide fast delivery of Internet content.== 
 
 ### Considerations
 
 + Failures: plan for failure of different parts
 + Operational metrics
-  + Availability: % time that system is operational
-  + Reliability:  prob system is operational for certain unit of time
+  + ==Availability: % time that system is operational==
+  + ==Reliability:  prob system is operational for certain unit of time==
 + Read vs. write -heavy
   + Read heavy: cache
-  + Write heavy: queuing up writes
+  + ==Write heavy: queuing up writes==
 + Security
   + Authentication
   + Authorization
