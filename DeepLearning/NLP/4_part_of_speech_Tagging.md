@@ -150,9 +150,9 @@ $$
 
 + Base case: $v_{1}(\tilde{y})=\log P\left(x_{1} \mid \tilde{y}\right)+\log P(\tilde{y})$
 
-+ Recursion: $v_{i}(\tilde{y})=\log P\left(x_{i} \mid \tilde{y}\right)+\text{argmax}_{y_{prev}} [\log P(\tilde{y}|y_{prev}) + v_{i-1}(y_{prev})]$
++ Recursion: $v_{i}(\tilde{y})=\log P\left(x_{i} \mid \tilde{y}\right)+\text{max}_{y_{prev}} [\log P(\tilde{y}|y_{prev}) + v_{i-1}(y_{prev})]$
 
-  +  = Emission + argmax(transition + prev)
+  +  = Emission + max(transition + prev)
 
 + Algorithm:
 

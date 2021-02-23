@@ -1,7 +1,5 @@
 
 
-## Tools
-
 ### Math
 
 ```python
@@ -2865,6 +2863,84 @@ class GraphNode{
 
 
 
+### O(1) Data structures
+
++ 380 Insert (hash) Delete (hash) GetRandom (array) [hash{value-> array idx}]
+
+![image-20210222083119790](/home/arkyyang/files/notes/notes/attachments/image-20210222083119790.png)
+
++ 381 Insert Delete GetRandom - Duplicates allowed [hash{value -> (indices)}] array[value]
+
+  ![image-20210222091745212](/home/arkyyang/files/notes/notes/attachments/image-20210222091745212.png)
+
++ 146 LRU Cache: get (hash) + move to first (Linked-list) , put (hash) + evict last (Linked-list)
+
+![image-20210222092133990](/home/arkyyang/files/notes/notes/attachments/image-20210222092133990.png)
+
+```python
+class LLNode:
+    def __init__(self, key, val):
+        self.val = val
+        self.key = key
+        self.prev = None
+        self.next = None
+        
+class LList:
+    def __init__(self):
+        self.head = LLNode('Dummy Head', 'Dummy Head')
+        self.tail = LLNode('Dummy Tail', 'Dummy Tail')
+        self.head.next = self.tail
+        self.tail.prev = self.head
+    
+    def prepend(self, node):
+        node.next = self.head.next
+        node.next.prev = node
+        node.prev = self.head
+        self.head.next = node
+    
+    def remove(self, node) -> LLNode:
+        node.next.prev = node.prev
+        node.prev.next = node.next
+        return node
+    
+    def move_to_front(self, node):
+        self.prepend(self.remove(node))
+        
+class LRUCache:
+    def __init__(self, capacity: int):
+        self.capacity = capacity
+        self.cache = dict()
+        self.llist = LList()
+        
+    def get(self, key: int) -> int:
+        if key not in self.cache:
+            return -1
+        
+        self.llist.move_to_front(self.cache[key])
+        
+        return self.cache[key].val
+
+    def put(self, key: int, value: int) -> None:
+        if key in self.cache: 
+            self.cache[key].val = value
+            self.llist.move_to_front(self.cache[key])
+            return
+        
+        if len(self.cache) >= self.capacity:
+            node = self.llist.remove(self.llist.tail.prev)
+            del self.cache[node.key]
+        
+        newNode = LLNode(key, value)
+        self.cache[key] = newNode
+        self.llist.prepend(newNode)
+```
+
+
+
+
+
+
+
 ## OOD
 
 ### Concepts
@@ -3034,24 +3110,26 @@ class GraphNode{
 
   + Scale the design
   + Highly Available (no single point of failure):
+    
     + Minimum latency (no bottleneck): 
   + Scalable (caching/ sharding): 
-      + Sharding criteria
-
+    
+  + Sharding criteria
+    
   + Optimize
-
-    + More features: 
+  
+  + More features: 
     + Special cases: 
 
   + Maintainance
 
   + Additional considerations
-
+  
     + Security
     + Telemetry
-    
+  
   + 
-
+  
     
 
 ### Cheatsheet
