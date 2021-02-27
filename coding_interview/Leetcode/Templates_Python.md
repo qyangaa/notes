@@ -513,6 +513,26 @@ def goto(head, index):
 
 
 
+### Merge Linked List
+
+21, 148,1634
+
+```python
+dummy = Node()
+c, c1, c2 = dummy, head1, head2
+while c1 and c2:
+    if c1.val<c2.val:
+        node = Node(c1.val)
+        c1 = c1.next
+    else:
+        node = Node(c2.val)
+        c2 = c2.next
+    c.next = node
+    c = c.next
+c.next = c1 or c2 #easy way to deal with remaining
+return dummy.next
+```
+
 
 
 
@@ -2937,7 +2957,10 @@ class LRUCache:
 
 
 
++ LFU Cache: 460
+  + Node: {key, value, freq, it}
 
+<img src="/home/arkyyang/files/notes/notes/attachments/image-20210226092633202.png" alt="image-20210226092633202" style="zoom:67%;" />
 
 
 
@@ -3119,10 +3142,11 @@ class LRUCache:
   + Optimize
   
   + More features: 
-    + Special cases: 
-
-  + Maintainance
-
+  
++ Special cases: 
+  
++ Maintainance
+  
   + Additional considerations
   
     + Security
@@ -3279,3 +3303,13 @@ class LRUCache:
   + Maintainance
     + Robust
     + Scalability
+
+
+
+
+
+Confidential information and invention assignment agreement
+
+Personal projects
+
+4.7 : does not relate to the business of the company.
