@@ -197,6 +197,177 @@ while first<second:
       second+=1
   ```
 
+## Sliding Window
+
++ Optimize when substring has legal counts: 3, 159, 340, 495, 424, 567, 1004, 1100, 1151
+
+```python
+count = defaultdict(int)
+l = 0
+res = 1
+for r in range(len(s)):
+    count[s[r]] += 1
+    while illegal:
+        count[s[l]] -= 1
+        l += 1
+    res = max(res, r-l+1)
+return res
+```
+
++ Optimize (sum) for fixed length substring: 1052, 1176, 1208, 1423
+
+```python
+for r, cur in enumerate(nums):
+    curSum += cur
+    if r >= k-1:
+        minSum = min(curSum, minSum)
+        curSum -= nums[r-k+1]
+```
+
+
+
+
+
+#### Monotonic Queue
+
++ [1696, 1499, 1438, 1425](https://zxi.mytechroad.com/blog/tag/monotonic-queue/)
+
++ 239 Sliding Window Maximum
+
+```python
+class MonoQ:
+    def __init__(self):
+        self.key = deque()
+    def push(self,key, value):
+        while self.key and key > self.key[-1]: self.key.pop()
+        self.key.append(key)
+    def pop(self):
+        return self.key.popleft()
+    def max(self):
+        return self.key[0]
+    def isEmpty(self):
+        return len(self.key) == 0
+
+# solution
+q = MonotonicQueue()
+res = []
+for i in range(len(nums)):
+    q.push(nums[i])
+    if i-k+1 >=0: # get to window size
+        res.push(q.max())
+        if nums[i-k+1] == q.max(): q.pop() # pop only if start of queue is current number
+return res
+```
+
++ 1438 Longest Continuous Subarray With Absolute Diff Less Than or Equal to Limit
+
+```python
+min_q = deque()
+max_q = deque()
+l = 0
+maxLen = 0
+for r, cur in enumerate(nums):
+    while min_q and cur < min_q[-1]:
+        min_q.pop()
+    while max_q and cur > max_q[-1]:
+        max_q.pop()
+    min_q.append(cur)
+    max_q.append(cur)
+    while max_q[0] - min_q[0]  > limit:
+        if max_q[0] == nums[l]: max_q.popleft()
+        if min_q[0] == nums[l]: min_q.popleft()
+        l += 1
+    maxLen = max(maxLen, r-l+1)
+return maxLen
+```
+
++ 739: min(r-l), nums[r] > nums[l]: decreasing queue
++ 901: consequtive items before current with value <= current : decreasing queue
++ 862: min(r-l), nums[r] - nums[l] > K:  increasing queue, pop left
+
++ 907: Sum of Subarray Minimums
+
+  + PLE: distance to previous smaller number
+
+    ```python
+            stack = []
+            # get PLE: increasing stack
+            for i in range(n):
+                while stack and arr[i]<arr[stack[-1]]:
+                    stack.pop()
+                if not stack:
+                    left[i] = i + 1
+                else:
+                    left[i] = i - stack[-1]
+                stack.append(i)
+    ```
+
+  + NLE: distance to next smaller number
+
+    ```python
+            # get NLE: decreasing stack
+            stack = []
+            for i in range(n-1, -1, -1):
+                while stack and arr[i]<=arr[stack[-1]]:
+                    stack.pop()
+                if not stack:
+                    right[i] = n - i 
+                else:
+                    right[i] = stack[-1] - i
+                stack.append(i) 
+    ```
+
+  + Number of subarrays with minimum number at i: ```left[i] * right[i]```
+
++ 975: Odd Even Jump
+
+  ```python
+  class Solution:
+      def oddEvenJumps(self, arr: List[int]) -> int:
+          n = len(arr)
+          next_higher, next_lower = [0]*n, [0]*n
+          
+          # Find smallest next higher and largest next lower elements
+          stack = [] # decreasing stack
+          for a, i in sorted([a,i] for i, a in enumerate(arr)):
+              while stack and stack[-1]<i:
+                  next_higher[stack.pop()] = i
+              stack.append(i)
+          stack = []
+          for a, i in sorted([-a,i] for i, a in enumerate(arr)):
+              while stack and stack[-1]<i:
+                  next_lower[stack.pop()] = i
+              stack.append(i)
+          
+          # DP
+          higher, lower = [0]*n, [0]*n
+          higher[-1] = lower[-1] = 1
+          for i in range(n-2, -1, -1):
+              higher[i] = lower[next_higher[i]]
+              lower[i] = higher[next_lower[i]]
+          return sum(higher)
+  ```
+
++ 1696 Jump Game VI: Max sum subsequence with distances between indexes <=k, DP + decreasing queue
+
+  ```python
+  class Solution:
+      def maxResult(self, nums: List[int], k: int) -> int:
+          n = len(nums)
+          q = deque([0])
+          dp = [0]*n
+          dp[0] = nums[0]
+          for i in range(1, n):
+              dp[i] = nums[i] + dp[q[0]]
+              while q and dp[i] >= dp[q[-1]]:
+                  q.pop()
+              while q and i-q[0] >=k:
+                  q.popleft()
+              q.append(i)
+          return dp[n-1]
+              
+  ```
+
   
 
 ## Sort
