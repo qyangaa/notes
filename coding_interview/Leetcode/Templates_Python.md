@@ -1260,7 +1260,7 @@ for i in range(1, n):
 return dp[-1]
 ```
 
-
++ Others: 96, 
 
 #### 1D, 2 sets of sub-problems
 
@@ -1924,6 +1924,7 @@ def combine(items, n):
   + at most $ceil(2^{k+1})-1$ nodes for height $k$ tree
   + Complete tree: height $\log_2{(n+1)}-1$ for $n$ nodes
   + parent index $k$, children $2k+1, 2k+2$
+  + Perfect binary tree: $n = 2^{h}-1$, root height = 1
 + Traversal:
   + BFS: LevelOrder
   + DFS: pre/ in/ post  order
@@ -1987,6 +1988,42 @@ while queue:
 
 ### DFS
 
+#### Seialization/ Deserialization
+
++ Serialization: 652(Inorder), 606(preorder)
++ Deserialization: 536
+
+```python
+def preorderSerialize(node):
+    if not node: return "#"
+    serial = "{},{},{}".format(node.val, collect(node.left), preorderSerialize(node.right))
+    return serial
+def preorderDeserialize(s): #s = "4(2(3)(1))(6(5))"
+    for ch in s:
+        if ch in "()":
+            if ch == '(' and num: # if see (, push
+                stack.append(TreeNode(num))
+                num = ''
+            elif ch == ")": # if see ), pop and connect to parent 
+                if num: # parent is always the prev item on stack
+                    node, parent = TreeNode(num), stack[-1]
+                    num = ''
+                else: # if no num, process item in stack
+                    node = stack.pop()
+                    parent = stack[-1]
+
+                if parent.left:
+                    parent.right = node
+                else:
+                    parent.left = node
+        else:
+            num += ch
+
+    if num:
+        stack = [TreeNode(num)]
+    return stack[0]
+```
+
 #### One root
 
 ```python
@@ -2022,6 +2059,8 @@ while stack:
 visit(cur)  
 
 # Inoder: push, go left, if no left, pop, visit, go right
+# Inorder Binary Tree: 94, 173
+# Inorder Successor in BST: 285 (no parent pointer, give root, p), 510 (has parent pointer, give p)
 stack = []
 cur = root
 while stack or cur:
@@ -2203,6 +2242,103 @@ return res
       path.pop()
   ```
 
++ 687 Longest Univalue Path
+
+#### Lowest Common Ancestor
+
++ I: 236 only children pointer, given root, p, q, guarantee exist
+
+  II: 1644 only children pointer, given root, p, q, not** guarantee exist
+
+```python        def recurse_tree(current_node):
+res = [None]
+def recurse_tree(current_node):
+    if not current_node:
+        return False
+    left = recurse_tree(current_node.left)
+    right = recurse_tree(current_node.right)
+    mid = current_node == p or current_node == q
+    if mid + left + right >= 2:
+        res[0] = current_node
+    return mid or left or right
+
+recurse_tree(root)
+return res[0]
+```
+
++ III: 1650 has parent pointer, given p, q, guarantee exist
+
+```python
+containsq = set([p.val])
+while p.parent:
+    p = p.parent
+    containsq.add(p.val)
+
+if q.val in containsq: return q
+while q.parent:
+    q = q.parent
+    if q.val in containsq: break
+
+return q
+```
+
++ IV: 1676 only children pointer, given root, list of nodes
+
+```python
+if not root:
+    return None
+if root in nodes:
+    return root
+left, right = self.lowestCommonAncestor(root.left, nodes), self.lowestCommonAncestor(root.right, nodes)
+if not left:
+    return right
+if not right:
+    return left
+else: 
+    return root
+```
+
++ 235 BST, given root, p, q  (is common ancestor if cur val in between two nodes)
+
+```python
+p_val, q_val = p.val,q.val
+node=root
+while node:
+    parent_val = node.val
+    if p_val>parent_val and q_val>parent_val:
+        node=node.right
+    elif p_val<parent_val and q_val<parent_val:
+        node=node.left
+    else:
+        return node
+```
+
+#### Flip Tree
+
++ 156: upside down: .left->root; root->.right; .right->.left, 1666(description unclear)
+
+```python
+    if not root: return root
+    node = root
+    while node.left:
+        node = node.left
+    self.flip(root)
+    return node
+
+def flip(self, root):
+    if not root or not root.left: 
+        return root
+    newRoot = self.flip(root.left)
+    newRoot.right = root
+    root.left = None        
+    newRoot.left = self.flip(root.right)
+    root.right = None
+
+    return root
+```
+
+
+
 #### Two roots
 
 ```python
@@ -2251,6 +2387,83 @@ def f(p, q):
       return p.val==q.val and ((l1 and r1) or (l2 and r2))
       
   ```
+
+#### All unique trees
+
++ 96 Unique BST with values 1-n, 95 list all unique BSTs: 
+
+```python
+# Count
+G = [0]*(n+1)
+G[0], G[1] = 1, 1
+
+for i in range(2, n+1):
+    for j in range(1, i+1):
+        G[i] += G[j-1] * G[i-j]
+
+return G[n]
+
+# List
+res = []
+memo = {}
+
+def bindRoot(rootVal: int, leftChildren: List[TreeNode], rightChildren: List[TreeNode]):
+    if not leftChildren and not rightChildren: return [TreeNode(rootVal)]
+    curList = []
+    for lchild in leftChildren:
+        for rchild in rightChildren:
+            root = TreeNode(rootVal)
+            root.left = lchild
+            root.right = rchild
+            curList.append(root)
+    return curList
+
+def helper(l, r):
+    if l>r: return [None]
+    if (l,r) in memo: return memo[(l,r)]
+    curList = []
+    for i in range(l, r+1):
+        curList += bindRoot(i, helper(l, i-1), helper(i+1, r))
+    memo[(l, r)] = curList
+    return curList
+
+helper(1, n)
+return memo[(1,n)]
+```
+
++ 894 all full binary trees with n nodes
+
+```python
+if n%2 == 0: return []
+memo = {}
+memo[0] = None
+memo[1] = [TreeNode(0)]
+
+def bindRoot(leftChildren, rightChildren):
+    if not leftChildren and not rightChildren: return [TreeNode(0)]
+    if not leftChildren or not rightChildren: return []
+    curList = []
+    for lchild in leftChildren:
+        for rchild in rightChildren:
+            root = TreeNode(0)
+            root.left = lchild
+            root.right = rchild
+            curList.append(root)
+    return curList
+
+def helper(n):
+    if n in memo: return memo[n]
+    curList = []
+    for i in range((n-1)//2):
+         curList += bindRoot(helper(i*2+1), helper(n-1-i*2-1))
+    memo[n] = curList
+    return curList
+
+helper(n)
+return memo[n]
+```
+
+
 
 ### Morris Traversal (In Order)
 
@@ -2325,9 +2538,32 @@ def findAndRemove(node):
     result = node.right.val
     node.right = node.right.left
     return result
+
+# remove without recursive swap:
+def deleteNode(self, root: TreeNode, key: int) -> TreeNode:
+    if not root: return root
+    if key>root.val:
+        root.right = self.deleteNode(root.right, key)
+    elif key<root.val:
+        root.left = self.deleteNode(root.left, key)
+    else: # need to delete root
+        new_root = None
+        if not root.left:
+            new_root = root.right
+        elif not root.right:
+            new_root = root.left
+        else: # have two children
+            parent, new_root = root, root.right
+            while new_root.left: # find left most node of right subtree
+                parent, new_root = new_root, new_root.left
+            if new_root!=root.right: # right subtree is not leaf, move node
+                parent.left, new_root.right = new_root.right, root.right
+            new_root.left = root.left
+        return new_root
+    return root
 ```
 
-
++ 
 
 ### Trie
 
