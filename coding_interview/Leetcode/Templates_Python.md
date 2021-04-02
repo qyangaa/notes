@@ -8,7 +8,46 @@ math.ceil(p/k) #equivalent to:
 ((p-1) // k) + 1 #two times faster
 math.floor(p/k) #equivalent to:
 p//k
+
+# check if is perfect square
+def is_square(i: int) -> bool:
+    return i == math.isqrt(i) ** 2
+
+# check if is prime: go until sqrt(n) with step 2
+def is_prime(n):
+    return all(n % i for i in range(2, sqrt(n))) # for not overflow n
+    return n > 1 and all(n % i for i in islice(count(2), int(sqrt(n)-1))) #count from 2 to int(...)
+
+# count number of primes numbers < n (204)
+isPrime = [True]*n
+count  = 0
+for i in range(2, n):
+    if not isPrime[i]: continue
+    j = 2
+    count += 1
+    while i*j < n:
+        isPrime[i*j] = False
+        j += 1
+return count
 ```
+
+#### Centroid in grid (by Manhattan Distance)
+
+```python
+h, w = len(G), len(G[0])
+
+I = [i for i in range(h) for j in range(w) if G[i][j] == 1]
+J = [j for j in range(w) for i in range(h) if G[i][j] == 1]
+
+median_pos = len(I) // 2
+mi, mj = I[median_pos], J[median_pos]
+
+return sum(abs(x-mi) for x in I) + sum(abs(x-mj) for x in J)
+```
+
+#### Series
+
++ Geometric series: $\sum ar^{n-1} = a\frac{1-r^n}{1-r}$ 
 
 ### max min
 
@@ -36,12 +75,21 @@ S = ''.join(s)
 
 
 
-### List
+### List/ Array
 
 ```python
 None in list  # check is non is in list
 all(v is None for v in l) # check if all items in list is none
 l.pop(idx)
+# max in 2d grid
+row_maxes = [max(row) for row in grid]
+col_maxes = [max(col) for col in zip(*grid)]
+```
+
+### Hash
+
+```python
+hash(val) # generate a hash value
 ```
 
 
@@ -53,6 +101,7 @@ set2 & set1 # intersection
 A.intersection(*other_sets) # intersection destroy
 set1 | set2 # union
 A.union(*other_sets) # union destroy
+set2 - set1 # asymetric difference
 ```
 
 
@@ -83,6 +132,8 @@ c += collections.Counter()
 import collections
 import heapq
 
+
+counter.most_common()
 count = list(collections.Counter(items).items())
 #sort by count (max) then alphabetical
 count.sort(key=lambda x: (-x[1], x[0]))
@@ -164,6 +215,17 @@ perm = list(permutations([1, 2, 3]))
 from itertools import combinations 
 comb = list(combinations([1, 2, 3], 2))
 ```
+
+
+
+### Functools
+
+```python
+@functools.cache
+def dfs(i, j): ...
+```
+
+
 
 
 
@@ -1260,6 +1322,32 @@ for i in range(1, n):
 return dp[-1]
 ```
 
++ 297 perfect squares: use square numbers as subproblems instead of all numbers < i
+
+```python
+for i in range(1, n):
+    for square in [i**2 for i in range(int(sqrt(n)) + 1)]:
+        if i<square: break
+        dp[i] = min(dp[i], dp[i-square] + 1)
+return dp[-1]
+```
+
++ 264: n'th Ugly Number  (positive number whose prime factors only include `2`, `3`, and/or `5`), DP with subproblem pointers to prevent traverse all subproblems:
+
+```python
+nums = [1]
+i2, i3, i5 = 0, 0, 0
+for i in range(1, n):
+    cur = min(nums[i2]*2, nums[i3]*3, nums[i5]*5)
+    nums.append(cur)
+    if cur == nums[i2]*2: i2+=1
+    if cur == nums[i3]*3: i3+=1    
+    if cur == nums[i5]*5: i5+=1
+return nums[-1]
+```
+
+
+
 + Others: 96, 
 
 #### 1D, 2 sets of sub-problems
@@ -1293,14 +1381,19 @@ for i in range(n):
 
 ### 2D
 
++ 718 Longest Common Subarray
+
+```python
+# dp[i][j]: LCS between first i items of l1 and first j items of l2
+if A[i] == B[j]: dp[i][j] = dp[i-1][j-1] + 1
+```
+
 + 1143 Longest Common Subsequence
 
 ```python
-dp[i][j]: LCS between first i items of l1 and first j items of l2
-if l1[i-1] == l2[j-1]:
-    dp[i][j] = dp[i-1][j-1] + 1
-else:
-    dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+# dp[i][j]: LCS between first i items of l1 and first j items of l2
+if l1[i-1] == l2[j-1]: dp[i][j] = dp[i-1][j-1] + 1
+else: dp[i][j] = max(dp[i-1][j], dp[i][j-1])
 ```
 
 + 1092 Shortest Common Supersequence
@@ -1718,16 +1811,16 @@ def DFS(i,j):
     return res
 
 def BFS(i,j):
-    seen=()
+    seen=set()
     queue = deque((i,j))
     while queue:
         r,c = queue.popleft()
         for d in [(r+1,c),(r-1,c),(r,c+1),(r,c-1)]:
             if illegal(d): 
-                seen.append(d) #prevent reuse
+                seen.add(d) #prevent reuse
                 continue
             if earlyStop(d): return result
-            seen.add(d) #prevent reuse
+            seen.add(d) # add to visited when appending not when popping
             queue.append(d)
     return NOT_FOUND
 
@@ -1965,7 +2058,7 @@ while queue:
     cur = queue.popleft()
     if not cur: #level ends
         level+=1
-        queue.append([None])
+        queue.append(None)
     else:
         f(cur)
         if cur.left: queue.append(cur.left)
@@ -1994,9 +2087,48 @@ while queue:
 + Deserialization: 536
 
 ```python
+# Binary Tree
+def serialize(root):
+    if not root: return "^"
+    return str(root.val) + "," + serialize(root.left) + "," + serialize(root.right)
+def deserialize(data):
+    data = deque(data.split(","))
+    def build(data):
+        cur = data.popleft()
+        if cur == "^": return None
+        node = TreeNode(int(cur))
+        node.left = build(data)
+        node.right = build(data)
+        return node
+    return build(data)
+
+# N-ary Tree
+def serialize(self, root: 'Node') -> str:
+    if not root: return ""
+    res = str(root.val)
+    res += "," + str(len(root.children)) # store number of children right after root value
+    for child in root.children:
+        res += "," + self.serialize(child)
+    return res
+
+def deserialize(self, data: str) -> 'Node':
+    if not data: return None
+    data = deque(data.split(","))
+    def build(data):
+        cur = int(data.popleft())
+        num = int(data.popleft())
+        node = Node(cur)
+        node.children = []
+        for i in range(num):
+            node.children.append(build(data))
+        return node
+    return build(data)
+
+
+# Binary tree paranthesis
 def preorderSerialize(node):
     if not node: return "#"
-    serial = "{},{},{}".format(node.val, collect(node.left), preorderSerialize(node.right))
+    serial = "{},{},{}".format(node.val, preorderSerialize(node.left), preorderSerialize(node.right))
     return serial
 def preorderDeserialize(s): #s = "4(2(3)(1))(6(5))"
     for ch in s:
@@ -2115,6 +2247,27 @@ while stack:
     rev = cur
 return res
 ```
+
+#### Iterative Deserialize
+
+```python
+
+
+# Postorder [1628]
+stack = []
+for c in postfix:
+    if c.isdigit(): # isleaf
+        stack.append(TreeNode(int(c)))
+    else:
+        r = stack.pop()
+        l = stack.pop()
+        stack.append(TreeNode(c, l, r))
+return stack[-1]
+```
+
+
+
+
 
 #### Root-to-leaf sum
 
@@ -2249,6 +2402,8 @@ return res
 + I: 236 only children pointer, given root, p, q, guarantee exist
 
   II: 1644 only children pointer, given root, p, q, not** guarantee exist
+  
+  1740: min distance between two nodes
 
 ```python        def recurse_tree(current_node):
 res = [None]
@@ -2312,6 +2467,23 @@ while node:
     else:
         return node
 ```
+
++ 865, 1123: LCA of deepest nodes
+
+```python
+def depth(node): # return (depth, cur LCA of deepest)
+    if not node: return (0, None)
+    left, right = depth(node.left), depth(node.right)
+    if left[0] > right[0]:
+        return (left[0]+1, left[1])
+    elif left[0] < right[0]:
+        return (right[0]+1, right[1])
+    else:
+        return (left[0]+1, node)
+return depth(root)[1]
+```
+
+
 
 #### Flip Tree
 
@@ -2463,6 +2635,45 @@ helper(n)
 return memo[n]
 ```
 
+#### Delete Node
+
++ 814 Binary Tree Pruning: remove every subtree (of the given tree) not containing a 1
+
+```python
+if not root: return None
+root.left = self.pruneTree(root.left)
+root.right = self.pruneTree(root.right)
+if root.val: return root
+return root if root.left or root.right else None
+```
+
+#### Clone
+
+```python
+copy = {} # store dict{originalNode : copyNode}
+stack = [root]
+while stack:
+    node = stack.pop()
+    copy[node] = NodeCopy(node.val)
+    if node.left:
+        stack.append(node.left)
+    if node.right:
+        stack.append(node.right)
+```
+
+#### Tree Evaluation
+
+```python
+def evaluate(self):
+    if not self.left and not self.right: return self.val
+    if self.val == '+': return self.left.evaluate() + self.right.evaluate()
+    if self.val == '-': return self.left.evaluate() - self.right.evaluate()
+    if self.val == '*': return self.left.evaluate() * self.right.evaluate()
+    if self.val == '/': return self.left.evaluate() // self.right.evaluate()
+```
+
+
+
 
 
 ### Morris Traversal (In Order)
@@ -2563,7 +2774,21 @@ def deleteNode(self, root: TreeNode, key: int) -> TreeNode:
     return root
 ```
 
-+ 
++ Verify from preorder:
+
+```python
+# Use stack
+if not preorder: return True
+stack = []
+minVal = float('-inf')
+for num in preorder:
+    if num<minVal: return False
+    while stack and stack[-1] < num: minVal = stack.pop()
+    stack.append(num)
+return True
+```
+
+
 
 ### Trie
 
@@ -2736,7 +2961,29 @@ for i in range(n):
                 return True
 ```
 
-### BFS (shortest path in grid)
+### BFS (min dist unweighed graph)
+
++ Min dist in graph (1129)
+
+```python
+q = deque([source])
+steps = 0
+seen = set()
+dist = [float('inf')]*n
+while q:
+    size = len(q)
+    steps += 1
+    for i in range(size):
+        cur = q.popleft()
+        dist[cur] = min(dist[cur], steps)
+        for nei in graph[cur]:
+            if nei in seen or not isLegal(nei): continue
+            seen.add(nei)
+            q.append(nei)
+return dist
+```
+
+
 
 + Max/ min dist in grid: 1162, 542, 994, 1092
 
@@ -2760,23 +3007,70 @@ while queue:
 
 
 
-### Dijkstra (shorted weight path)
+### Shortest path problems
+
+#### Kruskal (min spanning forest undirected graph)
 
 ```python
-def dijkstra(start):
-    dist = [float('inf')]*n
+ds = DSU(n)
+heap = [(w, (u, v))...]
+res = 0
+while heap:
+    w, (u, v) = heapq.heappop(heap)
+    if ds.find(u) != ds.find(v):
+        ds.union(u,v)
+        res += cost
+return res
+```
+
+
+
+#### Dijkstra (single source shortest weight path $O(N^2)$)
+
++ dist: dict of shortest distance from start
+
+```python
+def dijkstra(start, graph):
+    dist = {v: float('inf') for v in N} # N = num nodes
     dist[start] = 0
     heap = [(0, start)]
+    # visited = set() # only need visited if has negative weight or undirected graph
     while heap:
         curDist, cur = heapq.heappop(heap)
-        if curDist > dist[cur]:
-            continue
-        for neighbor, weight in graph[cur]:
+        # visited.add(cur)
+        f(cur, curDist) # if len(visited) == N: reached all nodes
+        for nei, weight in graph[cur]:
             newDist = curDist + weight
-            if newDist < dist[neightbor]:
-                dist[neighbor] = newDist
-                heapq.heappush(heap, (newDist, neighbor))
+            if newDist < dist[nei]: # and nei not in visited:
+                dist[nei] = newDist
+                heapq.heappush(heap, (newDist, nei))
     return dist
+```
+
+#### Bellman-Ford ( single source shortest weight path $O(NE)$)
+
+```python
+dp = [[float('inf')]*n for _ in range(K+2)] # at most K steps,  K = N if not limited
+dp[0][src] = 0
+for i in range(1, K+2):
+    dp[i][src] = 0
+    for from_, to_, w in edges:
+        dist[i][to_] = min(dist[i][to_], dist[i-1][from_] + w)
+return dp[K+1][end] if dp[K+1][end]!=float('inf') else -1
+```
+
+#### Floyd-Warshall (All pairs $O(N^3)$, DP)
+
++ d: shortest distance from u to v
+
+```python
+d = [[float('inf')]*n for _ in range(n)]
+for from_, to_, w in edges: d[from_][to_] = w
+for from_ in range(n): d[from_][from_] = 0   
+for k in range(n):
+    for i in range(n):
+        for j in range(n):
+            d[i][j] = min(d[i][j], d[i][k] + d[k][j])
 ```
 
 
@@ -2816,30 +3110,57 @@ return res[1:]
 
 ### Topological Sort
 
-+ BFS
++ BFS directed graph [444,207, 210]
 
 ```python
-def topSOrt(self,graph):
-    indegrees = self.get_indegree(graph)
-    order = []
-    start_nodes = [n for n in graph if indegrees[n] == 0]
-    queue = deque(start_nodes)
-    while queue:
-        node = queue.popleft()
-        order.append(node)
-        for neighbor in node.neighbors:
-            indegrees[neighbor] -= 1
-            if indegrees[neighbor] == 0:
-                queue.append(neighbor)
-     return order
-
-def get_indegree(self, graph):
-    indegrees = {x: 0 for x in graph}
-    for node in graph:
-        for neighbor in node.neighbors:
-            indregees[neighbor] += 1
-    return indegrees
+# graph processing
+out_edges = defaultdict(list)
+in_deg = defaultdict(int)
+for f, t in edges:
+    out_edges[f].append(t)
+    in_deg[t] += 1
+   
+# topological sort
+q = deque([v for v in in_deg if in_deg[v] == 0])
+order = []/ count = 0
+while q:
+    # if len(q) != 1: not unique sorting order
+    node = q.popleft()
+    order.append(node) / count += 1 # if final count != num nodes: no top sort
+    for nei in out_edges[node]:
+        in_deg[nei] -= 1
+        if not in_deg[nei]: q.append(nei)
 ```
+
++ BFS undirected graph [310: find centroid, ],
+
+```python
+# graph processing
+neis = [[] for _ in range(n)]
+inDeg = [0 for _ in range(n)]
+for f, t in edges:
+    neis[f].append(t)
+    neis[t].append(f)
+    inDeg[f] += 1
+    inDeg[t] += 1
+
+# top sort:
+q = deque([v for v in range(n) if inDeg[v] == 1])
+res = [0]
+while q:
+    res = list(q) # last in q will be centroid
+    q2 = deque([])
+    while q:
+        cur = q.popleft()
+        for nei in neis[cur]:
+            inDeg[nei] -= 1
+            if inDeg[nei] == 1: q2.append(nei) # inDeg=1 for terminal nodes
+    q = q2
+
+return res
+```
+
+
 
 + DFS
 
@@ -2972,27 +3293,22 @@ for node in range(len(graph)):
 
 ```python
 class DSU: #for set size of max 1001
-    def __init__(self):
-        self.par=[i for i in range(1001)]
-        self.rank=[0]*1001
-        
-    def find(self,x):
-        if self.par[x]!=x:# path compression
-            self.par[x]=self.find(self.par[x])
+    def __init__(self, N):
+        self.par = [i for i in range(N)]
+        self.rank  = [0]*N
+    def find(self, x):
+        if self.par[x] != x:
+            self.par[x] = self.find(self.par[x])
         return self.par[x]
-    
-    def union(self,x,y):
-        #xr, yr: rank of parent (depth of tree)
-        xr,yr=self.find(x), self.find(y)
-        if xr==yr: 
+    def union(self, x, y):
+        xr, yr = self.find(x), self.find(y)
+        if xr == yr:
             return False
-        elif self.rank[xr]<self.rank[yr]:
-            self.par[xr]=yr
-        elif self.rank[xr]>self.rank[yr]:
-            self.par[yr]=xr
-        else: 
-            self.par[yr]=xr
-            self.rank[xr]+=1
+        if self.rank(xr) > self.rank(yr): self.par[yr] = xr
+        elif self.rank(yr) > self.rank(xr): self.par[xr] = yr
+        else:
+            self.par[yr] = xr
+            self.rank[xr] += 1 
         return True
     
     def unionWithoutRank(self,x,y):
@@ -3002,6 +3318,7 @@ class DSU: #for set size of max 1001
         return True
 ```
 
++ Representing special points (source, target...): add a dummy node
 + Number of connected components: 
 
 ```python
@@ -3011,6 +3328,55 @@ for u,v in edgeList:
     if not dsu.union(u,v): numRedundant += 1
 
 numConnected = len({dsu.find(i) for i in range(n)})
+```
+
++ DSU with snapshot 1724
+
+```python
+class DSU:
+    
+    def __init__(self, a):
+        self.par = {u:u for u in a}
+        self.pool = {u:{u} for u in a}
+        self.events = {u: [[-inf,u]] for u in a} #snapshot
+    
+    def merge(self, u, v, weight):
+        rootu = self.par[u]
+        rootv = self.par[v]
+        
+        if rootu != rootv:
+            
+            if len(self.pool[rootv]) > len(self.pool[rootu]): # by rank
+                rootu,rootv = rootv,rootu
+            
+            for node in self.pool[rootv]:
+                self.par[node] = rootu
+                self.pool[rootu].add(node)
+                self.events[node].append([weight,rootu])
+```
+
+
+
+### Articulating point
+
++ Critical connection 1192: DFS marking currrent steps from start, find all edges not in cycle
+
+```python
+def dfs(cur, par, parStep):
+    steps[cur] = parStep + 1
+    for child in g[cur]:
+        if child == par: continue
+        elif steps[child] == -1: # not visited
+            steps[cur] = min(steps[cur], dfs(child, cur, parStep + 1))
+        else: # find cycle
+            steps[cur] = min(steps[cur], steps[child])
+
+    if steps[cur] == parStep + 1 and cur != 0: res.append([par, cur]) # not in cycle
+    return steps[cur]
+
+steps = [-1]*n
+res = []
+dfs(0, -1, 0)
 ```
 
 
@@ -3068,7 +3434,11 @@ def dfs(cur):
 
 
 
+## Bit Manipulation
 
++ **```count ^= (1<<val)```**: Whether count of a value is even. =0 if even, =1 if odd   [1457]
++ **```x & (x-1)```** flips least siginificant 1 to 0. ==0: has <=1 1's in x   [191, 1457]
++  
 
 
 

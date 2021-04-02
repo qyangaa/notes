@@ -105,8 +105,9 @@ $\text { The dog ran } \longrightarrow \text { (S (NP (DT the) (NN dog) ) (VP (V
 
 + $\text { Objective: maximize } \sum_{(\mathbf{x}, \mathbf{y})} \sum_{i=1}^{n} \log P\left(y_{i}^{*} \mid \mathbf{x}, y_{1}^{*}, \ldots, y_{i-1}^{*}\right)$
 + Encoder:  (Other architectures than RNN: CNN, Transformer)
-  + consumes sequence of tokens, produces a vector. Analogous to RNN encoders for classification/tagging tasks
-
+  
++ consumes sequence of tokens, produces a vector. Analogous to RNN encoders for classification/tagging tasks
+  
 + Decoder: 
 
   + separate module, single cell. Two inputs: hidden state (vector $h$ or tuple $(h, c))$ and previous token. Outputs token $+$ new state
@@ -206,3 +207,75 @@ $$
 ### Training
 
 ![image-20210309130458020](/home/arkyyang/files/notes/notes/attachments/image-20210309130458020.png)
+
++ Pointer networks
+
+  + standard decoder: softmax over vocabulary, all words get $>0$ prob
+
+  + Pointer network: predict from source words instead of target vocab
+    $$
+    P_{\text {pointer }}\left(y_{i} \mid \mathbf{x}, y_{1}, \ldots, y_{i-1}\right) \propto\left\{\begin{array}{l}
+    h_{j}^{\top} V \bar{h}_{i} \text { if } y_{i}=w_{j} \\
+    0 \text { otherwise }
+    \end{array}\right.
+    $$
+
+  + <img src="/home/arkyyang/files/notes/notes/attachments/image-20210322190925134.png" alt="image-20210322190925134" style="zoom:67%;" />
+
++ Pointer Generator Mixture
+
+  + $$
+    P\left(y_{i} \mid \mathbf{x}, y_{1}, \ldots, y_{i-1}\right)=P(\text { copy }) P_{\text {pointer }}+(1-P(\text { copy })) P_{\text {vocab }}
+    $$
+
+#### Handle Unknown words: add ability to copy words
+
+$$
+P\left(y_{i} \mid \mathbf{x}, y_{1}, \ldots, y_{i-1}\right)=\operatorname{softmax}\left(W\left[c_{i} ; \bar{h}_{i}\right]\right)\\
+c_i: \text{ from attention}\\
+h_i: \text{ from hidden state}
+$$
+
++ Copy from source
++ or use subword tokens
+
+##### determine subword tokens
+
++ Byte Pair Encoding (BPE):
+  + Count bigram character cooccurrences in dictionary
+  + Merge the most frequent pair of adjacent characters
++ Word Pieces (SentencePiece by Google)
+
+
+
+#### Sentence Encoders
+
++ LSTM: context-aware
++ CNN: filters achieve similar function
++ Problem: LSTM and CNN don't do self-attention over long distance
+
+### Self-attention
+
++ Each word forms a "query" which then computes attention over each word
+
++ $$
+  \begin{array}{l}
+  \alpha_{i, j}=\operatorname{softmax}\left(x_{i}^{\top} x_{j}\right) \quad \text { scalar } \\
+  x_{i}^{\prime}=\sum_{j=1}^{n} \alpha_{i, j} x_{j} \quad \text { vector = sum of scalar * vector }
+  \end{array}
+  $$
+
++ Multiple "heads" analogous to different convolutional filters. Parameters $W_{k}$ and $V_{k}$ give different attention values (multiple head because softmax can only point to single peak)
+  $$
+  \alpha_{k, i, j}=\operatorname{softmax}\left(x_{i}^{\top} W_{k} x_{j}\right) \quad x_{k, i}^{\prime}=\sum_{j=1}^{n} \alpha_{k, i, j} V_{k} x_{j}
+  $$
+  <img src="/home/arkyyang/files/notes/notes/attachments/image-20210322191743525.png" alt="image-20210322191743525" style="zoom:67%;" />
+
+### Transformers
+
++ Built on self-attention layers + feedforward layers
+
+![image-20210322192138398](/home/arkyyang/files/notes/notes/attachments/image-20210322192138398.png)
+
++ Augment word embedding with position embeddings, each dim is a sine/cosine wave of a different frequency. Closer points = higher dot products
++ 
