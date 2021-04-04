@@ -33,11 +33,12 @@ To remove redundancy seen in most pain-tracking application, we distilled our fe
 
 ![Pain Tracker app](/home/arkyyang/files/notes/notes/attachments/Pain Tracker app.JPG)
 
-## Implementation design details
+## Front End
 
 1. Selection of frameworks
-   1. Cross platform mobile: React Native
-   2. Do we need to develop web version?
+   1. Cross platform mobile: 
+      1. React Native: similar to react (used by TelePainCenter), smooth User interaction.
+      2. PWA: lighter weight, full web implementation
 2. Problem: how to minimize number of clicks needed for logging while recording most important information
    1. Keep selection simple and intuitive, leave less common selections to input boxes
       1. example: (pain gets better/ worse/ same) vs. (pain level 1,2,3,4,5..)
@@ -57,9 +58,23 @@ To remove redundancy seen in most pain-tracking application, we distilled our fe
    1. Option 1:  single push of tips after every daily log
    2. Option 2: create a blog-style community that users can explore within
 
+## Back end
+
++ Express Node.js backend
++ GraphQL API design: better schema design, easier adaption to different fronend.
++ Postgresql:
+  + records data are very structured and relational
+  + handles fast filtering and query of multiple rows
+  + integrated full text search
++ Firebase authentication for authentication management: may be able to integrate with TelePainCenter
++ Firebase storage for file storage.
+
 ## Others
 
 1. Testing and evaluation plan
 2. Impact Hypothesis
 3. Logging
-4. Deployment Plan
+4. Deployment Plan:
+   1. To Google cloud
+      1. Postgresql: Cloud SQL
+      2. Backend hosting: Firebase Hosting, easier integration with authentication and storage

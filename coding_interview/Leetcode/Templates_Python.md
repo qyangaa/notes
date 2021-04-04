@@ -49,6 +49,12 @@ return sum(abs(x-mi) for x in I) + sum(abs(x-mj) for x in J)
 
 + Geometric series: $\sum ar^{n-1} = a\frac{1-r^n}{1-r}$ 
 
+#### Sum problems
+
++ Subarray sum multiple of k: ```if prefixSum[i]%k in seen(prefixSum[:i]%k)```
+
++ Sum of rectangle in grid: prefix sum `br - (bl + tr - tl)`
+
 ### max min
 
 ```python
@@ -1159,7 +1165,7 @@ dp[i] = max(dp[i-1]+arr[i], arr[i])
 
 
 
-198. House Robber (max sum of no adjacent house)
+198. [740] House Robber (max sum of no adjacent house), 
 
 ```python
 for i in range(N):
@@ -1273,6 +1279,17 @@ for i in range(1,n):
         if nums[j]<nums[i]:
         	dp[i] = max(dp[i], dp[j]+1)
 return max(dp)
+
+# With bisect
+maxList = [nums[0]] + [float('inf')]*len(nums)
+maxIdx = 0
+for num in nums[1:]:
+    idxl = bisect_left(maxList, num)
+    idxr = bisect_right(maxList, num)
+    if idxl == idxr: # key not present
+        maxIdx = max(maxIdx, idxl)
+        maxList[idxl] = min(maxList[idxl], num)
+return maxIdx + 1
 ```
 
 673 Number-of-Longest-Increasing-Subsequence
@@ -1676,6 +1693,59 @@ for i in range(1,N+1):
         for cn in range(1,n+1):
             if cm-num0[i-1]>=0and cn-num1[i-1]>=0:
                 dp[i][cm][cn] = max(dp[i-1][cm-num0[i-1]][cn-num1[i-1]]+1, dp[i-1][cm][cn])
+```
+
+
+
+#### grid
+
++ [1277, 221] squares in matrix
+
+```python
+# max square with bottom right vertice at i,j
+dp[i][j] = min(dp[i][j-1], dp[i-1][j], dp[i-1][j-1]) + 1
+# sum number of all squares:
+res += dp[i][j]
+```
+
++ [304] sum of rectangles: 2D prefix sum 
+
+```python
+dp[i+1][j+1] = grid[i][j] + dp[i][j+1] + dp[i+1][j] - dp[i][j]
+```
+
+
+
+## Greedy
+
+### Coverage
+
++ 45, 1326: Jump game, iterate over maxReach, doesn't require sorting, require dense step (every i has value)
+
+```python
+#  maxReach[i] = max idx reachable from idx i
+steps = l = e = 0
+for i in range(n+1):
+    if i>e: return -1
+    if i>l:
+        steps += 1
+        l = e # need to start a new tap from current pos
+    e = max(e, maxReach[i]) # max reachable by current tap
+return steps
+```
+
++ 1024, 1326: video stitching, find max end for every start < curEnd, require sorted [(begin, end)..]
+
+```python
+ranges = [(begin, end)...].sort()
+steps = i = l = e = 0
+while e<n:
+    while i <= n and ranges[i] <= l: # when start < curEnd
+        e = max(e, t[i][1]) # find max end
+        i += 1
+   	l = e # update curMaxReach
+    steps += 1
+return steps
 ```
 
 
